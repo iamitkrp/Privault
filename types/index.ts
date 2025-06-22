@@ -1,10 +1,7 @@
 // User and Authentication Types
-export interface User {
-  id: string;
-  email: string;
-  created_at: string;
-  email_verified: boolean;
-}
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+
+export type User = SupabaseUser;
 
 export interface AuthState {
   user: User | null;
