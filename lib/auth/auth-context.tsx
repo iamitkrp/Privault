@@ -22,39 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Check if Supabase is configured
-  if (!supabase) {
-    return (
-      <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <h1 className="text-lg font-semibold text-gray-900">Configuration Error</h1>
-          </div>
-          
-          <div className="mb-4">
-            <p className="text-gray-600 mb-3">
-              Supabase environment variables are missing. Please create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in your project root with:
-            </p>
-            <div className="bg-gray-100 p-3 rounded text-xs font-mono text-gray-800 overflow-auto">
-              <div>NEXT_PUBLIC_SUPABASE_URL=your_supabase_url</div>
-              <div>NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key</div>
-            </div>
-          </div>
-
-          <div className="text-sm text-gray-500">
-            Restart the development server after creating the file.
-          </div>
-        </div>
-      </div>
-    );
-  }
+    const [error, setError] = useState<string | null>(null);
 
   // Clear error helper
   const clearError = () => setError(null);
@@ -64,6 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       setError(null);
+
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -95,6 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
 
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -122,6 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
 
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -146,6 +126,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
 
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
@@ -168,6 +152,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Refresh session function
   const refreshSession = async () => {
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const { error } = await supabase.auth.refreshSession();
       
       if (error) {
@@ -190,6 +178,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        if (!supabase) {
+          throw new Error('Supabase client not initialized');
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -213,6 +205,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getInitialSession();
 
     // Listen for auth state changes
+    if (!supabase) {
+      return () => {};
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.email);
@@ -259,6 +255,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearError,
     refreshSession,
   };
+
+  // Check if Supabase is configured and show error if not
+  if (!supabase) {
+    return (
+      <AuthContext.Provider value={value}>
+        <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+            <div className="flex items-center mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h1 className="text-lg font-semibold text-gray-900">Configuration Error</h1>
+            </div>
+            
+            <div className="mb-4">
+              <p className="text-gray-600 mb-3">
+                Supabase environment variables are missing. Please create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in your project root with:
+              </p>
+              <div className="bg-gray-100 p-3 rounded text-xs font-mono text-gray-800 overflow-auto">
+                <div>NEXT_PUBLIC_SUPABASE_URL=your_supabase_url</div>
+                <div>NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key</div>
+              </div>
+            </div>
+
+            <div className="text-sm text-gray-500">
+              Restart the development server after creating the file.
+            </div>
+          </div>
+        </div>
+      </AuthContext.Provider>
+    );
+  }
 
   return (
     <AuthContext.Provider value={value}>

@@ -6,11 +6,15 @@ export const APP_DESCRIPTION = 'Zero-knowledge password manager';
 // Cryptographic Constants
 export const CRYPTO_CONFIG = {
   ALGORITHM: 'AES-GCM',
-  KEY_LENGTH: 256, // bits
+  KEY_LENGTH: 32, // bytes (256 bits)
   IV_LENGTH: 12, // bytes for AES-GCM
   TAG_LENGTH: 16, // bytes for AES-GCM
   SALT_LENGTH: 32, // bytes
   PBKDF2_ITERATIONS: 100000, // OWASP recommended minimum
+  HASH_ALGORITHM: 'SHA-256' as const,
+  PASSPHRASE_TEST_STRING: 'privault-test-string',
+  SESSION_TIMEOUT: 15 * 60 * 1000, // 15 minutes in milliseconds
+  HIDDEN_TAB_TIMEOUT: 5 * 60 * 1000, // 5 minutes when tab is hidden
 } as const;
 
 // Security Constants
@@ -103,6 +107,7 @@ export const ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
   RESET_PASSWORD: '/reset-password',
+  VERIFY_EMAIL: '/verify-email',
   VAULT: '/vault',
   SETTINGS: '/settings',
   PROFILE: '/profile',

@@ -8,6 +8,16 @@ import { CRYPTO_CONFIG, ERROR_MESSAGES } from '@/constants';
  */
 export class AuthService {
   /**
+   * Check if supabase client is initialized
+   */
+  private static ensureSupabaseClient() {
+    if (!supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+    return supabase;
+  }
+
+  /**
    * Generate a cryptographic salt for PBKDF2 key derivation
    */
   static generateSalt(): string {
@@ -35,7 +45,8 @@ export class AuthService {
         },
       };
 
-      const { data, error } = await supabase
+      const client = this.ensureSupabaseClient();
+      const { data, error } = await client
         .from('profiles')
         .insert(profileData)
         .select()
@@ -61,7 +72,8 @@ export class AuthService {
    */
   static async getProfile(userId: string): Promise<{ data: Profile | null; error: string | null }> {
     try {
-      const { data, error } = await supabase
+      const client = this.ensureSupabaseClient();
+      const { data, error } = await client
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
@@ -94,7 +106,8 @@ export class AuthService {
     updates: Partial<Omit<Profile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
   ): Promise<{ data: Profile | null; error: string | null }> {
     try {
-      const { data, error } = await supabase
+      const client = this.ensureSupabaseClient();
+      const { data, error } = await client
         .from('profiles')
         .update(updates)
         .eq('user_id', userId)
@@ -121,7 +134,8 @@ export class AuthService {
    */
   static async deleteProfile(userId: string): Promise<{ error: string | null }> {
     try {
-      const { error } = await supabase
+      const client = this.ensureSupabaseClient();
+      const { error } = await client
         .from('profiles')
         .delete()
         .eq('user_id', userId);
@@ -170,7 +184,8 @@ export class AuthService {
   }> {
     try {
       // Get current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const client = this.ensureSupabaseClient();
+      const { data: { session }, error: sessionError } = await client.auth.getSession();
 
       if (sessionError) {
         return { user: null, profile: null, error: sessionError.message };
@@ -206,7 +221,8 @@ export class AuthService {
    */
   static async checkEmailAvailability(email: string): Promise<{ available: boolean; error: string | null }> {
     try {
-      const { data, error } = await supabase
+      const client = this.ensureSupabaseClient();
+      const { data, error } = await client
         .from('profiles')
         .select('email')
         .eq('email', email.toLowerCase().trim())
@@ -239,7 +255,8 @@ export class AuthService {
     settings: Record<string, any>
   ): Promise<{ error: string | null }> {
     try {
-      const { error } = await supabase
+      const client = this.ensureSupabaseClient();
+      const { error } = await client
         .from('profiles')
         .update({ security_settings: settings })
         .eq('user_id', userId);
