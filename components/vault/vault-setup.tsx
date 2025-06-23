@@ -66,8 +66,34 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
         throw new Error(sessionResult.error || 'Failed to create vault');
       }
 
-      // Here we could store encrypted test data in the database to verify the password later
-      // For now, we'll just mark the vault as set up in the user's profile
+      if (!sessionResult.cryptoKey) {
+        throw new Error('Failed to obtain crypto key');
+      }
+
+      // Create encrypted verification data to validate the password later
+      // We'll encrypt a known test string with the master password
+      const testData = 'VAULT_PASSWORD_VERIFICATION_DATA';
+      const { encrypt } = await import('@/lib/crypto/crypto-utils');
+      
+      const encryptionResult = await encrypt(testData, sessionResult.cryptoKey);
+      
+      // Combine encrypted data and IV into a single string for storage
+      const verificationData = JSON.stringify({
+        encryptedData: encryptionResult.encryptedData,
+        iv: encryptionResult.iv
+      });
+
+      // Store the encrypted verification data in the user's profile
+      const { error: updateError } = await AuthService.updateProfile(user.id, {
+        vault_verification_data: verificationData
+      });
+
+      if (updateError) {
+        throw new Error('Failed to save vault setup data');
+      }
+
+      // Mark vault as set up for this user
+      localStorage.setItem(`vault-setup-${user.id}`, 'true');
 
       console.log('Vault created successfully!');
       

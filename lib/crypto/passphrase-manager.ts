@@ -25,7 +25,7 @@ class PassphraseManager {
     salt: string,
     testEncryptedData?: string,
     testIv?: string
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<{ success: boolean; error?: string; cryptoKey?: CryptoKey }> {
     try {
       // Clear any existing session
       this.clearSession();
@@ -62,7 +62,7 @@ class PassphraseManager {
       // Set up auto-timeout
       this.setupAutoTimeout();
 
-      return { success: true };
+      return { success: true, cryptoKey: derivedKey };
     } catch (error) {
       // Wipe the passphrase from memory on error
       wipeSensitiveData(passphrase);

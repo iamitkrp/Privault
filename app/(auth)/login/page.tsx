@@ -32,7 +32,7 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !loading) {
-      router.push(ROUTES.VAULT);
+      router.push(ROUTES.DASHBOARD);
     }
   }, [user, loading, router]);
 

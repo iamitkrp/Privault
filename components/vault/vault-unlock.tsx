@@ -35,10 +35,7 @@ export default function VaultUnlock({ user }: VaultUnlockProps) {
         throw new Error('Failed to load user profile');
       }
 
-      // For Phase 5 demo: Accept any non-empty password and establish a session
-      // In a real implementation, this would verify against stored encrypted test data
-      
-      // Initialize the passphrase session directly
+      // Initialize the passphrase session to derive the crypto key
       const sessionResult = await passphraseManager.initializeSession(
         masterPassword,
         profile.salt
@@ -46,6 +43,65 @@ export default function VaultUnlock({ user }: VaultUnlockProps) {
 
       if (!sessionResult.success) {
         throw new Error(sessionResult.error || ERROR_MESSAGES.INVALID_MASTER_PASSWORD);
+      }
+
+      if (!sessionResult.cryptoKey) {
+        throw new Error('Failed to obtain crypto key');
+      }
+
+      // Verify the password is correct by attempting to decrypt the verification data
+      if (profile.vault_verification_data) {
+        try {
+          const { decrypt } = await import('@/lib/crypto/crypto-utils');
+          
+          // Parse the stored verification data
+          const verificationData = JSON.parse(profile.vault_verification_data);
+          const decryptedData = await decrypt(
+            verificationData.encryptedData, 
+            verificationData.iv, 
+            sessionResult.cryptoKey
+          );
+          
+          if (decryptedData !== 'VAULT_PASSWORD_VERIFICATION_DATA') {
+            throw new Error(ERROR_MESSAGES.INVALID_MASTER_PASSWORD);
+          }
+        } catch (err) {
+          console.error('Password verification failed:', err);
+          throw new Error(ERROR_MESSAGES.INVALID_MASTER_PASSWORD);
+        }
+      } else {
+        // If no verification data exists, this is an old vault that needs to be secured
+        // Create verification data for the first time using the current password
+        console.warn('Old vault detected. Creating verification data for security upgrade...');
+        
+        try {
+          const testData = 'VAULT_PASSWORD_VERIFICATION_DATA';
+          const { encrypt } = await import('@/lib/crypto/crypto-utils');
+          
+          const encryptionResult = await encrypt(testData, sessionResult.cryptoKey);
+          
+          // Combine encrypted data and IV into a single string for storage
+          const verificationData = JSON.stringify({
+            encryptedData: encryptionResult.encryptedData,
+            iv: encryptionResult.iv
+          });
+
+          // Store the encrypted verification data in the user's profile
+          const { error: updateError } = await AuthService.updateProfile(user.id, {
+            vault_verification_data: verificationData
+          });
+
+          if (updateError) {
+            console.error('Failed to upgrade vault security:', updateError);
+            // Still allow access this time, but warn user
+            console.warn('Vault security upgrade failed. Please change your vault password to enable proper security.');
+          } else {
+            console.log('Vault security upgraded successfully!');
+          }
+        } catch (upgradeError) {
+          console.error('Vault security upgrade failed:', upgradeError);
+          // Still allow access this time for backward compatibility
+        }
       }
 
       // Success - the vault is now unlocked and the parent component will detect this

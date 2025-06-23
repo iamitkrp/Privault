@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
+import { passphraseManager } from '@/lib/crypto/passphrase-manager';
 import { AuthState } from '@/types';
 
 // Auth Context Interface
@@ -100,6 +101,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!supabase) {
         throw new Error('Supabase client not initialized');
+      }
+
+      // Clear vault session first (security critical)
+      passphraseManager.clearSession();
+
+      // Clear vault setup flags for security (when user signs out, clear all vault state)
+      if (typeof window !== 'undefined') {
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('vault-setup-')) {
+            localStorage.removeItem(key);
+          }
+        });
       }
 
       const { error } = await supabase.auth.signOut();

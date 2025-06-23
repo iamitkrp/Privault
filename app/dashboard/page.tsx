@@ -21,9 +21,11 @@ export default function DashboardPage() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push(ROUTES.HOME);
+      router.push(ROUTES.HOME); // Redirect to intro page, not login
     } catch (err) {
       console.error('Sign out error:', err);
+      // Even if there's an error, still redirect to home since local state is cleared
+      router.push(ROUTES.HOME);
     }
   };
 
@@ -85,7 +87,13 @@ export default function DashboardPage() {
           {/* Feature Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Vault Card */}
-            <Link href={ROUTES.VAULT}>
+            <Link 
+              href={ROUTES.VAULT} 
+              onClick={() => {
+                // Set session flag to allow vault access
+                sessionStorage.setItem('vault-access-allowed', 'true');
+              }}
+            >
               <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
                   <div className="flex items-center">
@@ -203,8 +211,8 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Settings Card - Coming Soon */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden opacity-75">
+            {/* Settings Card - Active */}
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden opacity-75 cursor-pointer">
               <div className="bg-gradient-to-r from-gray-600 to-gray-700 px-6 py-4">
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
@@ -220,9 +228,26 @@ export default function DashboardPage() {
                 <p className="text-gray-600 mb-4">
                   Customize your Privault experience
                 </p>
+                
+                {/* Vault Settings */}
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Vault Settings</h4>
+                  <button 
+                    onClick={() => {
+                      // Set flag to allow changing vault password
+                      sessionStorage.setItem('vault-access-allowed', 'true');
+                      sessionStorage.setItem('vault-action', 'change-password');
+                      window.location.href = ROUTES.VAULT;
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-500 underline"
+                  >
+                    Change Vault Master Password
+                  </button>
+                </div>
+
                 <div className="flex items-center text-gray-400 text-sm font-medium">
                   <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs mr-2">Coming Soon</span>
-                  Account Settings
+                  More Settings
                 </div>
               </div>
             </div>

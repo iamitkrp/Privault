@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants';
 import Link from 'next/link';
 import { usePassphraseSession } from '@/hooks/use-passphrase-session';
+import { passphraseManager } from '@/lib/crypto/passphrase-manager';
 // import { CryptoService } from '@/services/crypto.service';
 import { AuthService } from '@/services/auth.service';
 
@@ -13,6 +14,7 @@ import { AuthService } from '@/services/auth.service';
 import VaultSetup from '@/components/vault/vault-setup';
 import VaultUnlock from '@/components/vault/vault-unlock';
 import VaultDashboard from '@/components/vault/vault-dashboard';
+import VaultChangePassword from '@/components/vault/vault-change-password';
 
 export default function VaultPage() {
   const { user, loading, signOut } = useAuth();
@@ -22,6 +24,8 @@ export default function VaultPage() {
   const [error, setError] = useState<string | null>(null);
   const [profileInitialized, setProfileInitialized] = useState(false);
   const [vaultExists, setVaultExists] = useState<boolean | null>(null);
+  const [accessFromDashboard, setAccessFromDashboard] = useState<boolean | null>(null);
+  const [vaultAction, setVaultAction] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -29,6 +33,59 @@ export default function VaultPage() {
       router.push(ROUTES.LOGIN);
     }
   }, [user, loading, router]);
+
+  // Security: Clear any vault session when component mounts
+  // This ensures a fresh vault state after login
+  useEffect(() => {
+    if (user) {
+      // Clear any existing vault session for security
+      passphraseManager.clearSession();
+      console.log('Vault session cleared for security');
+    }
+  }, [user]);
+
+  // Security: Check if user accessed vault properly through dashboard
+  useEffect(() => {
+    if (typeof window !== 'undefined' && user && !loading) {
+      // Check if there's a proper session flag or if user came from dashboard
+      const vaultAccessFlag = sessionStorage.getItem('vault-access-allowed');
+      const referrer = document.referrer;
+      
+      // Allow access if:
+      // 1. They have the session flag (came from dashboard)
+      // 2. They came from the dashboard page referrer
+      // 3. This is a development environment (for testing)
+      const isDev = process.env.NODE_ENV === 'development';
+      const fromDashboard = vaultAccessFlag === 'true' || referrer.includes('/dashboard');
+      
+      if (isDev || fromDashboard) {
+        setAccessFromDashboard(true);
+        // Clear the access flag but keep the action flag for now
+        if (vaultAccessFlag) {
+          sessionStorage.removeItem('vault-access-allowed');
+        }
+      } else {
+        // Redirect to dashboard if not accessed properly
+        console.log('Redirecting to dashboard - vault must be accessed through dashboard');
+        router.push(ROUTES.DASHBOARD);
+        return;
+      }
+    } else if (user && !loading) {
+      // Fallback for SSR - allow access but clear session
+      setAccessFromDashboard(true);
+    }
+  }, [user, loading, router]);
+
+  // Handle vault actions after access is confirmed
+  useEffect(() => {
+    if (accessFromDashboard && typeof window !== 'undefined') {
+      const action = sessionStorage.getItem('vault-action');
+      if (action) {
+        setVaultAction(action);
+        sessionStorage.removeItem('vault-action');
+      }
+    }
+  }, [accessFromDashboard]);
 
   // Initialize user crypto if needed
   useEffect(() => {
@@ -53,9 +110,15 @@ export default function VaultPage() {
         // Mark profile as initialized
         setProfileInitialized(true);
 
-        // For Phase 5 demo: assume vault doesn't exist for first-time setup
-        // In a real implementation, we'd check for encrypted test data in the database
-        setVaultExists(false);
+        // Check if vault exists by looking for vault setup flag in profile metadata
+        // For Phase 5 demo: use localStorage to track vault setup status
+        if (typeof window !== 'undefined') {
+          const vaultSetupCompleted = localStorage.getItem(`vault-setup-${user.id}`);
+          setVaultExists(vaultSetupCompleted === 'true');
+        } else {
+          // SSR fallback - assume vault exists to show unlock screen
+          setVaultExists(true);
+        }
 
       } catch (err) {
         console.error('Failed to initialize user crypto:', err);
@@ -72,14 +135,16 @@ export default function VaultPage() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push(ROUTES.HOME);
+      router.push(ROUTES.HOME); // Redirect to intro page, not login
     } catch (err) {
       console.error('Sign out error:', err);
+      // Even if there's an error, still redirect to home since local state is cleared
+      router.push(ROUTES.HOME);
     }
   };
 
   // Loading state
-  if (loading || isInitializing || sessionLoading || vaultExists === null) {
+  if (loading || isInitializing || sessionLoading || vaultExists === null || accessFromDashboard === null) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -193,7 +258,21 @@ export default function VaultPage() {
               </li>
             </ol>
           </nav>
-          {isUnlocked ? (
+
+          {vaultAction === 'change-password' ? (
+            <VaultChangePassword 
+              user={user}
+              onPasswordChanged={() => {
+                setVaultAction(null);
+                // After password change, go back to dashboard
+                router.push(ROUTES.DASHBOARD);
+              }}
+              onCancel={() => {
+                setVaultAction(null);
+                router.push(ROUTES.DASHBOARD);
+              }}
+            />
+          ) : isUnlocked ? (
             <VaultDashboard user={user} />
           ) : vaultExists === false ? (
             <VaultSetup 

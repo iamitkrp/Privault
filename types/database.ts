@@ -11,6 +11,7 @@ export interface Database {
           updated_at: string;
           salt: string;
           security_settings: Record<string, any> | null;
+          vault_verification_data: string | null;
         };
         Insert: {
           id?: string;
@@ -20,6 +21,7 @@ export interface Database {
           updated_at?: string;
           salt: string;
           security_settings?: Record<string, any> | null;
+          vault_verification_data?: string | null;
         };
         Update: {
           id?: string;
@@ -29,6 +31,7 @@ export interface Database {
           updated_at?: string;
           salt?: string;
           security_settings?: Record<string, any> | null;
+          vault_verification_data?: string | null;
         };
       };
       vaults: {
