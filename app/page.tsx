@@ -18,7 +18,7 @@ export default function HomePage() {
   // Redirect authenticated users to vault
   useEffect(() => {
     if (user && !loading) {
-      router.push(ROUTES.VAULT);
+      router.push(ROUTES.DASHBOARD);
     }
   }, [user, loading, router]);
 

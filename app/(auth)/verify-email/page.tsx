@@ -13,7 +13,7 @@ export default function VerifyEmailPage() {
             Check your email
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            We've sent you a verification link
+            We&apos;ve sent you a verification link
           </p>
         </div>
       </div>
@@ -33,7 +33,7 @@ export default function VerifyEmailPage() {
             </h3>
 
             <p className="text-sm text-gray-600 mb-6">
-              We've sent a verification email to your inbox. Please click the verification link in the email to activate your account and complete the signup process.
+              We&apos;ve sent a verification email to your inbox. Please click the verification link in the email to activate your account and complete the signup process.
             </p>
 
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
@@ -45,7 +45,7 @@ export default function VerifyEmailPage() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-blue-700">
-                    <strong>Important:</strong> Check your spam folder if you don't see the email within a few minutes. The verification link will expire in 24 hours.
+                    <strong>Important:</strong> Check your spam folder if you don&apos;t see the email within a few minutes. The verification link will expire in 24 hours.
                   </p>
                 </div>
               </div>
@@ -53,7 +53,7 @@ export default function VerifyEmailPage() {
 
             <div className="space-y-3">
               <p className="text-sm text-gray-500">
-                After verifying your email, you'll be automatically redirected to your secure vault.
+                After verifying your email, you&apos;ll be automatically redirected to your secure vault.
               </p>
 
               <div className="pt-4">
@@ -71,7 +71,7 @@ export default function VerifyEmailPage() {
         {/* Additional help */}
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500">
-            Didn't receive an email? Check your spam folder or try signing up again.
+            Didn&apos;t receive an email? Check your spam folder or try signing up again.
           </p>
         </div>
       </div>

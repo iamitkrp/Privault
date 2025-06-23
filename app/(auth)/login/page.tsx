@@ -81,7 +81,7 @@ export default function LoginPage() {
         setFormErrors({ general: error || ERROR_MESSAGES.INVALID_CREDENTIALS });
       } else {
         // Success - redirect will happen via useEffect
-        router.push(ROUTES.VAULT);
+        router.push(ROUTES.DASHBOARD);
       }
     } catch (err) {
       setFormErrors({ 
