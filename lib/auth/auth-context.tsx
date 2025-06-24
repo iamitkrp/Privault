@@ -103,6 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Supabase client not initialized');
       }
 
+      // Mark logout timestamp for OTP requirement (before clearing user)
+      if (user?.id) {
+        const { OTPService } = await import('@/services/otp.service');
+        OTPService.markUserLogout(user.id);
+      }
+
       // Clear vault session first (security critical)
       passphraseManager.clearSession();
 

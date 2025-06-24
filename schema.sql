@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS profiles (
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     email TEXT NOT NULL,
     salt TEXT NOT NULL, -- Base64 encoded salt for PBKDF2 key derivation
-    security_settings JSONB DEFAULT '{}',
+    vault_verification_data TEXT, -- Encrypted verification data to validate vault password
+    security_settings JSONB DEFAULT '{"autoLockTimeout": 900000, "requireMasterPasswordConfirm": false, "enableBiometric": false}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     
@@ -184,3 +185,40 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 
 -- Success message
 SELECT 'Privault database schema created successfully! 🎉' as message;
+
+-- ==========================================
+-- MIGRATION: Add vault verification data
+-- ==========================================
+
+-- Add vault_verification_data column to store encrypted verification data
+ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS vault_verification_data TEXT;
+
+-- Add comment for documentation
+COMMENT ON COLUMN profiles.vault_verification_data IS 'Encrypted verification data used to validate vault master password';
+
+-- Migration success message
+SELECT 'Vault verification column added successfully! 🔐' as migration_message;
+
+-- Create vault OTP verifications table
+CREATE TABLE IF NOT EXISTS vault_otp_verifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    otp_code TEXT NOT NULL,
+    purpose TEXT NOT NULL CHECK (purpose IN ('vault_access', 'vault_password_change')),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    CONSTRAINT vault_otp_code_check CHECK (length(otp_code) = 6 AND otp_code ~ '^[0-9]+$')
+);
+
+CREATE INDEX IF NOT EXISTS idx_vault_otp_user_id ON vault_otp_verifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_vault_otp_code ON vault_otp_verifications(otp_code);
+CREATE INDEX IF NOT EXISTS idx_vault_otp_expires_at ON vault_otp_verifications(expires_at);
+CREATE INDEX IF NOT EXISTS idx_vault_otp_purpose ON vault_otp_verifications(purpose);
+
+ALTER TABLE vault_otp_verifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own OTP verifications" ON vault_otp_verifications FOR ALL USING (auth.uid() = user_id);
+GRANT SELECT, INSERT, UPDATE, DELETE ON vault_otp_verifications TO authenticated;
+
+SELECT 'Vault OTP verifications table created successfully! 🔐' as message;

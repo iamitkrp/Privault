@@ -15,6 +15,8 @@ import VaultSetup from '@/components/vault/vault-setup';
 import VaultUnlock from '@/components/vault/vault-unlock';
 import VaultDashboard from '@/components/vault/vault-dashboard';
 import VaultChangePassword from '@/components/vault/vault-change-password';
+import VaultOTPVerification from '@/components/vault/vault-otp-verification';
+import { OTPService } from '@/services/otp.service';
 
 export default function VaultPage() {
   const { user, loading, signOut } = useAuth();
@@ -26,6 +28,8 @@ export default function VaultPage() {
   const [vaultExists, setVaultExists] = useState<boolean | null>(null);
   const [accessFromDashboard, setAccessFromDashboard] = useState<boolean | null>(null);
   const [vaultAction, setVaultAction] = useState<string | null>(null);
+  const [needsOTP, setNeedsOTP] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -75,6 +79,14 @@ export default function VaultPage() {
       setAccessFromDashboard(true);
     }
   }, [user, loading, router]);
+
+  // Check if OTP is needed for vault access after logout
+  useEffect(() => {
+    if (accessFromDashboard && user && !otpVerified) {
+      const needsOTPCheck = OTPService.needsOTPForVaultAccess(user.id);
+      setNeedsOTP(needsOTPCheck);
+    }
+  }, [accessFromDashboard, user, otpVerified]);
 
   // Handle vault actions after access is confirmed
   useEffect(() => {
@@ -260,15 +272,44 @@ export default function VaultPage() {
           </nav>
 
           {vaultAction === 'change-password' ? (
-            <VaultChangePassword 
+            // First show OTP verification for password change if needed
+            needsOTP && !otpVerified ? (
+              <VaultOTPVerification
+                user={user}
+                purpose="vault_password_change"
+                onVerified={() => {
+                  setOtpVerified(true);
+                  setNeedsOTP(false);
+                }}
+                onCancel={() => {
+                  setVaultAction(null);
+                  router.push(ROUTES.DASHBOARD);
+                }}
+              />
+            ) : (
+              <VaultChangePassword 
+                user={user}
+                onPasswordChanged={() => {
+                  setVaultAction(null);
+                  // After password change, go back to dashboard
+                  router.push(ROUTES.DASHBOARD);
+                }}
+                onCancel={() => {
+                  setVaultAction(null);
+                  router.push(ROUTES.DASHBOARD);
+                }}
+              />
+            )
+          ) : needsOTP && !otpVerified ? (
+            // Show OTP verification for vault access after logout
+            <VaultOTPVerification
               user={user}
-              onPasswordChanged={() => {
-                setVaultAction(null);
-                // After password change, go back to dashboard
-                router.push(ROUTES.DASHBOARD);
+              purpose="vault_access"
+              onVerified={() => {
+                setOtpVerified(true);
+                setNeedsOTP(false);
               }}
               onCancel={() => {
-                setVaultAction(null);
                 router.push(ROUTES.DASHBOARD);
               }}
             />

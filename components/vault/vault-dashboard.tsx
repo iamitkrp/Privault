@@ -1,130 +1,322 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-// import { CryptoService } from '@/services/crypto.service';
-// import { supabase } from '@/lib/supabase/client';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { vaultService } from '@/services/vault.service';
+import { useAuth } from '@/lib/auth/auth-context';
 import PasswordFormModal from './password-form-modal';
-
-// Types
-interface VaultItem {
-  id: string;
-  name: string;
-  username: string;
-  password: string;
-  website?: string;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
+import VaultStatsCard from './vault-stats-card';
+import CategoryFilter from './category-filter';
+import PasswordList from './password-list';
+import type { Credential, VaultStats, PasswordCategory } from '@/types';
+import { PASSWORD_CATEGORIES } from '@/types';
+import { calculatePasswordStrength } from '@/lib/crypto/crypto-utils';
 
 interface VaultDashboardProps {
   user: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export default function VaultDashboard({}: VaultDashboardProps) {
-  const [items, setItems] = useState<VaultItem[]>([]);
+  const { user } = useAuth();
+  const [items, setItems] = useState<Credential[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'category' | 'strength'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<VaultItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Credential | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+
+  // Calculate vault statistics
+  const vaultStats = useMemo((): VaultStats => {
+    const totalPasswords = items.length;
+    const weakPasswords = items.filter(item => (item.passwordStrength || 0) < 2).length;
+    const oldPasswords = items.filter(item => {
+      if (!item.lastPasswordChange) return true; // No change date = potentially old
+      const changeDate = new Date(item.lastPasswordChange);
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      return changeDate < ninetyDaysAgo;
+    }).length;
+
+    // Count reused passwords
+    const passwordCounts = items.reduce((acc, item) => {
+      acc[item.password] = (acc[item.password] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const reusedPasswords = Object.values(passwordCounts).filter(count => count > 1).reduce((sum, count) => sum + count, 0);
+
+    // Average password strength
+    const totalStrength = items.reduce((sum, item) => sum + (item.passwordStrength || 0), 0);
+    const averagePasswordStrength = totalPasswords > 0 ? totalStrength / totalPasswords : 0;
+
+    // Category counts
+    const categoryCounts = items.reduce((acc, item) => {
+      const category = item.category || 'OTHER';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Recently added (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentlyAdded = items.filter(item => new Date(item.created_at) > sevenDaysAgo).length;
+
+    return {
+      totalPasswords,
+      weakPasswords,
+      reusedPasswords,
+      oldPasswords,
+      averagePasswordStrength,
+      categoryCounts,
+      recentlyAdded
+    };
+  }, [items]);
+
+  const loadVaultItems = useCallback(async () => {
+    try {
+      if (!user) {
+        setError('User not authenticated');
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      // Load encrypted vault from backend
+      const result = await vaultService.loadVault(user.id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to load vault');
+      }
+
+      // Enhance items with password strength if not already calculated
+      const enhancedItems = (result.credentials || []).map(item => ({
+        ...item,
+        passwordStrength: item.passwordStrength ?? calculatePasswordStrength(item.password).score,
+        lastPasswordChange: item.lastPasswordChange ?? item.updated_at,
+        accessCount: item.accessCount ?? 0,
+        isFavorite: item.isFavorite ?? false,
+        tags: item.tags ?? [],
+        category: item.category ?? 'OTHER'
+      }));
+
+      setItems(enhancedItems);
+    } catch (err) {
+      console.error('Failed to load vault items:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load your passwords');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
 
   // Load vault items
   useEffect(() => {
     loadVaultItems();
-  }, []);
+  }, [loadVaultItems]);
 
-  const loadVaultItems = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  // Filter and sort items
+  const filteredAndSortedItems = useMemo(() => {
+    let filtered = items;
 
-      // For now, we'll create some demo data since we haven't built the database integration yet
-      // In a real implementation, this would fetch encrypted data from Supabase and decrypt it
-      const demoItems: VaultItem[] = [
-        {
-          id: '1',
-          name: 'GitHub',
-          username: 'john.doe@example.com',
-          password: 'SecurePass123!',
-          website: 'https://github.com',
-          notes: 'My main GitHub account',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          name: 'Gmail',
-          username: 'john.doe@gmail.com',
-          password: 'MyGmail2024!',
-          website: 'https://gmail.com',
-          notes: 'Personal email account',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      ];
-
-      setItems(demoItems);
-    } catch (err) {
-      console.error('Failed to load vault items:', err);
-      setError('Failed to load your passwords');
-    } finally {
-      setIsLoading(false);
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.url && item.url.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (item.notes && item.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+      );
     }
-  };
 
-  // Filter items based on search
-  const filteredItems = items.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.website && item.website.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+    // Apply category filter
+    if (selectedCategory !== 'ALL') {
+      filtered = filtered.filter(item => item.category === selectedCategory);
+    }
+
+    // Apply favorites filter
+    if (showFavoritesOnly) {
+      filtered = filtered.filter(item => item.isFavorite);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.site.toLowerCase();
+          bValue = b.site.toLowerCase();
+          break;
+        case 'date':
+          aValue = new Date(a.updated_at);
+          bValue = new Date(b.updated_at);
+          break;
+        case 'category':
+          aValue = a.category || 'OTHER';
+          bValue = b.category || 'OTHER';
+          break;
+        case 'strength':
+          aValue = a.passwordStrength || 0;
+          bValue = b.passwordStrength || 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [items, searchTerm, selectedCategory, showFavoritesOnly, sortBy, sortOrder]);
 
   // Copy to clipboard
   const copyToClipboard = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // TODO: Show toast notification
-      console.log(`${type} copied to clipboard`);
+      setToast({ message: `${type} copied to clipboard`, type: 'success' });
+      setTimeout(() => setToast(null), 3000);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
+      setToast({ message: 'Failed to copy to clipboard', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
-  // Handle adding new password (demo)
-  const handleAddPassword = (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-    const newItem = {
-      id: Date.now().toString(),
-      name: data.name,
-      username: data.username,
-      password: data.password,
-      website: data.website,
-      notes: data.notes,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    setItems(prev => [...prev, newItem]);
+  // Handle adding new password
+  const handleAddPassword = async (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    try {
+      if (!user) {
+        setError('User not authenticated');
+        return;
+      }
+
+      const newCredential = {
+        site: data.name,
+        username: data.username,
+        password: data.password,
+        url: data.website,
+        notes: data.notes,
+      };
+
+      const result = await vaultService.addCredential(user.id, newCredential);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to add credential');
+      }
+
+      if (result.credential) {
+        setItems(prev => [...prev, result.credential!]);
+      }
+      
+      setShowAddForm(false);
+    } catch (err) {
+      console.error('Failed to add password:', err);
+      setError(err instanceof Error ? err.message : 'Failed to add password');
+    }
   };
 
-  // Handle updating password (demo)
-  const handleUpdatePassword = (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-    if (!selectedItem) return;
-    
-    setItems(prev => prev.map(item => 
-      item.id === selectedItem.id 
-        ? {
-            ...item,
-            name: data.name,
-            username: data.username,
-            password: data.password,
-            website: data.website,
-            notes: data.notes,
-            updated_at: new Date().toISOString(),
-          }
-        : item
-    ));
+  // Handle updating password
+  const handleUpdatePassword = async (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    try {
+      if (!selectedItem || !user) {
+        setError('Invalid operation');
+        return;
+      }
+
+      const updates = {
+        site: data.name,
+        username: data.username,
+        password: data.password,
+        url: data.website,
+        notes: data.notes,
+      };
+
+      // Add to password history if password changed
+      if (data.password !== selectedItem.password) {
+        await vaultService.addPasswordHistory(user.id, selectedItem.id, selectedItem.password);
+      }
+
+      const result = await vaultService.updateCredential(user.id, selectedItem.id, updates);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update credential');
+      }
+
+      if (result.credential) {
+        setItems(prev => prev.map(item => 
+          item.id === selectedItem.id ? result.credential! : item
+        ));
+      }
+      
+      setShowEditForm(false);
+      setSelectedItem(null);
+    } catch (err) {
+      console.error('Failed to update password:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update password');
+    }
   };
+
+  // Handle deleting password
+  const handleDeletePassword = async (credentialId: string) => {
+    try {
+      if (!user) {
+        setError('User not authenticated');
+        return;
+      }
+
+      if (!window.confirm('Are you sure you want to delete this password? This action cannot be undone.')) {
+        return;
+      }
+
+      const result = await vaultService.deleteCredential(user.id, credentialId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete credential');
+      }
+
+      setItems(prev => prev.filter(item => item.id !== credentialId));
+    } catch (err) {
+      console.error('Failed to delete password:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete password');
+    }
+  };
+
+  // Toggle favorite status
+  async function handleToggleFavorite(credentialId: string) {
+    try {
+      if (!user) return;
+
+      const item = items.find(i => i.id === credentialId);
+      if (!item) return;
+
+      const result = await vaultService.updateCredential(user.id, credentialId, {
+        isFavorite: !item.isFavorite
+      });
+      
+      if (result.success && result.credential) {
+        setItems(prev => prev.map(i => 
+          i.id === credentialId ? result.credential! : i
+        ));
+        setToast({ 
+          message: `${result.credential.isFavorite ? 'Added to' : 'Removed from'} favorites`, 
+          type: 'success' 
+        });
+        setTimeout(() => setToast(null), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to toggle favorite:', err);
+      setToast({ message: 'Failed to update favorite status', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -162,212 +354,235 @@ export default function VaultDashboard({}: VaultDashboardProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Header with search and add button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Your Vault</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            {items.length} {items.length === 1 ? 'password' : 'passwords'} stored securely
-          </p>
-        </div>
-        
-        <div className="mt-4 sm:mt-0 flex space-x-3">
-          {/* Search */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="Search passwords..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-            />
-          </div>
-          
-          {/* Add button */}
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Password
-          </button>
-        </div>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Vault Statistics */}
+      <VaultStatsCard stats={vaultStats} />
 
-      {/* Empty state */}
-      {filteredItems.length === 0 && !searchTerm && (
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No passwords yet</h3>
-          <p className="text-gray-600 mb-6">Get started by adding your first password to the vault.</p>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Your First Password
-          </button>
-        </div>
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar with filters */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Category Filter */}
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            categoryCounts={vaultStats.categoryCounts}
+          />
 
-      {/* Search results empty state */}
-      {filteredItems.length === 0 && searchTerm && (
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No passwords found</h3>
-          <p className="text-gray-600">Try adjusting your search term or add a new password.</p>
-        </div>
-      )}
-
-      {/* Password list */}
-      {filteredItems.length > 0 && (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
-            {filteredItems.map((item) => (
-              <li key={item.id} className="px-6 py-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    {/* Favicon placeholder */}
-                    <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-medium text-sm">
-                        {item.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    
-                    {/* Item details */}
-                    <div className="ml-4">
-                      <div className="flex items-center">
-                        <h4 className="text-lg font-medium text-gray-900">{item.name}</h4>
-                        {item.website && (
-                          <a
-                            href={item.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="ml-2 text-gray-400 hover:text-gray-600"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                          </a>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600">{item.username}</p>
-                      {item.notes && (
-                        <p className="text-sm text-gray-500 mt-1">{item.notes}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2">
-                    {/* Copy username */}
-                    <button
-                      onClick={() => copyToClipboard(item.username, 'Username')}
-                      className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                      title="Copy username"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </button>
-
-                    {/* Copy password */}
-                    <button
-                      onClick={() => copyToClipboard(item.password, 'Password')}
-                      className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                      title="Copy password"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-
-                    {/* Edit */}
-                    <button
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setShowEditForm(true);
-                      }}
-                      className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                      title="Edit"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                  </div>
+          {/* Quick Filters */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Quick Filters</h3>
+            <div className="space-y-2">
+              <button
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
+                  showFavoritesOnly
+                    ? 'bg-yellow-100 text-yellow-900 font-medium'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center">
+                  <span className="mr-2">⭐</span>
+                  <span>Favorites Only</span>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Phase 5 Development Notice */}
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-3">
-          🚧 Phase 5: Core Vault Functionality - IN PROGRESS
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
-          <div>
-            <p className="font-medium mb-2">✅ Completed:</p>
-            <ul className="space-y-1">
-              <li>✅ Vault unlock interface</li>
-              <li>✅ Dashboard layout</li>
-              <li>✅ Search functionality</li>
-              <li>✅ Demo data display</li>
-            </ul>
-          </div>
-          
-          <div>
-            <p className="font-medium mb-2">🚧 Next Steps:</p>
-            <ul className="space-y-1">
-              <li>🔨 Add/edit password forms</li>
-              <li>🔨 Database integration</li>
-              <li>🔨 Password generator</li>
-              <li>🔨 Copy notifications</li>
-            </ul>
+                {showFavoritesOnly && (
+                  <span className="bg-yellow-200 text-yellow-800 px-2 py-1 text-xs rounded-full">
+                    Active
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 text-sm text-blue-700">
-          <strong>Current Status:</strong> Demo interface working with mock data. Ready to integrate with encrypted database storage.
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          {/* Header with search and controls */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Your Vault</h1>
+                <p className="mt-1 text-sm text-gray-600">
+                  {filteredAndSortedItems.length} of {items.length} passwords
+                  {selectedCategory !== 'ALL' && ` in ${PASSWORD_CATEGORIES[selectedCategory as keyof typeof PASSWORD_CATEGORIES] || selectedCategory}`}
+                  {showFavoritesOnly && ' (favorites)'}
+                </p>
+              </div>
+              
+              <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+                {/* View Mode Toggle */}
+                <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-white shadow-sm text-gray-900'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    List
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                      viewMode === 'grid'
+                        ? 'bg-white shadow-sm text-gray-900'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Grid
+                  </button>
+                </div>
+                
+                {/* Add button */}
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Password
+                </button>
+              </div>
+            </div>
+
+            {/* Search and Sort Controls */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search passwords, usernames, notes, or tags..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* Sort Controls */}
+              <div className="flex items-center space-x-2">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                >
+                  <option value="name">Sort by Name</option>
+                  <option value="date">Sort by Date</option>
+                  <option value="category">Sort by Category</option>
+                  <option value="strength">Sort by Strength</option>
+                </select>
+                
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+                >
+                  <svg className={`w-4 h-4 text-gray-600 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Area */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading your vault...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 border border-red-300 rounded-md p-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Error</h3>
+                  <p className="mt-1 text-sm text-red-700">{error}</p>
+                  <button
+                    onClick={loadVaultItems}
+                    className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
+                  >
+                    Try again
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : filteredAndSortedItems.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm || selectedCategory !== 'ALL' || showFavoritesOnly
+                  ? 'No passwords found'
+                  : 'No passwords yet'}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm || selectedCategory !== 'ALL' || showFavoritesOnly
+                  ? 'Try adjusting your search term or filters.'
+                  : 'Get started by adding your first password to the vault.'}
+              </p>
+              {!searchTerm && selectedCategory === 'ALL' && !showFavoritesOnly && (
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Your First Password
+                </button>
+              )}
+            </div>
+          ) : (
+            <PasswordList
+              items={filteredAndSortedItems}
+              viewMode={viewMode}
+              onCopyToClipboard={copyToClipboard}
+              onEditItem={(item) => {
+                setSelectedItem(item);
+                setShowEditForm(true);
+              }}
+              onDeleteItem={handleDeletePassword}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          )}
         </div>
       </div>
 
-      {/* Add Form Modal */}
+      {/* Modals */}
       {showAddForm && (
         <PasswordFormModal
           isOpen={showAddForm}
           onClose={() => setShowAddForm(false)}
-          onSave={(data) => {
-            handleAddPassword(data);
-            setShowAddForm(false);
-          }}
+          onSave={handleAddPassword}
           title="Add New Password"
         />
       )}
 
-      {/* Edit Form Modal */}
       {showEditForm && selectedItem && (
         <PasswordFormModal
           isOpen={showEditForm}
@@ -375,14 +590,37 @@ export default function VaultDashboard({}: VaultDashboardProps) {
             setShowEditForm(false);
             setSelectedItem(null);
           }}
-          onSave={(data) => {
-            handleUpdatePassword(data);
-            setShowEditForm(false);
-            setSelectedItem(null);
-          }}
+          onSave={handleUpdatePassword}
           title="Edit Password"
-          initialData={selectedItem}
+          initialData={{
+            name: selectedItem.site,
+            username: selectedItem.username,
+            password: selectedItem.password,
+            website: selectedItem.url || '',
+            notes: selectedItem.notes || '',
+            category: selectedItem.category || 'OTHER',
+            isFavorite: selectedItem.isFavorite || false,
+          }}
         />
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 px-4 py-2 rounded-md shadow-lg z-50 transition-all duration-300 ${
+          toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          <div className="flex items-center">
+            <span>{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-2 text-white hover:text-gray-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -106,6 +106,35 @@ export interface Database {
           changed_at?: string;
         };
       };
+      vault_otp_verifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          otp_code: string;
+          purpose: 'vault_access' | 'vault_password_change';
+          expires_at: string;
+          is_used: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          otp_code: string;
+          purpose: 'vault_access' | 'vault_password_change';
+          expires_at: string;
+          is_used?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          otp_code?: string;
+          purpose?: 'vault_access' | 'vault_password_change';
+          expires_at?: string;
+          is_used?: boolean;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -134,4 +163,23 @@ export type VaultItemUpdate = Database['public']['Tables']['vault_items']['Updat
 
 export type PasswordHistory = Database['public']['Tables']['password_history']['Row'];
 export type PasswordHistoryInsert = Database['public']['Tables']['password_history']['Insert'];
-export type PasswordHistoryUpdate = Database['public']['Tables']['password_history']['Update']; 
+export type PasswordHistoryUpdate = Database['public']['Tables']['password_history']['Update'];
+
+export type VaultOTPVerification = Database['public']['Tables']['vault_otp_verifications']['Row'];
+export type VaultOTPVerificationInsert = Database['public']['Tables']['vault_otp_verifications']['Insert'];
+export type VaultOTPVerificationUpdate = Database['public']['Tables']['vault_otp_verifications']['Update'];
+
+export interface Profile {
+  id: string;
+  user_id: string;
+  email: string;
+  salt: string;
+  vault_verification_data?: string;
+  security_settings?: {
+    autoLockTimeout?: number;
+    requireMasterPasswordConfirm?: boolean;
+    enableBiometric?: boolean;
+  };
+  created_at: string;
+  updated_at: string;
+} 

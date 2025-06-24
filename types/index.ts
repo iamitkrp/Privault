@@ -17,9 +17,14 @@ export interface Credential {
   password: string;
   url?: string;
   notes?: string;
+  category?: string;
+  isFavorite?: boolean;
+  tags?: string[];
+  passwordStrength?: number;
+  lastPasswordChange?: string;
+  accessCount?: number;
   created_at: string;
   updated_at: string;
-  folder?: string;
 }
 
 export interface PasswordHistory {
@@ -159,4 +164,29 @@ export type DeepPartial<T> = {
 
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
-export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>; 
+export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// New: Password categories
+export const PASSWORD_CATEGORIES = {
+  SOCIAL: 'Social Media',
+  WORK: 'Work & Business',
+  SHOPPING: 'Shopping & Finance',
+  ENTERTAINMENT: 'Entertainment',
+  UTILITIES: 'Utilities & Services',
+  DEVELOPMENT: 'Development & Tech',
+  PERSONAL: 'Personal',
+  OTHER: 'Other'
+} as const;
+
+export type PasswordCategory = keyof typeof PASSWORD_CATEGORIES;
+
+// New: Vault statistics
+export interface VaultStats {
+  totalPasswords: number;
+  weakPasswords: number;
+  reusedPasswords: number;
+  oldPasswords: number; // Older than 90 days
+  averagePasswordStrength: number;
+  categoryCounts: Record<string, number>;
+  recentlyAdded: number; // Added in last 7 days
+} 

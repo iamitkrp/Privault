@@ -12,7 +12,11 @@ interface VaultChangePasswordProps {
   onCancel: () => void;
 }
 
-export default function VaultChangePassword({ user, onPasswordChanged, onCancel }: VaultChangePasswordProps) {
+export default function VaultChangePassword({ 
+  user, 
+  onPasswordChanged, 
+  onCancel 
+}: VaultChangePasswordProps) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

@@ -216,6 +216,31 @@ export const wipeSensitiveData = (data: unknown): void => {
 };
 
 /**
+ * Calculate password strength score (0-4)
+ */
+export const calculatePasswordStrength = (password: string): { score: number; feedback: string[] } => {
+  let score = 0;
+  const feedback: string[] = [];
+
+  if (password.length >= 8) score++;
+  else feedback.push('Use at least 8 characters');
+
+  if (/[a-z]/.test(password)) score++;
+  else feedback.push('Include lowercase letters');
+
+  if (/[A-Z]/.test(password)) score++;
+  else feedback.push('Include uppercase letters');
+
+  if (/\d/.test(password)) score++;
+  else feedback.push('Include numbers');
+
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+  else feedback.push('Include special characters');
+
+  return { score, feedback };
+};
+
+/**
  * Generate a secure random password
  */
 export const generateSecurePassword = (

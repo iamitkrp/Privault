@@ -92,6 +92,14 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
         throw new Error('Failed to save vault setup data');
       }
 
+      // Initialize empty vault in database
+      const { vaultService } = await import('@/services/vault.service');
+      const initResult = await vaultService.initializeVault(user.id);
+      
+      if (!initResult.success) {
+        throw new Error('Failed to initialize vault storage');
+      }
+
       // Mark vault as set up for this user
       localStorage.setItem(`vault-setup-${user.id}`, 'true');
 

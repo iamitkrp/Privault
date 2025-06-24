@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { generateSecurePassword } from '@/lib/crypto/crypto-utils';
+import { PASSWORD_CATEGORIES } from '@/types';
 
 interface PasswordFormData {
   name: string;
@@ -9,6 +10,8 @@ interface PasswordFormData {
   password: string;
   website?: string;
   notes?: string;
+  category?: string;
+  isFavorite?: boolean;
 }
 
 interface PasswordFormModalProps {
@@ -22,6 +25,8 @@ interface PasswordFormModalProps {
     password: string;
     website?: string;
     notes?: string;
+    category?: string;
+    isFavorite?: boolean;
   };
 }
 
@@ -38,6 +43,8 @@ export default function PasswordFormModal({
     password: '',
     website: '',
     notes: '',
+    category: 'OTHER',
+    isFavorite: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isGeneratingPassword, setIsGeneratingPassword] = useState(false);
@@ -51,6 +58,8 @@ export default function PasswordFormModal({
         password: initialData.password || '',
         website: initialData.website || '',
         notes: initialData.notes || '',
+        category: initialData.category || 'OTHER',
+        isFavorite: initialData.isFavorite || false,
       });
     } else {
       // Reset form for new entries
@@ -60,6 +69,8 @@ export default function PasswordFormModal({
         password: '',
         website: '',
         notes: '',
+        category: 'OTHER',
+        isFavorite: false,
       });
     }
   }, [initialData, isOpen]);
@@ -89,7 +100,7 @@ export default function PasswordFormModal({
     }
   };
 
-  const handleInputChange = (field: keyof PasswordFormData, value: string) => {
+  const handleInputChange = (field: keyof PasswordFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -214,19 +225,52 @@ export default function PasswordFormModal({
             </div>
           </div>
 
+          {/* Category */}
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <select
+              id="category"
+              value={formData.category}
+              onChange={(e) => handleInputChange('category', e.target.value)}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+            >
+              {Object.entries(PASSWORD_CATEGORIES).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Notes */}
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
               Notes
             </label>
-                         <textarea
-               id="notes"
-               value={formData.notes}
-               onChange={(e) => handleInputChange('notes', e.target.value)}
-               rows={3}
-               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-               placeholder="Additional notes or information..."
-             />
+            <textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => handleInputChange('notes', e.target.value)}
+              rows={3}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+              placeholder="Additional notes or information..."
+            />
+          </div>
+
+          {/* Favorite */}
+          <div className="flex items-center">
+            <input
+              id="isFavorite"
+              type="checkbox"
+              checked={formData.isFavorite}
+              onChange={(e) => handleInputChange('isFavorite', e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isFavorite" className="ml-2 block text-sm text-gray-700">
+              Add to favorites
+            </label>
           </div>
 
           {/* Buttons */}

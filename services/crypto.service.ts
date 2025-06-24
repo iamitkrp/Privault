@@ -8,7 +8,7 @@ import {
   wipeSensitiveData 
 } from '@/lib/crypto/crypto-utils';
 import { passphraseManager } from '@/lib/crypto/passphrase-manager';
-import type { VaultItem } from '@/types';
+import type { Credential } from '@/types';
 
 /**
  * Crypto Service
@@ -118,7 +118,7 @@ export class CryptoService {
   /**
    * Encrypt a single vault item
    */
-  async encryptVaultItem(item: Omit<VaultItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<{
+  async encryptVaultItem(item: Omit<Credential, 'id' | 'created_at' | 'updated_at'>): Promise<{
     success: boolean;
     encryptedData?: string;
     iv?: string;
@@ -160,7 +160,7 @@ export class CryptoService {
     iv: string
   ): Promise<{
     success: boolean;
-    item?: Omit<VaultItem, 'id' | 'createdAt' | 'updatedAt'>;
+    item?: Omit<Credential, 'id' | 'created_at' | 'updated_at'>;
     error?: string;
   }> {
     try {
@@ -193,7 +193,7 @@ export class CryptoService {
   /**
    * Encrypt an entire vault (collection of items)
    */
-  async encryptVault(items: VaultItem[]): Promise<{
+  async encryptVault(items: Credential[]): Promise<{
     success: boolean;
     encryptedData?: string;
     iv?: string;
@@ -235,7 +235,7 @@ export class CryptoService {
     iv: string
   ): Promise<{
     success: boolean;
-    items?: VaultItem[];
+    items?: Credential[];
     error?: string;
   }> {
     try {
