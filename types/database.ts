@@ -167,19 +167,4 @@ export type PasswordHistoryUpdate = Database['public']['Tables']['password_histo
 
 export type VaultOTPVerification = Database['public']['Tables']['vault_otp_verifications']['Row'];
 export type VaultOTPVerificationInsert = Database['public']['Tables']['vault_otp_verifications']['Insert'];
-export type VaultOTPVerificationUpdate = Database['public']['Tables']['vault_otp_verifications']['Update'];
-
-export interface Profile {
-  id: string;
-  user_id: string;
-  email: string;
-  salt: string;
-  vault_verification_data?: string;
-  security_settings?: {
-    autoLockTimeout?: number;
-    requireMasterPasswordConfirm?: boolean;
-    enableBiometric?: boolean;
-  };
-  created_at: string;
-  updated_at: string;
-} 
+export type VaultOTPVerificationUpdate = Database['public']['Tables']['vault_otp_verifications']['Update']; 

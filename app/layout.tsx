@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth/auth-context";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { APP_NAME, APP_DESCRIPTION } from "@/constants";
 import "./globals.css";
@@ -50,11 +51,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ErrorBoundary>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </ErrorBoundary>
+        {/* Skip link for keyboard navigation */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        
+        <ThemeProvider
+          defaultTheme="system"
+          storageKey="privault-ui-theme"
+        >
+          <ErrorBoundary>
+            <AuthProvider>
+              <div id="main-content">
+                {children}
+              </div>
+            </AuthProvider>
+          </ErrorBoundary>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -546,7 +546,12 @@ export class VaultService {
         password: decryptResult.item.password,
         url: decryptResult.item.url,
         notes: decryptResult.item.notes,
-        folder: decryptResult.item.folder,
+        category: decryptResult.item.category,
+        isFavorite: decryptResult.item.isFavorite,
+        tags: decryptResult.item.tags,
+        passwordStrength: decryptResult.item.passwordStrength,
+        lastPasswordChange: decryptResult.item.lastPasswordChange,
+        accessCount: decryptResult.item.accessCount,
         created_at: item.created_at,
         updated_at: item.updated_at,
       };
@@ -578,7 +583,12 @@ export class VaultService {
       password: credential.password,
       url: credential.url,
       notes: credential.notes,
-      folder: credential.folder,
+      category: credential.category,
+      isFavorite: credential.isFavorite,
+      tags: credential.tags,
+      passwordStrength: credential.passwordStrength,
+      lastPasswordChange: credential.lastPasswordChange,
+      accessCount: credential.accessCount,
     };
 
     const encryptResult = await cryptoService.encryptVaultItem(credentialData);
@@ -650,7 +660,12 @@ export class VaultService {
       password: decryptResult.item.password,
       url: decryptResult.item.url,
       notes: decryptResult.item.notes,
-      folder: decryptResult.item.folder,
+      category: decryptResult.item.category,
+      isFavorite: decryptResult.item.isFavorite,
+      tags: decryptResult.item.tags,
+      passwordStrength: decryptResult.item.passwordStrength,
+      lastPasswordChange: decryptResult.item.lastPasswordChange,
+      accessCount: decryptResult.item.accessCount,
       created_at: data.created_at,
       updated_at: data.updated_at,
     };
@@ -668,7 +683,12 @@ export class VaultService {
       password: updatedCredential.password,
       url: updatedCredential.url,
       notes: updatedCredential.notes,
-      folder: updatedCredential.folder,
+      category: updatedCredential.category,
+      isFavorite: updatedCredential.isFavorite,
+      tags: updatedCredential.tags,
+      passwordStrength: updatedCredential.passwordStrength,
+      lastPasswordChange: updatedCredential.lastPasswordChange,
+      accessCount: updatedCredential.accessCount,
     };
 
     const encryptResult = await cryptoService.encryptVaultItem(credentialData);

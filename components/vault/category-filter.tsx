@@ -43,42 +43,49 @@ export default function CategoryFilter({
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
-      <div className="p-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
+    <div className={`bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Categories</h3>
       </div>
       
       <div className="p-2">
-        {categories.map((category) => {
-          const count = category.key === 'ALL' ? getTotalCount() : (categoryCounts[category.key] || 0);
-          const isSelected = selectedCategory === category.key;
-          
-          return (
-            <button
-              key={category.key}
-              onClick={() => onCategoryChange(category.key)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
-                isSelected
-                  ? 'bg-blue-100 text-blue-900 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <div className="flex items-center">
-                <span className="mr-3 text-lg">{category.icon}</span>
-                <span>{category.label}</span>
-              </div>
-              {count > 0 && (
-                <span className={`px-2 py-1 text-xs rounded-full ${
+        <nav role="navigation" aria-label="Password categories">
+          {categories.map((category) => {
+            const count = category.key === 'ALL' ? getTotalCount() : (categoryCounts[category.key] || 0);
+            const isSelected = selectedCategory === category.key;
+            
+            return (
+              <button
+                key={category.key}
+                onClick={() => onCategoryChange(category.key)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
                   isSelected
-                    ? 'bg-blue-200 text-blue-800'
-                    : 'bg-gray-200 text-gray-600'
-                }`}>
-                  {count}
-                </span>
-              )}
-            </button>
-          );
-        })}
+                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-medium'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+                aria-pressed={isSelected}
+                aria-label={`${category.label} category, ${count} passwords`}
+              >
+                <div className="flex items-center">
+                  <span className="mr-3 text-lg" aria-hidden="true">{category.icon}</span>
+                  <span>{category.label}</span>
+                </div>
+                {count > 0 && (
+                  <span 
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      isSelected
+                        ? 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
