@@ -67,18 +67,53 @@ export class OTPService {
   static async sendVaultOTP(
     userId: string, 
     email: string, 
-    purpose: 'vault_access' | 'vault_password_change'
-  ): Promise<{ success: boolean; error?: string }> {
+    purpose: 'vault_access' | 'vault_password_change',
+    isResend: boolean = false
+  ): Promise<{ success: boolean; error?: string; message?: string }> {
     try {
       if (!supabase) {
         throw new Error('Supabase client not initialized');
+      }
+
+      // Smart duplicate prevention: Only check for rapid resends, not initial loads
+      if (isResend) {
+        const { data: recentOTP, error: recentError } = await supabase
+          .from('vault_otp_verifications')
+          .select('created_at')
+          .eq('user_id', userId)
+          .eq('purpose', purpose)
+          .gte('created_at', new Date(Date.now() - 60 * 1000).toISOString()) // Within last 60 seconds
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!recentError && recentOTP) {
+          const timeSinceLastOTP = Date.now() - new Date(recentOTP.created_at).getTime();
+          const waitTime = Math.ceil((60 * 1000 - timeSinceLastOTP) / 1000);
+          
+          return { 
+            success: false, 
+            error: `Please wait ${waitTime} seconds before requesting another OTP code` 
+          };
+        }
+      }
+
+      // For initial loads, mark any existing unused OTPs as used to prevent confusion
+      if (!isResend) {
+        await supabase
+          .from('vault_otp_verifications')
+          .update({ is_used: true })
+          .eq('user_id', userId)
+          .eq('purpose', purpose)
+          .eq('is_used', false)
+          .gte('expires_at', new Date().toISOString());
       }
 
       // Generate OTP code
       const otpCode = this.generateOTP();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-      // Store OTP in database (we'll create this table)
+      // Store OTP in database
       const { error: insertError } = await supabase
         .from('vault_otp_verifications')
         .insert({
@@ -101,7 +136,7 @@ export class OTPService {
         console.log('✅ OTP email sent successfully to:', email);
         return { 
           success: true,
-          message: 'OTP sent to your email address'
+          message: isResend ? 'New OTP sent to your email address' : 'OTP sent to your email address'
         };
       } else {
         // Fallback: Log to console for development

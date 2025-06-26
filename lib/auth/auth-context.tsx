@@ -178,15 +178,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear vault session first (security critical)
       passphraseManager.clearSession();
 
-      // Clear vault setup flags for security (when user signs out, clear all vault state)
-      if (typeof window !== 'undefined') {
-        const keys = Object.keys(localStorage);
-        keys.forEach(key => {
-          if (key.startsWith('vault-setup-')) {
-            localStorage.removeItem(key);
-          }
-        });
-      }
+      // NOTE: We do NOT clear vault-setup flags as those should persist across sessions
+      // The vault setup completion status is not sensitive security data and helps UX
 
       const { error } = await supabase.auth.signOut();
       

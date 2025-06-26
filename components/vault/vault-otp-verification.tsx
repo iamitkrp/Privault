@@ -22,12 +22,18 @@ export default function VaultOTPVerification({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(0);
+  const [hasSentInitialOTP, setHasSentInitialOTP] = useState(false);
+  const [isManualResend, setIsManualResend] = useState(false);
 
-  // Auto-send OTP on component mount
+  // Auto-send OTP on component mount (with duplicate prevention)
   useEffect(() => {
-    sendOTP();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!hasSentInitialOTP && user?.id && purpose) {
+      console.log('🚀 VaultOTPVerification: Attempting to send initial OTP for', purpose);
+      setHasSentInitialOTP(true);
+      setIsManualResend(false); // This is the initial send, not a manual resend
+      sendOTP();
+    }
+  }, [user?.id, purpose, hasSentInitialOTP]);
 
   // Countdown timer for resend button
   useEffect(() => {
@@ -38,12 +44,21 @@ export default function VaultOTPVerification({
   }, [countdown]);
 
   const sendOTP = async () => {
+    // Prevent multiple simultaneous sends
+    if (isSending) {
+      console.log('⚠️ VaultOTPVerification: sendOTP called but already sending, ignoring');
+      return;
+    }
+
+    console.log('📧 VaultOTPVerification: Starting OTP send process');
     setIsSending(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const result = await OTPService.sendVaultOTP(user.id, user.email, purpose);
+      const result = await OTPService.sendVaultOTP(user.id, user.email, purpose, isManualResend);
+      
+      console.log('📧 VaultOTPVerification: OTP send result:', result);
       
       if (result.success) {
         setSuccess(result.message || 'OTP sent to your email address');
@@ -107,6 +122,11 @@ export default function VaultOTPVerification({
     const numericValue = value.replace(/[^0-9]/g, '').substring(0, 6);
     setOtpCode(numericValue);
     setError(null);
+  };
+
+  const handleResendOTP = () => {
+    setIsManualResend(true); // This is a manual resend attempt
+    sendOTP();
   };
 
   const purposeText = purpose === 'vault_access' ? 'Vault Access' : 'Vault Password Change';
@@ -217,7 +237,7 @@ export default function VaultOTPVerification({
               {/* Resend OTP */}
               <button
                 type="button"
-                onClick={sendOTP}
+                onClick={handleResendOTP}
                 disabled={isSending || countdown > 0}
                 className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
