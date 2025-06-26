@@ -177,22 +177,22 @@ export default function PasswordFormModal({
               Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-                             <input
-                 type={showPassword ? 'text' : 'password'}
-                 id="password"
-                 value={formData.password}
-                 onChange={(e) => handleInputChange('password', e.target.value)}
-                 className="block w-full px-3 py-2 pr-20 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-                 placeholder="Enter password"
-                 required
-               />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className="block w-full px-3 py-2 pr-20 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                placeholder="Enter password"
+                required
+              />
               <div className="absolute inset-y-0 right-0 flex items-center">
                 {/* Generate Password Button */}
                 <button
                   type="button"
                   onClick={generatePassword}
                   disabled={isGeneratingPassword}
-                  className="px-2 py-1 text-xs text-blue-600 hover:text-blue-500 focus:outline-none disabled:opacity-50"
+                  className="px-2 py-1 text-xs text-blue-600 hover:text-blue-500 focus:outline-none focus:bg-gray-100 rounded transition-colors disabled:opacity-50 z-20"
                   title="Generate secure password"
                 >
                   {isGeneratingPassword ? (
@@ -208,7 +208,9 @@ export default function PasswordFormModal({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="px-2 py-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="px-2 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:bg-gray-100 rounded transition-colors z-20"
+                  title={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

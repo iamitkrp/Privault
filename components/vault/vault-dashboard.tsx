@@ -219,6 +219,8 @@ export default function VaultDashboard({}: VaultDashboardProps) {
         password: data.password,
         url: data.website || '',
         notes: data.notes || '',
+        category: data.category || 'OTHER',
+        isFavorite: data.isFavorite || false,
       };
 
       const result = await vaultService.addCredential(user.id, newCredential);
@@ -260,6 +262,8 @@ export default function VaultDashboard({}: VaultDashboardProps) {
         password: data.password,
         url: data.website || '',
         notes: data.notes || '',
+        category: data.category || 'OTHER',
+        isFavorite: data.isFavorite || false,
       };
 
       // Add to password history if password changed

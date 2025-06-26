@@ -4,7 +4,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 import { passphraseManager } from '@/lib/crypto/passphrase-manager';
-import { AuthState } from '@/types';
+import { AuthState, SecurityEvent } from '@/types';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/constants';
 
 // Auth Context Interface
 interface AuthContextType extends AuthState {
@@ -62,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Sign in function
+  // Sign in function with security monitoring
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -72,14 +74,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Supabase client not initialized');
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        // Record failed login attempt (commented out for now as it may not have user_id)
+        try {
+          // Note: We can't record failed attempts here as we don't have user_id for failed logins
+          console.warn('Failed login attempt for:', email);
+        } catch {
+          console.warn('Could not log failed login attempt');
+        }
+        
         setError(error.message);
         return { error: error.message };
+      }
+
+      // Initialize session management for successful login
+      if (data.user) {
+        try {
+          const [{ SecurityMonitoringService }, { SessionManagementService }] = await Promise.all([
+            import('@/services/security-monitoring.service'),
+            import('@/services/session-management.service')
+          ]);
+
+          // Clear any previous failed attempts
+          SecurityMonitoringService.clearFailedAttempts(data.user.id);
+          
+          // Log successful login
+          await SecurityMonitoringService.logSecurityEvent(
+            data.user.id,
+            SecurityEvent.LOGIN,
+            { login_method: 'email_password' },
+            'low'
+          );
+
+          // Initialize session management
+          await SessionManagementService.initializeSession(data.user.id);
+        } catch (serviceError) {
+          console.warn('Could not initialize security services:', serviceError);
+        }
       }
 
       // User will be set via the auth state change listener
@@ -93,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Sign out function
+  // Sign out function with security monitoring
   const signOut = async () => {
     try {
       setLoading(true);
@@ -103,10 +139,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Supabase client not initialized');
       }
 
-      // Mark logout timestamp for OTP requirement (before clearing user)
+      // Clear session and log security events before signing out
       if (user?.id) {
-        const { OTPService } = await import('@/services/otp.service');
-        OTPService.markUserLogout(user.id);
+        try {
+          const [{ OTPService }, { SecurityMonitoringService }, { SessionManagementService }] = await Promise.all([
+            import('@/services/otp.service'),
+            import('@/services/security-monitoring.service'),
+            import('@/services/session-management.service')
+          ]);
+
+          // Mark logout timestamp for OTP requirement
+          OTPService.markUserLogout(user.id);
+
+          // Log logout event
+          await SecurityMonitoringService.logSecurityEvent(
+            user.id,
+            SecurityEvent.LOGOUT,
+            { logout_method: 'user_initiated' },
+            'low'
+          );
+
+          // Clear session activities
+          SecurityMonitoringService.clearSessionActivity(user.id);
+
+          // Terminate current session
+          const currentSession = SessionManagementService.getCurrentSession();
+          if (currentSession) {
+            await SessionManagementService.terminateSession(
+              currentSession.session_id, 
+              'user_logout'
+            );
+          }
+        } catch (serviceError) {
+          console.warn('Could not import security services:', serviceError);
+        }
       }
 
       // Clear vault session first (security critical)
@@ -350,4 +416,35 @@ export function useAuthRedirect() {
   }, [user, loading]);
   
   return { user, loading };
+}
+
+// New hook that handles logout redirect properly
+export function useAuthWithLogoutRedirect() {
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
+  
+  // Custom sign out that redirects to home page
+  const signOutToHome = async () => {
+    try {
+      await signOut();
+      router.push(ROUTES.HOME);
+    } catch (err) {
+      console.error('Sign out error:', err);
+      router.push(ROUTES.HOME);
+    }
+  };
+
+  // Redirect to login only if not authenticated (not during logout)
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push(ROUTES.LOGIN);
+    }
+  }, [user, loading, router]);
+
+  return {
+    user,
+    loading,
+    signOut: signOutToHome,
+    isAuthenticated: !!user && !loading,
+  };
 } 

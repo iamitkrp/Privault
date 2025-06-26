@@ -158,10 +158,27 @@ export const verifyPassphrase = async (
   expectedPlaintext: string
 ): Promise<boolean> => {
   try {
+    console.log('🔍 Verifying passphrase with:', {
+      passphraseLength: passphrase.length,
+      saltLength: salt.length,
+      testEncryptedDataLength: testEncryptedData.length,
+      testIvLength: testIv.length,
+      expectedPlaintext
+    });
+    
     const key = await deriveKey(passphrase, salt);
+    console.log('🔑 Derived key for verification:', !!key);
+    
     const decryptedData = await decrypt(testEncryptedData, testIv, key);
+    console.log('🔓 Decrypted verification data:', {
+      decryptedData,
+      expectedPlaintext,
+      matches: decryptedData === expectedPlaintext
+    });
+    
     return decryptedData === expectedPlaintext;
-  } catch {
+  } catch (err) {
+    console.error('❌ Passphrase verification failed:', err);
     return false;
   }
 };

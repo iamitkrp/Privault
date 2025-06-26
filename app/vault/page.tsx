@@ -31,10 +31,20 @@ export default function VaultPage() {
   const [needsOTP, setNeedsOTP] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (but not during sign out process)
   useEffect(() => {
     if (!loading && !user) {
-      router.push(ROUTES.LOGIN);
+      // Check if this is a fresh page load (not a sign out redirect)
+      // If user manually navigates to vault without auth, redirect to login
+      // If they just signed out, they should go to home page
+      const isSignOutRedirect = sessionStorage.getItem('signing-out') === 'true';
+      if (!isSignOutRedirect) {
+        router.push(ROUTES.LOGIN);
+      } else {
+        // Clear the sign out flag and redirect to home
+        sessionStorage.removeItem('signing-out');
+        router.push(ROUTES.HOME);
+      }
     }
   }, [user, loading, router]);
 
@@ -146,12 +156,15 @@ export default function VaultPage() {
   // Handle sign out
   const handleSignOut = async () => {
     try {
+      // Set flag to indicate this is a sign out process
+      sessionStorage.setItem('signing-out', 'true');
       await signOut();
-      router.push(ROUTES.HOME); // Redirect to intro page, not login
+      // Use window.location for immediate redirect to avoid race condition with useEffect
+      window.location.href = '/';
     } catch (err) {
       console.error('Sign out error:', err);
       // Even if there's an error, still redirect to home since local state is cleared
-      router.push(ROUTES.HOME);
+      window.location.href = '/';
     }
   };
 

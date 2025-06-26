@@ -2,7 +2,98 @@ import type { NextConfig } from "next";
 import withPWA from 'next-pwa';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Performance optimizations
+  experimental: {
+    // Enable optimizePackageImports for better tree shaking
+    optimizePackageImports: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-form', '@radix-ui/react-label', '@radix-ui/react-progress', '@radix-ui/react-separator', '@radix-ui/react-toast', '@radix-ui/react-tooltip'],
+    // Enable React 19 features
+    turbo: {
+      rules: {
+        '*.tsx': {
+          loaders: ['@next/react-refresh-utils/loader'],
+          as: '*.js',
+        },
+      },
+    },
+  },
+  
+  // Bundle optimization
+  compiler: {
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  
+  // Compression and optimization
+  compress: true,
+  poweredByHeader: false,
+  
+  // Image optimization
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+  
+  // Bundle analyzer and webpack optimization
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Bundle analyzer
+    if (process.env.ANALYZE === 'true') {
+      const BundleAnalyzerPlugin = require('@next/bundle-analyzer')({
+        enabled: true,
+      });
+      config.plugins.push(new BundleAnalyzerPlugin());
+    }
+    
+    // Optimize chunks - only in production and for client-side
+    if (!dev && !isServer) {
+      // Ensure optimization object exists
+      if (!config.optimization) {
+        config.optimization = {};
+      }
+      
+      // Initialize splitChunks if it doesn't exist or is false
+      if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
+        config.optimization.splitChunks = {
+          chunks: 'all',
+          cacheGroups: {}
+        };
+      }
+      
+      // Now safely set properties
+      config.optimization.splitChunks.chunks = 'all';
+      config.optimization.splitChunks.cacheGroups = {
+        ...(config.optimization.splitChunks.cacheGroups || {}),
+        crypto: {
+          name: 'crypto',
+          test: /[\\/]services[\\/](crypto|vault|auth)\.service\.ts/,
+          priority: 30,
+          reuseExistingChunk: true,
+        },
+        security: {
+          name: 'security',
+          test: /[\\/]services[\\/](security-monitoring|session-management)\.service\.ts/,
+          priority: 25,
+          reuseExistingChunk: true,
+        },
+        ui: {
+          name: 'ui',
+          test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+          priority: 20,
+          reuseExistingChunk: true,
+        },
+        supabase: {
+          name: 'supabase',
+          test: /[\\/]node_modules[\\/]@supabase[\\/]/,
+          priority: 15,
+          reuseExistingChunk: true,
+        },
+      };
+    }
+    
+    return config;
+  },
 };
 
 export default withPWA({
@@ -135,7 +226,7 @@ export default withPWA({
       }
     },
     {
-      urlPattern: ({ url, request }: any) => {
+      urlPattern: ({ url }: { url: URL; request: Request }) => {
         if (url.pathname.startsWith('/api/')) return false;
         if (url.pathname.includes('/auth/')) return false;
         return url.origin === location.origin;

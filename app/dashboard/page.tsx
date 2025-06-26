@@ -1,31 +1,48 @@
 'use client';
 
 import { useAuth } from '@/lib/auth/auth-context';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants';
 import Link from 'next/link';
+import SecurityDashboard from '@/components/security/security-dashboard';
+// import PerformanceDashboard from '@/components/performance/performance-dashboard';
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const [showSecurityDashboard, setShowSecurityDashboard] = useState(false);
+  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false);
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (but not during sign out process)
   useEffect(() => {
     if (!loading && !user) {
-      router.push(ROUTES.LOGIN);
+      // Check if this is a fresh page load (not a sign out redirect)
+      // If user manually navigates to dashboard without auth, redirect to login
+      // If they just signed out, they should go to home page
+      const isSignOutRedirect = sessionStorage.getItem('signing-out') === 'true';
+      if (!isSignOutRedirect) {
+        router.push(ROUTES.LOGIN);
+      } else {
+        // Clear the sign out flag and redirect to home
+        sessionStorage.removeItem('signing-out');
+        router.push(ROUTES.HOME);
+      }
     }
   }, [user, loading, router]);
 
   // Handle sign out
   const handleSignOut = async () => {
     try {
+      // Set flag to indicate this is a sign out process
+      sessionStorage.setItem('signing-out', 'true');
       await signOut();
-      router.push(ROUTES.HOME); // Redirect to intro page, not login
+      // Use window.location for immediate redirect to avoid race condition with useEffect
+      window.location.href = '/';
     } catch (err) {
       console.error('Sign out error:', err);
       // Even if there's an error, still redirect to home since local state is cleared
-      router.push(ROUTES.HOME);
+      window.location.href = '/';
     }
   };
 
@@ -46,19 +63,95 @@ export default function DashboardPage() {
     return null;
   }
 
+  // Show performance dashboard if requested
+  if (showPerformanceDashboard) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setShowPerformanceDashboard(false)}
+                  className="mr-4 text-blue-600 hover:text-blue-500"
+                >
+                  ← Back to Dashboard
+                </button>
+                <h1 className="text-2xl font-bold text-gray-900">⚡ Performance Monitor</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">{user.email}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-blue-600 hover:text-blue-500"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Performance Dashboard */}
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Performance Monitor</h2>
+            <p className="text-gray-600">Performance monitoring coming soon...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show security dashboard if requested
+  if (showSecurityDashboard) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setShowSecurityDashboard(false)}
+                  className="mr-4 text-blue-600 hover:text-blue-500"
+                >
+                  ← Back to Dashboard
+                </button>
+                <h1 className="text-2xl font-bold text-gray-900">🔒 Security Center</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">{user.email}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-blue-600 hover:text-blue-500"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Security Dashboard */}
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <SecurityDashboard />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">🔒 Privault</h1>
-              <span className="ml-4 text-sm text-gray-500">Personal Dashboard</span>
-            </div>
+            <h1 className="text-2xl font-bold text-gray-900">🏠 Personal Dashboard</h1>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                Welcome, {user.email?.split('@')[0]}
+                {user.email}
               </span>
               <button
                 onClick={handleSignOut}
@@ -94,180 +187,244 @@ export default function DashboardPage() {
                 sessionStorage.setItem('vault-access-allowed', 'true');
               }}
             >
-              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+              <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200 cursor-pointer">
+                <div className="p-6">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                        <span className="text-white font-semibold">🔐</span>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-white">Password Vault</h3>
+                    <div className="ml-4 flex-1">
+                      <h3 className="text-lg font-medium text-gray-900">Password Vault</h3>
+                      <p className="text-sm text-gray-500">Secure password storage</p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="px-6 py-4">
-                  <p className="text-gray-600 mb-4">
-                    Securely store and manage your passwords with zero-knowledge encryption
-                  </p>
-                  <div className="flex items-center text-blue-600 text-sm font-medium">
-                    Access Vault
-                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600">
+                      Access your encrypted password vault with zero-knowledge security.
+                    </p>
                   </div>
                 </div>
               </div>
             </Link>
 
-            {/* Notes Card - Coming Soon */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden opacity-75">
-              <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+            {/* Security Center Card */}
+            <div 
+              onClick={() => setShowSecurityDashboard(true)}
+              className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200 cursor-pointer"
+            >
+              <div className="p-6">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                      <span className="text-white font-semibold">🛡️</span>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Secure Notes</h3>
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-lg font-medium text-gray-900">Security Center</h3>
+                    <p className="text-sm text-gray-500">Monitor account security</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Active
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="px-6 py-4">
-                <p className="text-gray-600 mb-4">
-                  Encrypted personal notes and documents
-                </p>
-                <div className="flex items-center text-gray-400 text-sm font-medium">
-                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs mr-2">Coming Soon</span>
-                  Notes & Documents
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600">
+                    View security events, manage sessions, and configure security settings.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Watchlists Card - Coming Soon */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden opacity-75">
-              <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+            {/* Performance Monitor Card */}
+            <div 
+              onClick={() => setShowPerformanceDashboard(true)}
+              className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200 cursor-pointer"
+            >
+              <div className="p-6">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
-                    </svg>
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                      <span className="text-white font-semibold">⚡</span>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Watchlists</h3>
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-lg font-medium text-gray-900">Performance Monitor</h3>
+                    <p className="text-sm text-gray-500">Application performance</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      New
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="px-6 py-4">
-                <p className="text-gray-600 mb-4">
-                  Track stocks, crypto, and personal goals
-                </p>
-                <div className="flex items-center text-gray-400 text-sm font-medium">
-                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs mr-2">Coming Soon</span>
-                  Investment Tracking
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600">
+                    Monitor app performance, load times, and optimization metrics.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Pomodoro Card - Coming Soon */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden opacity-75">
-              <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4">
+            {/* Secure Notes Card */}
+            <div className="bg-white overflow-hidden shadow rounded-lg opacity-60">
+              <div className="p-6">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                      <span className="text-white font-semibold">📝</span>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Pomodoro Timer</h3>
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-lg font-medium text-gray-900">Secure Notes</h3>
+                    <p className="text-sm text-gray-500">Encrypted note storage</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Coming Soon
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="px-6 py-4">
-                <p className="text-gray-600 mb-4">
-                  Boost productivity with time management
-                </p>
-                <div className="flex items-center text-gray-400 text-sm font-medium">
-                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs mr-2">Coming Soon</span>
-                  Productivity Timer
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600">
+                    Store sensitive notes and documents with end-to-end encryption.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Tasks Card - Coming Soon */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden opacity-75">
-              <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+            {/* Watchlists Card */}
+            <div className="bg-white overflow-hidden shadow rounded-lg opacity-60">
+              <div className="p-6">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                      <span className="text-white font-semibold">👁️</span>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Task Manager</h3>
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-lg font-medium text-gray-900">Watchlists</h3>
+                    <p className="text-sm text-gray-500">Monitor important items</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Coming Soon
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="px-6 py-4">
-                <p className="text-gray-600 mb-4">
-                  Organize your daily tasks and projects
-                </p>
-                <div className="flex items-center text-gray-400 text-sm font-medium">
-                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs mr-2">Coming Soon</span>
-                  Task Organization
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600">
+                    Keep track of stocks, cryptocurrency, and other investments.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Settings Card - Active */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden opacity-75 cursor-pointer">
-              <div className="bg-gradient-to-r from-gray-600 to-gray-700 px-6 py-4">
+            {/* Pomodoro Timer Card */}
+            <div className="bg-white overflow-hidden shadow rounded-lg opacity-60">
+              <div className="p-6">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+                      <span className="text-white font-semibold">⏱️</span>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Settings</h3>
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-lg font-medium text-gray-900">Pomodoro Timer</h3>
+                    <p className="text-sm text-gray-500">Productivity tracking</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Coming Soon
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600">
+                    Focus sessions with time tracking and productivity analytics.
+                  </p>
                 </div>
               </div>
-              <div className="px-6 py-4">
-                <p className="text-gray-600 mb-4">
-                  Customize your Privault experience
-                </p>
-                
-                {/* Vault Settings */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Vault Settings</h4>
-                  <button 
-                    onClick={() => {
-                      // Set flag to allow changing vault password
-                      sessionStorage.setItem('vault-access-allowed', 'true');
-                      sessionStorage.setItem('vault-action', 'change-password');
-                      window.location.href = ROUTES.VAULT;
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-500 underline"
-                  >
-                    Change Vault Master Password
-                  </button>
-                </div>
+            </div>
 
-                <div className="flex items-center text-gray-400 text-sm font-medium">
-                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs mr-2">Coming Soon</span>
-                  More Settings
+            {/* Task Manager Card */}
+            <div className="bg-white overflow-hidden shadow rounded-lg opacity-60">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
+                      <span className="text-white font-semibold">✅</span>
+                    </div>
+                  </div>
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-lg font-medium text-gray-900">Task Manager</h3>
+                    <p className="text-sm text-gray-500">Project organization</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Coming Soon
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600">
+                    Organize tasks, projects, and deadlines with advanced filtering.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Overview</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">1</div>
-                <div className="text-sm text-gray-600">Active Vault</div>
+          {/* Account Overview Section */}
+          <div className="mt-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Account Overview</h3>
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h4 className="text-sm font-medium text-gray-900">Account Settings</h4>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">100%</div>
-                <div className="text-sm text-gray-600">Encryption Status</div>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">{new Date().toLocaleDateString()}</div>
-                <div className="text-sm text-gray-600">Last Login</div>
+              <div className="px-6 py-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Email Address</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                  <button className="text-sm text-blue-600 hover:text-blue-500">
+                    Update
+                  </button>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Change Vault Master Password</p>
+                    <p className="text-sm text-gray-500">Update your vault encryption password</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      sessionStorage.setItem('vault-access-allowed', 'true');
+                      sessionStorage.setItem('vault-action', 'change-password');
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    <Link href={ROUTES.VAULT}>Change Password</Link>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Account Created</p>
+                    <p className="text-sm text-gray-500">
+                      {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

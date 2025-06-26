@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase/client';
 import { cryptoService } from './crypto.service';
+// import { performanceService } from './performance.service';
 import type { 
   Credential, 
   PasswordHistory as PasswordHistoryType 

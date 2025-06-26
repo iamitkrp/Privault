@@ -12,7 +12,7 @@ export const CRYPTO_CONFIG = {
   SALT_LENGTH: 32, // bytes
   PBKDF2_ITERATIONS: 100000, // OWASP recommended minimum
   HASH_ALGORITHM: 'SHA-256' as const,
-  PASSPHRASE_TEST_STRING: 'privault-test-string',
+  PASSPHRASE_TEST_STRING: 'VAULT_PASSWORD_VERIFICATION_DATA',
   SESSION_TIMEOUT: 15 * 60 * 1000, // 15 minutes in milliseconds
   HIDDEN_TAB_TIMEOUT: 5 * 60 * 1000, // 5 minutes when tab is hidden
 } as const;
