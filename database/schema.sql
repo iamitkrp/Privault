@@ -72,6 +72,24 @@ CREATE TABLE IF NOT EXISTS password_history (
 );
 
 -- ==========================================
+-- TABLE: vault_otp_verifications
+-- Stores OTP codes for vault security verification
+-- ==========================================
+CREATE TABLE IF NOT EXISTS vault_otp_verifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    otp_code TEXT NOT NULL, -- 6-digit OTP code
+    purpose TEXT NOT NULL CHECK (purpose IN ('vault_access', 'vault_password_change')),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    
+    -- Constraints
+    CONSTRAINT otp_code_check CHECK (otp_code ~ '^[0-9]{6}$'), -- Ensure 6-digit numeric code
+    CONSTRAINT otp_expires_future CHECK (expires_at > created_at) -- Expiry must be in future
+);
+
+-- ==========================================
 -- INDEXES for Performance
 -- ==========================================
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
@@ -82,6 +100,10 @@ CREATE INDEX IF NOT EXISTS idx_vault_items_credential_id ON vault_items(credenti
 CREATE INDEX IF NOT EXISTS idx_password_history_user_id ON password_history(user_id);
 CREATE INDEX IF NOT EXISTS idx_password_history_credential_id ON password_history(credential_id);
 CREATE INDEX IF NOT EXISTS idx_password_history_changed_at ON password_history(changed_at);
+CREATE INDEX IF NOT EXISTS idx_vault_otp_user_id ON vault_otp_verifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_vault_otp_code ON vault_otp_verifications(otp_code);
+CREATE INDEX IF NOT EXISTS idx_vault_otp_expires_at ON vault_otp_verifications(expires_at);
+CREATE INDEX IF NOT EXISTS idx_vault_otp_purpose ON vault_otp_verifications(purpose);
 
 -- ==========================================
 -- ROW LEVEL SECURITY (RLS) SETUP
@@ -92,6 +114,7 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vaults ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vault_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE password_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vault_otp_verifications ENABLE ROW LEVEL SECURITY;
 
 -- ==========================================
 -- RLS POLICIES: profiles table
@@ -128,6 +151,15 @@ CREATE POLICY "Users can view own password history" ON password_history FOR SELE
 CREATE POLICY "Users can insert own password history" ON password_history FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own password history" ON password_history FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own password history" ON password_history FOR DELETE USING (auth.uid() = user_id);
+
+-- ==========================================
+-- RLS POLICIES: vault_otp_verifications table
+-- ==========================================
+-- Users can only access their own OTP verifications
+CREATE POLICY "Users can view own otp verifications" ON vault_otp_verifications FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own otp verifications" ON vault_otp_verifications FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own otp verifications" ON vault_otp_verifications FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own otp verifications" ON vault_otp_verifications FOR DELETE USING (auth.uid() = user_id);
 
 -- ==========================================
 -- FUNCTIONS AND TRIGGERS

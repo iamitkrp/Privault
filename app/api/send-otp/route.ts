@@ -15,12 +15,16 @@ export async function POST(request: NextRequest) {
     // Get Resend API key from environment
     const resendApiKey = process.env.RESEND_API_KEY;
     if (!resendApiKey) {
-      console.warn('RESEND_API_KEY not found in environment variables');
+      console.error('❌ RESEND_API_KEY not found in environment variables');
+      console.log('Environment variables available:', Object.keys(process.env).filter(key => key.includes('RESEND')));
       return NextResponse.json(
         { success: false, error: 'Email service not configured' },
         { status: 500 }
       );
     }
+
+    console.log('📧 Attempting to send OTP email to:', email);
+    console.log('🔑 Resend API key found:', resendApiKey.substring(0, 10) + '...');
 
     const resend = new Resend(resendApiKey);
 
@@ -28,48 +32,104 @@ export async function POST(request: NextRequest) {
     const expirationDate = new Date(expiresAt);
     
     const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1f2937; margin-bottom: 10px;">🔒 Privault Security</h1>
-          <h2 style="color: #4b5563; font-size: 24px; margin: 0;">${purposeText} Verification</h2>
-        </div>
-        
-        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 30px; text-align: center; margin-bottom: 30px;">
-          <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
-            Your verification code is:
-          </p>
-          <div style="font-size: 32px; font-weight: bold; color: #1f2937; letter-spacing: 4px; font-family: monospace; background: white; padding: 15px; border-radius: 6px; border: 2px solid #3b82f6;">
-            ${otpCode}
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Privault Security Verification</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f3f4f6;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: white;">
+          
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 40px 20px; text-align: center;">
+            <div style="background: rgba(255,255,255,0.1); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 36px;">🔒</span>
+            </div>
+            <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px; font-weight: 700;">Privault Security</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 16px;">${purposeText} Verification</p>
           </div>
+          
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <p style="color: #374151; font-size: 16px; line-height: 24px; margin: 0 0 30px 0;">
+              Hello,
+            </p>
+            <p style="color: #374151; font-size: 16px; line-height: 24px; margin: 0 0 30px 0;">
+              You've requested access to your Privault vault. Please use the verification code below to proceed:
+            </p>
+            
+            <!-- OTP Code Box -->
+            <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+              <p style="color: #64748b; font-size: 14px; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                Your Verification Code
+              </p>
+              <div style="font-size: 36px; font-weight: bold; color: #1e293b; letter-spacing: 8px; font-family: 'Courier New', monospace; background: white; padding: 20px; border-radius: 8px; border: 2px solid #4f46e5; display: inline-block;">
+                ${otpCode}
+              </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 4px;">
+              <p style="color: #92400e; font-size: 14px; margin: 0; font-weight: 600;">⚠️ Important Security Information</p>
+              <ul style="color: #92400e; font-size: 14px; margin: 10px 0 0 0; padding-left: 20px;">
+                <li>This code expires at: <strong>${expirationDate.toLocaleString()}</strong></li>
+                <li>Never share this code with anyone</li>
+                <li>Privault staff will never ask for this code</li>
+              </ul>
+            </div>
+            
+            <p style="color: #64748b; font-size: 14px; line-height: 20px; margin: 30px 0 0 0;">
+              If you didn't request this verification, please ignore this email and ensure your account is secure.
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+            <p style="color: #64748b; font-size: 12px; margin: 0; line-height: 18px;">
+              This is an automated security message from<br>
+              <strong>Privault</strong> - Zero Knowledge Password Manager
+            </p>
+            <p style="color: #64748b; font-size: 11px; margin: 15px 0 0 0;">
+              © ${new Date().getFullYear()} Privault. All rights reserved.
+            </p>
+          </div>
+          
         </div>
-        
-        <div style="color: #6b7280; font-size: 14px; text-align: center;">
-          <p><strong>This code expires at:</strong> ${expirationDate.toLocaleString()}</p>
-          <p>If you didn't request this verification, please ignore this email.</p>
-          <p style="margin-top: 20px; font-size: 12px;">
-            This is an automated message from Privault - Zero Knowledge Password Manager
-          </p>
-        </div>
-      </div>
+      </body>
+      </html>
     `;
 
     const result = await resend.emails.send({
-      from: 'Privault Security <noreply@privault.app>', // Change this to your verified domain
+      from: 'Privault Security <onboarding@resend.dev>', // Using Resend's default sender
       to: email,
       subject: `Privault Security Code: ${otpCode}`,
       html: emailContent,
     });
 
     if (result.error) {
-      console.error('Resend email error:', result.error);
+      console.error('❌ Resend email error:', result.error);
+      console.error('Error details:', JSON.stringify(result.error, null, 2));
       return NextResponse.json(
-        { success: false, error: 'Failed to send email' },
+        { 
+          success: false, 
+          error: 'Failed to send email', 
+          details: result.error.message || 'Unknown email service error'
+        },
         { status: 500 }
       );
     }
 
-    console.log('✅ OTP email sent successfully via Resend:', result.data?.id);
-    return NextResponse.json({ success: true, messageId: result.data?.id });
+    console.log('✅ OTP email sent successfully via Resend!');
+    console.log('📬 Message ID:', result.data?.id);
+    console.log('📧 Sent to:', email);
+    
+    return NextResponse.json({ 
+      success: true, 
+      messageId: result.data?.id,
+      message: 'OTP email sent successfully'
+    });
 
   } catch (error) {
     console.error('Email sending error:', error);

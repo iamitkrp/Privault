@@ -98,12 +98,17 @@ export class OTPService {
       const emailResult = await this.sendEmail(email, otpCode, purpose, expiresAt);
       
       if (emailResult.success) {
-        console.log('📧 OTP email sent successfully');
-        return { success: true };
+        console.log('✅ OTP email sent successfully to:', email);
+        return { 
+          success: true,
+          message: 'OTP sent to your email address'
+        };
       } else {
         // Fallback: Log to console for development
+        console.error('❌ Email sending failed, showing OTP in console:');
         console.log(`
 🔐 PRIVAULT SECURITY OTP (EMAIL FAILED - CONSOLE FALLBACK)
+════════════════════════════════════════════════════════
 To: ${email}
 Purpose: ${purpose === 'vault_access' ? 'Vault Access' : 'Vault Password Change'}
 Code: ${otpCode}
@@ -111,10 +116,15 @@ Expires: ${expiresAt.toLocaleString()}
 Email Error: ${emailResult.error}
 
 📋 COPY THIS CODE: ${otpCode}
+════════════════════════════════════════════════════════
         `);
         
-        // Return success anyway since OTP is available in console
-        return { success: true };
+        // Return error so user knows email failed
+        return { 
+          success: false, 
+          error: `Email sending failed: ${emailResult.error}. Check console for OTP code.`,
+          fallback: true
+        };
       }
       
     } catch (error) {

@@ -46,12 +46,18 @@ export default function VaultOTPVerification({
       const result = await OTPService.sendVaultOTP(user.id, user.email, purpose);
       
       if (result.success) {
-        setSuccess('OTP sent to your email address');
+        setSuccess(result.message || 'OTP sent to your email address');
         setCountdown(60); // 60 second cooldown
       } else {
-        setError(result.error || 'Failed to send OTP');
+        // Check if it's a fallback case (email failed but OTP is in console)
+        if ((result as any).fallback) {
+          setError(`${result.error}\n\n⚠️ Email delivery failed - please check the browser console for your OTP code.`);
+        } else {
+          setError(result.error || 'Failed to send OTP');
+        }
       }
-    } catch {
+    } catch (error) {
+      console.error('OTP sending error:', error);
       setError('Failed to send OTP. Please try again.');
     } finally {
       setIsSending(false);
@@ -180,7 +186,7 @@ export default function VaultOTPVerification({
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
+                    <div className="text-sm text-red-700 whitespace-pre-line">{error}</div>
                   </div>
                 </div>
               </div>
