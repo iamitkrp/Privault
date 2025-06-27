@@ -122,11 +122,27 @@ export async function POST(request: NextRequest) {
       console.error('❌ Resend email error:', result.error);
       console.error('Error details:', JSON.stringify(result.error, null, 2));
       console.error('Full result object:', JSON.stringify(result, null, 2));
+      
+      // Check if this is the Resend testing mode limitation
+      if (result.error.statusCode === 403 && 
+          (result.error.error?.includes('testing emails') || 
+           result.error.message?.includes('testing emails'))) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Email service is in development mode', 
+            details: 'The email service can only send to verified addresses in development. Please check the browser console for your OTP code.',
+            isDevelopmentMode: true
+          },
+          { status: 403 }
+        );
+      }
+      
       return NextResponse.json(
         { 
           success: false, 
           error: 'Failed to send email', 
-          details: result.error.message || 'Unknown email service error'
+          details: result.error.message || result.error.error || 'Unknown email service error'
         },
         { status: 500 }
       );
