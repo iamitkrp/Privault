@@ -69,7 +69,7 @@ export class OTPService {
     email: string, 
     purpose: 'vault_access' | 'vault_password_change',
     isResend: boolean = false
-  ): Promise<{ success: boolean; error?: string; message?: string }> {
+  ): Promise<{ success: boolean; error?: string; message?: string; fallback?: boolean }> {
     try {
       if (!supabase) {
         throw new Error('Supabase client not initialized');

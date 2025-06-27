@@ -5,6 +5,7 @@ import { AuthService } from '@/services/auth.service';
 import { passphraseManager } from '@/lib/crypto/passphrase-manager';
 import { SECURITY_CONFIG } from '@/constants';
 import zxcvbn from 'zxcvbn';
+import VaultOTPVerification from './vault-otp-verification';
 
 interface VaultChangePasswordProps {
   user: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -17,26 +18,19 @@ export default function VaultChangePassword({
   onPasswordChanged, 
   onCancel 
 }: VaultChangePasswordProps) {
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChanging, setIsChanging] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
 
   // Calculate password strength
   const passwordStrength = newPassword ? zxcvbn(newPassword) : null;
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!currentPassword.trim()) {
-      setError('Current vault password is required');
-      return;
-    }
-
+  const handleRequestOTP = () => {
+    // Validate new password before requesting OTP
     if (!newPassword.trim()) {
       setError('New vault password is required');
       return;
@@ -57,11 +51,17 @@ export default function VaultChangePassword({
       return;
     }
 
-    if (currentPassword === newPassword) {
-      setError('New password must be different from current password');
-      return;
-    }
+    setError(null);
+    setShowOTPVerification(true);
+  };
 
+  const handleOTPVerified = () => {
+    setShowOTPVerification(false);
+    // Immediately proceed to change password after OTP verification
+    changePasswordAfterOTPVerification();
+  };
+
+  const changePasswordAfterOTPVerification = async () => {
     setIsChanging(true);
     setError(null);
 
@@ -73,41 +73,7 @@ export default function VaultChangePassword({
         throw new Error('Failed to load user profile');
       }
 
-      // First verify current password by checking against stored verification data
-      const currentSessionResult = await passphraseManager.initializeSession(
-        currentPassword,
-        profile.salt
-      );
-
-      if (!currentSessionResult.success || !currentSessionResult.cryptoKey) {
-        throw new Error('Current password is incorrect');
-      }
-
-      // Verify the current password is correct by attempting to decrypt the verification data
-      if (profile.vault_verification_data) {
-        try {
-          const { decrypt } = await import('@/lib/crypto/crypto-utils');
-          
-          // Parse the stored verification data
-          const verificationData = JSON.parse(profile.vault_verification_data);
-          const decryptedData = await decrypt(
-            verificationData.encryptedData, 
-            verificationData.iv, 
-            currentSessionResult.cryptoKey
-          );
-          
-          if (decryptedData !== 'VAULT_PASSWORD_VERIFICATION_DATA') {
-            throw new Error('Current password is incorrect');
-          }
-        } catch (err) {
-          console.error('Current password verification failed:', err);
-          throw new Error('Current password is incorrect');
-        }
-      } else {
-        throw new Error('Vault verification data not found. Please contact support.');
-      }
-
-      // Clear the session after verification
+      // Clear any existing session before creating new one
       passphraseManager.clearSession();
 
       // Initialize with new password to create new verification data
@@ -141,7 +107,7 @@ export default function VaultChangePassword({
         throw new Error('Failed to save new password verification data');
       }
 
-      console.log('Vault password changed successfully!');
+      console.log('Vault password changed successfully with OTP verification!');
       
       // Notify parent component
       onPasswordChanged();
@@ -149,7 +115,6 @@ export default function VaultChangePassword({
     } catch (err) {
       console.error('Password change error:', err);
       setError(err instanceof Error ? err.message : 'Failed to change password');
-      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setIsChanging(false);
@@ -189,6 +154,18 @@ export default function VaultChangePassword({
     }
   };
 
+  // Show OTP verification screen
+  if (showOTPVerification) {
+    return (
+      <VaultOTPVerification 
+        user={user}
+        purpose="vault_password_change"
+        onVerified={handleOTPVerified}
+        onCancel={() => setShowOTPVerification(false)}
+      />
+    );
+  }
+
   return (
     <div className="max-w-md mx-auto">
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -200,48 +177,12 @@ export default function VaultChangePassword({
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Change Vault Password</h2>
-          <p className="text-orange-100">Update your vault master password</p>
+          <p className="text-orange-100">Update your vault master password with email verification</p>
         </div>
 
         {/* Form */}
         <div className="px-6 py-8">
-          <form onSubmit={handleChangePassword} className="space-y-6">
-            {/* Current Password field */}
-            <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Current Vault Password
-              </label>
-              <div className="relative">
-                <input
-                  id="currentPassword"
-                  type={showCurrentPassword ? 'text' : 'password'}
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors pr-10"
-                  placeholder="Enter your current password"
-                  disabled={isChanging}
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  disabled={isChanging}
-                >
-                  {showCurrentPassword ? (
-                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
+          <form onSubmit={(e) => { e.preventDefault(); handleRequestOTP(); }} className="space-y-6">
             {/* New Password field */}
             <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
@@ -256,6 +197,7 @@ export default function VaultChangePassword({
                   className="block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors pr-10"
                   placeholder="Enter your new password"
                   disabled={isChanging}
+                  autoFocus
                 />
                 <button
                   type="button"
@@ -370,32 +312,32 @@ export default function VaultChangePassword({
               </button>
               <button
                 type="submit"
-                disabled={isChanging || !currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim() || newPassword !== confirmPassword}
+                disabled={isChanging || !newPassword.trim() || !confirmPassword.trim() || newPassword !== confirmPassword}
                 className="flex-1 py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isChanging ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
-                    Changing...
+                    Changing Password...
                   </>
                 ) : (
-                  'Change Password'
+                  'Send Verification Code'
                 )}
               </button>
             </div>
           </form>
 
           {/* Security notice */}
-          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-amber-700">
-                  <strong>Security Notice:</strong> Changing your vault password will not affect your existing stored passwords. They will remain encrypted and accessible with the new password.
+                <p className="text-sm text-blue-700">
+                  <strong>Enhanced Security:</strong> We&apos;ll send a verification code to your email address ({user.email}) to confirm this password change. Your existing stored passwords will remain encrypted and accessible with the new password.
                 </p>
               </div>
             </div>

@@ -65,7 +65,7 @@ export default function VaultOTPVerification({
         setCountdown(60); // 60 second cooldown
       } else {
         // Check if it's a fallback case (email failed but OTP is in console)
-        if ((result as any).fallback) {
+        if ('fallback' in result && result.fallback) {
           setError(`${result.error}\n\n⚠️ Email delivery failed - please check the browser console for your OTP code.`);
         } else {
           setError(result.error || 'Failed to send OTP');
