@@ -5,7 +5,16 @@ export async function POST(request: NextRequest) {
   try {
     const { email, otpCode, purpose, expiresAt } = await request.json();
 
+    console.log('📧 OTP Request Details:', {
+      email,
+      otpCode,
+      purpose,
+      expiresAt,
+      timestamp: new Date().toISOString()
+    });
+
     if (!email || !otpCode || !purpose || !expiresAt) {
+      console.error('❌ Missing required fields:', { email, otpCode, purpose, expiresAt });
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }
@@ -101,6 +110,7 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
+    console.log('📤 Sending email with Resend...');
     const result = await resend.emails.send({
       from: 'Privault Security <onboarding@resend.dev>', // Using Resend's default sender
       to: email,
@@ -111,6 +121,7 @@ export async function POST(request: NextRequest) {
     if (result.error) {
       console.error('❌ Resend email error:', result.error);
       console.error('Error details:', JSON.stringify(result.error, null, 2));
+      console.error('Full result object:', JSON.stringify(result, null, 2));
       return NextResponse.json(
         { 
           success: false, 
@@ -132,7 +143,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('❌ Email sending error:', error);
+    console.error('Error details:', error instanceof Error ? error.stack : error);
     return NextResponse.json(
       { success: false, error: 'Failed to send email' },
       { status: 500 }
