@@ -154,10 +154,16 @@ Email Error: ${emailResult.error}
 ════════════════════════════════════════════════════════
         `);
         
+        // Check if this is a development mode limitation
+        const isDevelopmentMode = emailResult.error?.includes('development mode') || 
+                                 emailResult.error?.includes('testing emails');
+        
         // Return error so user knows email failed
         return { 
           success: false, 
-          error: `Email sending failed: ${emailResult.error}. Check console for OTP code.`,
+          error: isDevelopmentMode ? 
+            'Email service is in development mode. Check browser console for your OTP code.' :
+            `Email sending failed: ${emailResult.error}. Check console for OTP code.`,
           fallback: true
         };
       }
