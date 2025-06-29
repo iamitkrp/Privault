@@ -66,14 +66,21 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
   
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-neue-montreal), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  
+  /* NeueMontreal Font Weight Mapping */
+  --font-weight-light: 300;
+  --font-weight-normal: 300; /* Map normal to light since we don't have regular */
+  --font-weight-medium: 700; /* Map medium to bold */
+  --font-weight-bold: 700;
 }
 
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
+  font-weight: 300; /* Default to light weight for NeueMontreal */
 }
 
 *:focus-visible {
