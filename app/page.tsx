@@ -16,6 +16,7 @@ export default function HomePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuClosing, setIsMenuClosing] = useState(false);
 
   // Redirect authenticated users to vault
   useEffect(() => {
@@ -49,15 +50,29 @@ export default function HomePage() {
     { name: 'Sign In', href: ROUTES.LOGIN },
   ];
 
+  const openMenu = () => setIsMenuOpen(true);
+  const closeMenu = () => {
+    setIsMenuClosing(true);
+    setTimeout(() => {
+      setIsMenuOpen(false);
+      setIsMenuClosing(false);
+    }, 250); // match exit animation
+  };
+
+  const toggleMenu = () => {
+    if (isMenuOpen) closeMenu();
+    else openMenu();
+  };
+
   // Show landing page for unauthenticated users
   return (
     <div className="min-h-screen bg-white">
       {/* Desktop Layout - Hidden on mobile */}
-      <div className="hidden lg:block">
+      <div className="block">
         {/* Main Container */}
         <div className="relative">
           {/* Left Side - Modern Minimal Design */}
-          <div className="fixed left-0 top-0 w-2/5 h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col justify-center items-start px-16 py-12 text-white overflow-hidden z-10 relative">
+          <div className="relative w-full h-auto bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col justify-center items-start px-6 py-12 text-white overflow-hidden z-10 lg:fixed lg:left-0 lg:top-0 lg:w-2/5 lg:h-screen lg:px-16 lg:py-12">
             {/* Subtle Background Elements */}
             <div className="absolute inset-0">
               {/* Single elegant gradient orb */}
@@ -88,7 +103,16 @@ export default function HomePage() {
                   </div>
                   
                   {/* Clean brand name */}
-                  <span className="text-xl font-light tracking-wider text-white/90">{APP_NAME}</span>
+                  <span className="text-xl font-light tracking-wider text-white/90 ml-3 flex-1">{APP_NAME}</span>
+                  {/* Hamburger for mobile */}
+                  <button
+                    className="lg:hidden relative w-20 px-3 py-1.5 rounded-md text-sm font-medium text-white/90 bg-white/10 hover:bg-white/20 backdrop-blur overflow-hidden focus:outline-none focus:ring-2 focus:ring-white transition-all duration-300"
+                    onClick={toggleMenu}
+                    aria-label="Toggle menu"
+                  >
+                    <span className={`block transition-all duration-300 ${isMenuOpen && !isMenuClosing ? '-translate-y-5 opacity-0' : 'translate-y-0 opacity-100'}`}>Menu</span>
+                    <span className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMenuOpen && !isMenuClosing ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}>Close</span>
+                  </button>
                 </div>
               </div>
 
@@ -149,7 +173,7 @@ export default function HomePage() {
           </div>
 
           {/* Right Side - Scrollable Content */}
-          <div className="fixed right-0 top-0 w-3/5 h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-y-auto overflow-x-hidden">
+          <div className="relative w-full h-auto bg-gradient-to-br from-gray-50 to-blue-50 overflow-x-hidden lg:fixed lg:right-0 lg:top-0 lg:w-3/5 lg:h-screen lg:overflow-y-auto">
             {/* Cuberto-style Abstract Geometric Background */}
             <div className="absolute inset-0 overflow-hidden">
               {/* Large abstract geometric shapes */}
@@ -169,11 +193,15 @@ export default function HomePage() {
             </div>
             
             {/* Content Overlay */}
-            <div className="relative z-10 flex flex-col justify-between p-20" style={{ minHeight: '100vh' }}>
-              {/* Top - Navigation Menu */}
-              <div className="text-right animate-fade-in" style={{ animationDelay: '0.6s' }}>
-                <nav className="flex items-center justify-end space-x-10">
-                  {menuItems.map((item, index) => (
+            <div className="relative z-10 flex flex-col justify-between p-6 lg:p-20" style={{ minHeight: '100vh' }}>
+              {/* Mobile/Desktop Nav */}
+              <div className="flex items-center justify-between lg:justify-end animate-fade-in" style={{ animationDelay: '0.6s' }}>
+                {/* Hamburger - mobile only */}
+                <button className="hidden" aria-hidden="true" />
+
+                {/* Desktop links */}
+                <nav className="hidden lg:flex items-center space-x-10">
+                  {menuItems.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
@@ -323,7 +351,7 @@ export default function HomePage() {
       </div>
 
       {/* Mobile Layout */}
-      <div className="lg:hidden">
+      <div className="hidden">
         {/* Mobile Hero */}
         <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white p-8 relative overflow-hidden min-h-screen flex flex-col justify-center">
           {/* Enhanced Mobile Background Pattern */}
@@ -470,15 +498,37 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-          </div>
+      </div>
 
-      {/* Click outside to close mobile menu */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
+      {/* Mobile slide-out menu */}
+      {isMenuOpen || isMenuClosing ? (
+        <>
+          {/* Click-away area */}
+          <div
+            className="fixed inset-0 z-40 lg:hidden"
+            onClick={closeMenu}
+          />
+
+          {/* Glassmorphic popup */}
+          <div className="fixed top-24 right-4 z-50 lg:hidden">
+            <div className={`w-48 rounded-xl bg-white/10 backdrop-blur-lg shadow-lg ring-1 ring-white/20 p-3 flex flex-col space-y-1 origin-top-right ${isMenuClosing ? 'animate-menu-exit' : 'animate-menu-pop'}`}
+            >
+              {menuItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-white/20 transition-colors ${
+                    item.name === 'Sign In' ? 'border border-white text-white hover:bg-white/30' : ''
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
 
       <style jsx>{`
         /* Premium Entry Animations */
@@ -990,7 +1040,11 @@ export default function HomePage() {
           opacity: 0;
         }
 
-
+        @keyframes menu-pop {
+          0% { opacity: 0; transform: scale(0.9) translateY(-10px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-menu-pop { animation: menu-pop 0.25s cubic-bezier(.22,1,.36,1) forwards; }
 
         /* Custom scrollbar for webkit browsers */
         .overflow-y-auto::-webkit-scrollbar {
@@ -1009,6 +1063,12 @@ export default function HomePage() {
         .overflow-y-auto::-webkit-scrollbar-thumb:hover {
           background: rgba(156, 163, 175, 0.5);
         }
+
+        @keyframes menu-exit {
+          0% { opacity:1; transform: translateY(0) scale(1) rotateX(0deg); }
+          100% { opacity:0; transform: translateY(-12px) scale(.92) rotateX(-10deg); }
+        }
+        .animate-menu-exit { animation: menu-exit 0.25s ease-in forwards; }
       `}</style>
     </div>
   );
