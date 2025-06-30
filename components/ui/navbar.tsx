@@ -6,7 +6,7 @@ import { gsap } from 'gsap';
 // import { Shield, Menu, X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { ROUTES, APP_NAME } from '@/constants';
-import { ThemeToggle } from './theme-toggle';
+import ThemeToggle from './theme-toggle';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
