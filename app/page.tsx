@@ -28,20 +28,27 @@ export default function HomePage() {
     }
   }, [user, loading, router]);
 
-  // Sync right-panel scrolling when wheel events occur over the left panel (desktop only)
+  // Sync right-panel scrolling when wheel events occur anywhere (desktop only)
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (window.innerWidth >= 1024 && rightPanelRef.current) {
-        e.preventDefault();
-        rightPanelRef.current.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        // Check if the scroll event is happening on the right panel itself
+        // If so, let it handle its own scrolling naturally
+        const isScrollingRightPanel = rightPanelRef.current.contains(e.target as Node);
+        
+        if (!isScrollingRightPanel) {
+          // If scrolling anywhere else (including left panel), sync to right panel
+          e.preventDefault();
+          rightPanelRef.current.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        }
       }
     };
-    const left = leftPanelRef.current;
-    if (left) {
-      left.addEventListener('wheel', handleWheel, { passive: false });
-    }
+
+    // Add event listener to the entire window to capture all scroll events
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    
     return () => {
-      if (left) left.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
