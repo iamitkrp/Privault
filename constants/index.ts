@@ -112,6 +112,9 @@ export const ROUTES = {
   VAULT: '/vault',
   SETTINGS: '/settings',
   PROFILE: '/profile',
+  TERMS: '/terms',
+  PRIVACY: '/privacy',
+  FORGOT_PASSWORD: '/forgot-password',
 } as const;
 
 // Local Storage Keys
