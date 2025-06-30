@@ -281,7 +281,7 @@ export default function LoginPage() {
         {/* Sign up link */}
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href={ROUTES.SIGNUP} className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
               Create an account
             </Link>

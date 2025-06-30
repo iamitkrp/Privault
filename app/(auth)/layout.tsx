@@ -98,7 +98,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 <p className="text-lg text-white/70 font-light leading-relaxed max-w-md">
                   Your passwords, encrypted on your device. 
                   <br />
-                  <span className="text-white/90">Even we can't see them.</span>
+                  <span className="text-white/90">Even we can&apos;t see them.</span>
                 </p>
               </div>
 

@@ -33,6 +33,7 @@ export default function VaultOTPVerification({
       setIsManualResend(false); // This is the initial send, not a manual resend
       sendOTP();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, purpose, hasSentInitialOTP]);
 
   // Countdown timer for resend button
