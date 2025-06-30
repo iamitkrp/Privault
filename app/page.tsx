@@ -17,6 +17,8 @@ export default function HomePage() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuClosing, setIsMenuClosing] = useState(false);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
 
   // Redirect authenticated users to vault
   useEffect(() => {
@@ -24,6 +26,23 @@ export default function HomePage() {
       router.push(ROUTES.DASHBOARD);
     }
   }, [user, loading, router]);
+
+  // Sync right-panel scrolling when wheel events occur over the left panel (desktop only)
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (window.innerWidth >= 1024 && rightPanelRef.current) {
+        e.preventDefault();
+        rightPanelRef.current.scrollBy({ top: e.deltaY, behavior: 'auto' });
+      }
+    };
+    const left = leftPanelRef.current;
+    if (left) {
+      left.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    return () => {
+      if (left) left.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   // Show loading while checking authentication
   if (loading) {
@@ -62,26 +81,6 @@ export default function HomePage() {
     if (isMenuOpen) closeMenu();
     else openMenu();
   };
-
-  // Sync right-panel scrolling when wheel events occur over the left panel (desktop only)
-  const leftPanelRef = useRef<HTMLDivElement>(null);
-  const rightPanelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (window.innerWidth >= 1024 && rightPanelRef.current) {
-        e.preventDefault();
-        rightPanelRef.current.scrollBy({ top: e.deltaY, behavior: 'auto' });
-      }
-    };
-    const left = leftPanelRef.current;
-    if (left) {
-      left.addEventListener('wheel', handleWheel, { passive: false });
-    }
-    return () => {
-      if (left) left.removeEventListener('wheel', handleWheel);
-    };
-  }, []);
 
   // Show landing page for unauthenticated users
   return (
