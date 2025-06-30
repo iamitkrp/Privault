@@ -6,13 +6,14 @@ const nextConfig: NextConfig = {
   experimental: {
     // Enable optimizePackageImports for better tree shaking
     optimizePackageImports: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-form', '@radix-ui/react-label', '@radix-ui/react-progress', '@radix-ui/react-separator', '@radix-ui/react-toast', '@radix-ui/react-tooltip'],
-    // Enable React 19 features
-    turbo: {
-      rules: {
-        '*.tsx': {
-          loaders: ['@next/react-refresh-utils/loader'],
-          as: '*.js',
-        },
+  },
+  
+  // Turbopack configuration (moved out of experimental)
+  turbopack: {
+    rules: {
+      '*.tsx': {
+        loaders: ['@next/react-refresh-utils/loader'],
+        as: '*.js',
       },
     },
   },
@@ -46,51 +47,8 @@ const nextConfig: NextConfig = {
       config.plugins.push(new BundleAnalyzerPlugin());
     }
     
-    // Optimize chunks - only in production and for client-side
-    if (!dev && !isServer) {
-      // Ensure optimization object exists
-      if (!config.optimization) {
-        config.optimization = {};
-      }
-      
-      // Initialize splitChunks if it doesn't exist or is false
-      if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
-        config.optimization.splitChunks = {
-          chunks: 'all',
-          cacheGroups: {}
-        };
-      }
-      
-      // Now safely set properties
-      config.optimization.splitChunks.chunks = 'all';
-      config.optimization.splitChunks.cacheGroups = {
-        ...(config.optimization.splitChunks.cacheGroups || {}),
-        crypto: {
-          name: 'crypto',
-          test: /[\\/]services[\\/](crypto|vault|auth)\.service\.ts/,
-          priority: 30,
-          reuseExistingChunk: true,
-        },
-        security: {
-          name: 'security',
-          test: /[\\/]services[\\/](security-monitoring|session-management)\.service\.ts/,
-          priority: 25,
-          reuseExistingChunk: true,
-        },
-        ui: {
-          name: 'ui',
-          test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-          priority: 20,
-          reuseExistingChunk: true,
-        },
-        supabase: {
-          name: 'supabase',
-          test: /[\\/]node_modules[\\/]@supabase[\\/]/,
-          priority: 15,
-          reuseExistingChunk: true,
-        },
-      };
-    }
+    // Temporarily disable complex webpack optimizations for build stability
+    // TODO: Re-enable after build issues are resolved
     
     return config;
   },

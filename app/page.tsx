@@ -8,9 +8,10 @@ import { ROUTES, APP_NAME } from '@/constants';
 
 
 // Import crypto testing utilities in development
-if (process.env.NODE_ENV === 'development') {
-  import('@/lib/test-crypto');
-}
+// Temporarily disabled for build stability
+// if (process.env.NODE_ENV === 'development') {
+//   import('@/lib/test-crypto');
+// }
 
 export default function HomePage() {
   const { user, loading } = useAuth();
