@@ -158,7 +158,7 @@ export default function HomePage() {
                 <p className="text-lg text-white/70 font-light leading-relaxed max-w-md">
                   Your passwords, encrypted on your device. 
                   <br />
-                  <span className="text-white/90">Even we can't see them.</span>
+                                      <span className="text-white/90">Even we can&apos;t see them.</span>
                 </p>
               </div>
 
@@ -255,7 +255,7 @@ export default function HomePage() {
                     Stop worrying about data breaches. Your passwords are encrypted on your device before they ever reach our servers.
                   </p>
                   <p className="text-lg text-gray-900 font-medium">
-                    Even we can't see them.
+                    Even we can&apos;t see them.
                   </p>
                 </div>
 
@@ -268,7 +268,7 @@ export default function HomePage() {
                         Zero-Knowledge Security
                       </h4>
                       <p className="text-gray-600 leading-relaxed max-w-md">
-                        Your master password never leaves your device. We can't read your data, even if we wanted to.
+                        Your master password never leaves your device. We can&apos;t read your data, even if we wanted to.
                       </p>
                     </div>
                   </div>
@@ -292,7 +292,7 @@ export default function HomePage() {
                         No Tracking, Ever
                       </h4>
                       <p className="text-gray-600 leading-relaxed max-w-md">
-                        We don't track you, sell your data, or show ads. Your privacy is not our product.
+                        We don&apos;t track you, sell your data, or show ads. Your privacy is not our product.
                       </p>
                     </div>
                   </div>
@@ -316,7 +316,7 @@ export default function HomePage() {
                         <div className="text-4xl font-light text-purple-500">02</div>
                         <div>
                           <h5 className="text-xl font-medium text-gray-900 mb-3">Add Your Passwords</h5>
-                          <p className="text-gray-600 leading-relaxed max-w-md">Store all your passwords securely. They're encrypted before leaving your device.</p>
+                          <p className="text-gray-600 leading-relaxed max-w-md">Store all your passwords securely. They&apos;re encrypted before leaving your device.</p>
                         </div>
                       </div>
                       
@@ -504,7 +504,7 @@ export default function HomePage() {
               <p className="text-gray-500 leading-relaxed mb-4">
                 Stop worrying about data breaches. Your passwords are encrypted on your device before they reach our servers.
               </p>
-              <p className="text-gray-400">Even we can't see them.</p>
+                              <p className="text-gray-400">Even we can&apos;t see them.</p>
             </div>
 
             <div className="grid grid-cols-3 gap-4 text-center">

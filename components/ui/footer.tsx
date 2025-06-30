@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { gsap } from 'gsap';
 import { Shield, Github, Twitter, Mail, Heart } from 'lucide-react';
 import { APP_NAME } from '@/constants';

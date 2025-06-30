@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
       // For now, we'll just simulate a successful submission
       await new Promise(resolve => setTimeout(resolve, 1000));
       setIsSubmitted(true);
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
             Reset your password
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
             </div>
             <h3 className="text-lg font-medium text-green-800">Check your email</h3>
             <p className="mt-2 text-sm text-green-700">
-              We've sent a password reset link to {email}. The link will expire in 1 hour.
+              We&apos;ve sent a password reset link to {email}. The link will expire in 1 hour.
             </p>
             <div className="mt-4">
               <Link href={ROUTES.LOGIN} className="text-sm font-medium text-blue-600 hover:text-blue-500">

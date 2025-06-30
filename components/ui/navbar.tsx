@@ -3,18 +3,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { gsap } from 'gsap';
-import { Shield, Menu, X, ChevronDown } from 'lucide-react';
+// import { Shield, Menu, X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { ROUTES, APP_NAME } from '@/constants';
 import { ThemeToggle } from './theme-toggle';
 
 const Navbar = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  // const pathname = usePathname();
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  // const [scrolled, setScrolled] = useState(false);
   
   const navRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -82,16 +82,16 @@ const Navbar = () => {
     }
   };
 
-  const isActive = (path: string) => pathname === path;
+  // const isActive = (path: string) => pathname === path;
 
-  const navigationItems = user ? [
-    { href: ROUTES.DASHBOARD, label: 'Dashboard' },
-    { href: ROUTES.VAULT, label: 'Vault' },
-  ] : [
-    { href: '#features', label: 'Features' },
-    { href: '#security', label: 'Security' },
-    { href: '#about', label: 'About' },
-  ];
+  // const navigationItems = user ? [
+  //   { href: ROUTES.DASHBOARD, label: 'Dashboard' },
+  //   { href: ROUTES.VAULT, label: 'Vault' },
+  // ] : [
+  //   { href: '#features', label: 'Features' },
+  //   { href: '#security', label: 'Security' },
+  //   { href: '#about', label: 'About' },
+  // ];
 
   return (
     <nav className="relative bg-white border-b-2 border-black shadow-brutal">
