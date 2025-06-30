@@ -1,7 +1,7 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
 // import { Shield, Menu, X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -11,25 +11,12 @@ import { ThemeToggle } from './theme-toggle';
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  // const pathname = usePathname();
-  // const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  // const [scrolled, setScrolled] = useState(false);
   
   const navRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 20;
-      setScrolled(isScrolled);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Scroll effect removed since scrolled state is not used
 
   useEffect(() => {
     if (!navRef.current) return;
@@ -58,20 +45,7 @@ const Navbar = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (mobileMenuRef.current) {
-      if (isMenuOpen) {
-        gsap.fromTo(mobileMenuRef.current, 
-          { opacity: 0, scale: 0.95, y: -20 },
-          { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "power2.out" }
-        );
-      } else {
-        gsap.to(mobileMenuRef.current, 
-          { opacity: 0, scale: 0.95, y: -20, duration: 0.2, ease: "power2.in" }
-        );
-      }
-    }
-  }, [isMenuOpen]);
+  // Mobile menu animation removed since isMenuOpen state is not used
 
   const handleSignOut = async () => {
     try {
