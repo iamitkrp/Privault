@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -47,7 +47,6 @@ export default function HomePage() {
     { name: 'Security', href: '/security' },
     { name: 'Contact', href: '/contact' },
     { name: 'Help', href: '/help' },
-    { name: 'Sign In', href: ROUTES.LOGIN },
   ];
 
   const openMenu = () => setIsMenuOpen(true);
@@ -64,6 +63,26 @@ export default function HomePage() {
     else openMenu();
   };
 
+  // Sync right-panel scrolling when wheel events occur over the left panel (desktop only)
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (window.innerWidth >= 1024 && rightPanelRef.current) {
+        e.preventDefault();
+        rightPanelRef.current.scrollBy({ top: e.deltaY, behavior: 'auto' });
+      }
+    };
+    const left = leftPanelRef.current;
+    if (left) {
+      left.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    return () => {
+      if (left) left.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
+
   // Show landing page for unauthenticated users
   return (
     <div className="min-h-screen bg-white">
@@ -72,7 +91,7 @@ export default function HomePage() {
         {/* Main Container */}
         <div className="relative">
           {/* Left Side - Modern Minimal Design */}
-          <div className="relative w-full h-auto bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col justify-center items-start px-6 py-12 text-white overflow-hidden z-10 lg:fixed lg:left-0 lg:top-0 lg:w-2/5 lg:h-screen lg:px-16 lg:py-12">
+          <div ref={leftPanelRef} className="relative w-full h-auto bg-[#212529] flex flex-col justify-center items-start px-6 py-12 text-white overflow-hidden z-10 lg:fixed lg:left-0 lg:top-0 lg:w-2/5 lg:h-screen lg:px-16 lg:py-12">
             {/* Subtle Background Elements */}
             <div className="absolute inset-0">
               {/* Single elegant gradient orb */}
@@ -88,6 +107,13 @@ export default function HomePage() {
                   backgroundSize: '100px 100px'
                 }}
               ></div>
+
+              {/* New diagonal dotted overlay for desktop */}
+              <div className="hidden lg:block absolute inset-0 opacity-20 pointer-events-none"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(135deg, rgba(241,250,238,0.25) 0 2px, transparent 2px 24px)`
+                }}
+              />
             </div>
 
             {/* Content */}
@@ -141,7 +167,7 @@ export default function HomePage() {
               <div className="mb-16 animate-fade-in" style={{ animationDelay: '0.9s' }}>
                 <Link
                   href={ROUTES.SIGNUP}
-                  className="group inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl hover:bg-white/90 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-white/20"
+                  className="group inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl transition-colors duration-300 hover:bg-[#219EBC] hover:text-white"
                 >
                   <span className="text-base font-medium">Get Started</span>
                   <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -173,9 +199,9 @@ export default function HomePage() {
           </div>
 
           {/* Right Side - Scrollable Content */}
-          <div className="relative w-full h-auto bg-gradient-to-br from-gray-50 to-blue-50 overflow-x-hidden lg:fixed lg:right-0 lg:top-0 lg:w-3/5 lg:h-screen lg:overflow-y-auto">
+          <div ref={rightPanelRef} className="relative w-full h-auto bg-gradient-to-br from-gray-50 to-blue-50 overflow-x-hidden lg:fixed lg:right-0 lg:top-0 lg:w-3/5 lg:h-screen lg:overflow-y-auto">
             {/* Cuberto-style Abstract Geometric Background */}
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 lg:fixed lg:inset-0 overflow-hidden pointer-events-none">
               {/* Large abstract geometric shapes */}
               <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/10 transform rotate-45 rounded-3xl"></div>
               <div className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-indigo-400/12 to-blue-400/8 transform -rotate-12 rounded-full"></div>
@@ -190,6 +216,10 @@ export default function HomePage() {
               
               {/* Large background accent */}
               <div className="absolute bottom-0 right-0 w-96 h-72 bg-gradient-to-tl from-blue-500/8 via-purple-500/5 to-transparent transform skew-x-12 rounded-tl-[100px]"></div>
+              {/* Bottom abstract geometric shapes */}
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/10 to-blue-500/15 transform -rotate-45 rounded-3xl"></div>
+              <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-gradient-to-bl from-indigo-400/12 to-blue-400/8 transform rotate-12 rounded-full"></div>
+              <div className="absolute bottom-8 left-1/6 w-16 h-16 bg-gradient-to-tr from-purple-300/20 to-transparent transform -rotate-12 rounded-lg"></div>
             </div>
             
             {/* Content Overlay */}
@@ -205,11 +235,7 @@ export default function HomePage() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`relative text-sm font-medium transition-all duration-300 ${
-                        item.name === 'Sign In'
-                          ? 'text-gray-900 bg-gray-900 text-white px-6 py-3 rounded-full hover:bg-gray-700'
-                          : 'text-gray-700 hover:text-gray-900'
-                      }`}
+                      className="desktop-nav-link inline-block relative text-sm font-medium text-gray-700 hover:text-[#219EBC] transition-colors duration-300"
                     >
                       {item.name}
                     </Link>
@@ -1069,6 +1095,24 @@ export default function HomePage() {
           100% { opacity:0; transform: translateY(-12px) scale(.92) rotateX(-10deg); }
         }
         .animate-menu-exit { animation: menu-exit 0.25s ease-in forwards; }
+
+        /* Desktop nav underline hover */
+        .desktop-nav-link::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          bottom: -4px;
+          width: 100%;
+          height: 2px;
+          background-color: currentColor;
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 0.3s ease;
+        }
+
+        .desktop-nav-link:hover::after {
+          transform: scaleX(1);
+        }
       `}</style>
     </div>
   );
