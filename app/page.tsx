@@ -18,6 +18,7 @@ export default function HomePage() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuClosing, setIsMenuClosing] = useState(false);
+  const [currentSection, setCurrentSection] = useState('home');
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
 
@@ -70,10 +71,10 @@ export default function HomePage() {
   }
 
   const menuItems = [
-    { name: 'About', href: '/about' },
-    { name: 'Security', href: '/security' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Help', href: '/help' },
+    { name: 'About', section: 'about' },
+    { name: 'Security', section: 'security' },
+    { name: 'Contact', section: 'contact' },
+    { name: 'Help', section: 'help' },
   ];
 
   const openMenu = () => setIsMenuOpen(true);
@@ -90,6 +91,519 @@ export default function HomePage() {
     else openMenu();
   };
 
+  const handleSectionChange = (section: string) => {
+    setCurrentSection(section);
+    // Scroll to top of right panel when changing sections
+    if (rightPanelRef.current) {
+      rightPanelRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    closeMenu(); // Close mobile menu if open
+  };
+
+  const renderRightPanelContent = () => {
+    switch (currentSection) {
+      case 'about':
+        return (
+          <>
+            {/* About Section */}
+            <div className="mb-24 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+              <h3 className="text-4xl lg:text-5xl font-light text-gray-900 mb-8 leading-tight max-w-xl">
+                About 
+                <span className="text-blue-600 font-medium"> Privault</span>
+              </h3>
+              
+              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+                Born from the need for truly private password management, Privault represents the future of digital security.
+              </p>
+              <p className="text-lg text-gray-900 font-medium">
+                Your data belongs to you, and only you.
+              </p>
+            </div>
+
+            {/* About Features */}
+            <div className="space-y-8 animate-fade-in" style={{ animationDelay: '1s' }}>
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Privacy by Design
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Every feature is built with privacy as the foundation. We can't access your data because we designed it that way.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Transparent Security
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Our encryption methods are open source and auditable. No hidden backdoors, no proprietary algorithms.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    User-Centric Approach
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Built by security professionals who understand that usability and security aren't mutually exclusive.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mission Statement */}
+            <div className="mt-24 space-y-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+              <div className="border-t border-gray-200 pt-16">
+                <h4 className="text-3xl font-light text-gray-900 mb-12">Our Mission</h4>
+                
+                <div className="space-y-12">
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-blue-500">01</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Democratize Privacy</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Make enterprise-grade security accessible to everyone, not just large corporations.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-purple-500">02</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Rebuild Trust</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Restore confidence in digital security through transparency and proven technology.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-indigo-500">03</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Protect Freedom</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Preserve digital privacy as a fundamental right in an increasingly connected world.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'security':
+        return (
+          <>
+            {/* Security Section */}
+            <div className="mb-24 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+              <h3 className="text-4xl lg:text-5xl font-light text-gray-900 mb-8 leading-tight max-w-xl">
+                Military-grade
+                <span className="text-blue-600 font-medium"> security</span>
+              </h3>
+              
+              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+                Your passwords are protected by the same encryption used by governments and financial institutions worldwide.
+              </p>
+              <p className="text-lg text-gray-900 font-medium">
+                Security you can verify and trust.
+              </p>
+            </div>
+
+            {/* Security Features */}
+            <div className="space-y-8 animate-fade-in" style={{ animationDelay: '1s' }}>
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    AES-256 Encryption
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    The gold standard in encryption. Used by the NSA for top secret information and trusted globally.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    PBKDF2 Key Derivation
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Your master password is strengthened using 100,000+ iterations, making brute force attacks computationally impossible.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Client-Side Encryption
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Your data is encrypted on your device before it ever leaves. Even we can't decrypt your passwords.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Details */}
+            <div className="mt-24 space-y-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+              <div className="border-t border-gray-200 pt-16">
+                <h4 className="text-3xl font-light text-gray-900 mb-12">Security Architecture</h4>
+                
+                <div className="space-y-12">
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Zero-Knowledge Architecture</h5>
+                    <p className="text-gray-500 leading-relaxed">Your master password never leaves your device. All encryption and decryption happens locally, ensuring complete privacy.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Secure Remote Password Protocol</h5>
+                    <p className="text-gray-500 leading-relaxed">Even our authentication system follows zero-knowledge principles. We never see your password, not even during login.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">End-to-End Encrypted Sync</h5>
+                    <p className="text-gray-500 leading-relaxed">Data synchronization across devices maintains the same security standards. Your encrypted vault is the only thing that travels.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Regular Security Audits</h5>
+                    <p className="text-gray-500 leading-relaxed">Our codebase undergoes regular third-party security audits to ensure the highest standards are maintained.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'contact':
+        return (
+          <>
+            {/* Contact Section */}
+            <div className="mb-24 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+              <h3 className="text-4xl lg:text-5xl font-light text-gray-900 mb-8 leading-tight max-w-xl">
+                Get in
+                <span className="text-blue-600 font-medium"> touch</span>
+              </h3>
+              
+              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+                We're here to help with any questions about Privault, security, or privacy.
+              </p>
+              <p className="text-lg text-gray-900 font-medium">
+                Your privacy is our priority, even in communication.
+              </p>
+            </div>
+
+            {/* Contact Methods */}
+            <div className="space-y-8 animate-fade-in" style={{ animationDelay: '1s' }}>
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Email Support
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md mb-2">
+                    Get help with your account, security questions, or technical issues.
+                  </p>
+                  <a href="mailto:support@privault.security" className="text-blue-600 hover:text-blue-700 font-medium">
+                    support@privault.security
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Security Reports
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md mb-2">
+                    Found a security vulnerability? We take all reports seriously and respond quickly.
+                  </p>
+                  <a href="mailto:security@privault.security" className="text-purple-600 hover:text-purple-700 font-medium">
+                    security@privault.security
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Business Inquiries
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md mb-2">
+                    Enterprise solutions, partnerships, or press inquiries.
+                  </p>
+                  <a href="mailto:business@privault.security" className="text-indigo-600 hover:text-indigo-700 font-medium">
+                    business@privault.security
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Response Times & Policies */}
+            <div className="mt-24 space-y-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+              <div className="border-t border-gray-200 pt-16">
+                <h4 className="text-3xl font-light text-gray-900 mb-12">Response Times</h4>
+                
+                <div className="space-y-12">
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-blue-500">24h</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">General Support</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Account issues, billing questions, and general inquiries.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-purple-500">4h</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Security Reports</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Critical security vulnerabilities get immediate attention.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-indigo-500">48h</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Business Inquiries</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Partnership and enterprise solution discussions.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-16">
+                <h4 className="text-2xl font-light text-gray-900 mb-8">Privacy Notice</h4>
+                <div className="space-y-6">
+                  <p className="text-gray-500 leading-relaxed">
+                    All communication is treated with the same privacy standards as our product. We use encrypted email when possible and never share your information with third parties.
+                  </p>
+                  <p className="text-gray-500 leading-relaxed">
+                    For sensitive security reports, we recommend using PGP encryption. Our public key is available upon request.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'help':
+        return (
+          <>
+            {/* Help Section */}
+            <div className="mb-24 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+              <h3 className="text-4xl lg:text-5xl font-light text-gray-900 mb-8 leading-tight max-w-xl">
+                Help &
+                <span className="text-blue-600 font-medium"> support</span>
+              </h3>
+              
+              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+                Everything you need to get started with Privault and manage your passwords securely.
+              </p>
+              <p className="text-lg text-gray-900 font-medium">
+                Security made simple.
+              </p>
+            </div>
+
+            {/* Help Categories */}
+            <div className="space-y-8 animate-fade-in" style={{ animationDelay: '1s' }}>
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Getting Started
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Step-by-step guides to create your account, set up your master password, and import existing passwords.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Managing Passwords
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Learn how to add, edit, organize, and generate strong passwords for all your accounts.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Security Best Practices
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Tips and recommendations for maintaining maximum security with your password vault.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Section */}
+            <div className="mt-24 space-y-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+              <div className="border-t border-gray-200 pt-16">
+                <h4 className="text-3xl font-light text-gray-900 mb-12">Frequently Asked Questions</h4>
+                
+                <div className="space-y-12">
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">What if I forget my master password?</h5>
+                    <p className="text-gray-500 leading-relaxed">Unfortunately, due to our zero-knowledge architecture, we cannot recover your master password. However, this is by design - it ensures that only you can access your data. We recommend using account recovery hints and storing a secure backup of your master password.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">How does sync work across devices?</h5>
+                    <p className="text-gray-500 leading-relaxed">Your encrypted vault syncs across all your devices in real-time. The encryption happens locally on each device using your master password, so the data traveling between devices is always encrypted.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Can I import passwords from other managers?</h5>
+                    <p className="text-gray-500 leading-relaxed">Yes! Privault supports importing from most popular password managers including LastPass, 1Password, Bitwarden, and others. The import process maintains security by encrypting your data immediately.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Is my data backed up?</h5>
+                    <p className="text-gray-500 leading-relaxed">Your encrypted vault is automatically backed up to our secure servers. However, since it's encrypted with your master password, it's only useful if you remember your master password. We also recommend keeping local backups.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-16">
+                <h4 className="text-2xl font-light text-gray-900 mb-8">Need More Help?</h4>
+                <div className="space-y-6">
+                  <p className="text-gray-500 leading-relaxed">
+                    Check our comprehensive documentation or reach out to our support team. We're committed to helping you maintain the highest level of security.
+                  </p>
+                  <div className="flex space-x-4">
+                    <a href="mailto:support@privault.security" className="text-blue-600 hover:text-blue-700 font-medium">Contact Support</a>
+                    <span className="text-gray-300">|</span>
+                    <a href="#security" onClick={() => handleSectionChange('security')} className="text-purple-600 hover:text-purple-700 font-medium">Security Details</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+
+      default: // home
+        return (
+          <>
+            {/* Description */}
+            <div className="mb-24 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+              <h3 className="text-4xl lg:text-5xl font-light text-gray-900 mb-8 leading-tight max-w-xl">
+                The password manager that 
+                <span className="text-blue-600 font-medium"> actually</span> protects you
+              </h3>
+              
+              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+                Stop worrying about data breaches. Your passwords are encrypted on your device before they ever reach our servers.
+              </p>
+              <p className="text-lg text-gray-900 font-medium">
+                Even we can&apos;t see them.
+              </p>
+            </div>
+
+            {/* Features */}
+            <div className="space-y-8 animate-fade-in" style={{ animationDelay: '1s' }}>
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Zero-Knowledge Security
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    Your master password never leaves your device. We can&apos;t read your data, even if we wanted to.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    Bank-Grade Encryption
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    The same encryption used by banks and governments to protect their most sensitive data.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 mb-2">
+                    No Tracking, Ever
+                  </h4>
+                  <p className="text-gray-600 leading-relaxed max-w-md">
+                    We don&apos;t track you, sell your data, or show ads. Your privacy is not our product.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Content for Scroll Demo */}
+            <div className="mt-24 space-y-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+              <div className="border-t border-gray-200 pt-16">
+                <h4 className="text-3xl font-light text-gray-900 mb-12">How It Works</h4>
+                
+                <div className="space-y-12">
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-blue-500">01</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Create Your Master Password</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Choose a strong password that only you know. This becomes your key to everything.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-purple-500">02</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Add Your Passwords</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Store all your passwords securely. They&apos;re encrypted before leaving your device.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-8">
+                    <div className="text-4xl font-light text-indigo-500">03</div>
+                    <div>
+                      <h5 className="text-xl font-medium text-gray-900 mb-3">Access Anywhere</h5>
+                      <p className="text-gray-600 leading-relaxed max-w-md">Use your passwords on any device. Your data syncs securely across all platforms.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* More Content for Better Scroll Experience */}
+              <div className="border-t border-gray-100 pt-16">
+                <h4 className="text-2xl font-light text-gray-900 mb-8">Why Choose Privault?</h4>
+                <div className="space-y-8">
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Complete Privacy</h5>
+                    <p className="text-gray-500 leading-relaxed">Unlike other password managers, we use true zero-knowledge architecture. Your data is completely invisible to us.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Open Source Security</h5>
+                    <p className="text-gray-500 leading-relaxed">Our encryption methods are transparent and auditable. No hidden backdoors or proprietary algorithms.</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Cross-Platform Sync</h5>
+                    <p className="text-gray-500 leading-relaxed">Access your passwords on any device, anywhere. Seamless synchronization across all platforms.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+    }
+  };
+
   // Show landing page for unauthenticated users
   return (
     <div className="min-h-screen bg-white">
@@ -99,13 +613,17 @@ export default function HomePage() {
         <div className="relative">
           {/* Left Side - Modern Minimal Design */}
           <div ref={leftPanelRef} className="relative w-full h-auto bg-[#212529] flex flex-col justify-center items-start px-6 py-12 text-white overflow-hidden z-10 lg:fixed lg:left-0 lg:top-0 lg:w-2/5 lg:h-screen lg:px-16 lg:py-12">
-            {/* Subtle Background Elements */}
+            {/* Interactive Subtle Background Elements */}
             <div className="absolute inset-0">
-              {/* Single elegant gradient orb */}
-              <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl animate-pulse-slow"></div>
+              {/* Interactive elegant gradient orb */}
+              <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl animate-pulse-slow transition-all duration-1000 hover:scale-110 hover:from-blue-500/20 hover:via-purple-500/15 cursor-pointer"></div>
               
-              {/* Minimal grid pattern */}
-              <div className="absolute inset-0 opacity-[0.02]"
+              {/* Hoverable floating orbs */}
+              <div className="absolute top-1/6 left-1/6 w-32 h-32 bg-gradient-to-br from-cyan-500/8 to-transparent rounded-full blur-2xl transition-all duration-700 hover:scale-150 hover:from-cyan-500/16 cursor-pointer animate-drift-slow"></div>
+              <div className="absolute bottom-1/3 right-1/6 w-24 h-24 bg-gradient-to-tr from-purple-500/8 to-transparent rounded-full blur-xl transition-all duration-500 hover:scale-125 hover:from-purple-500/16 cursor-pointer animate-float-elegant"></div>
+              
+              {/* Interactive minimal grid pattern */}
+              <div className="absolute inset-0 opacity-[0.02] transition-opacity duration-500 hover:opacity-[0.04]"
                 style={{
                   backgroundImage: `
                     linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -115,12 +633,19 @@ export default function HomePage() {
                 }}
               ></div>
 
-              {/* New diagonal dotted overlay for desktop */}
-              <div className="hidden lg:block absolute inset-0 opacity-20 pointer-events-none"
+              {/* Interactive diagonal dotted overlay for desktop */}
+              <div className="hidden lg:block absolute inset-0 opacity-20 transition-all duration-700 hover:opacity-30"
                 style={{
                   backgroundImage: `repeating-linear-gradient(135deg, rgba(241,250,238,0.25) 0 2px, transparent 2px 24px)`
                 }}
               />
+              
+              {/* New floating geometric elements */}
+              <div className="absolute top-2/3 left-1/4 w-16 h-16 border border-white/10 rounded-full transition-all duration-500 hover:scale-125 hover:border-white/20 hover:rotate-45 cursor-pointer animate-particle-orbit"></div>
+              <div className="absolute bottom-1/4 right-1/8 w-12 h-20 border border-white/8 rounded-lg transform rotate-12 transition-all duration-600 hover:scale-110 hover:border-white/16 hover:-rotate-12 cursor-pointer animate-drift-reverse"></div>
+              
+              {/* Subtle hover glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-transparent to-purple-500/0 opacity-0 transition-opacity duration-1000 hover:opacity-10 pointer-events-none"></div>
             </div>
 
             {/* Content */}
@@ -207,26 +732,34 @@ export default function HomePage() {
 
           {/* Right Side - Scrollable Content */}
           <div ref={rightPanelRef} className="relative w-full h-auto bg-gradient-to-br from-gray-50 to-blue-50 overflow-x-hidden lg:fixed lg:right-0 lg:top-0 lg:w-3/5 lg:h-screen lg:overflow-y-auto">
-            {/* Cuberto-style Abstract Geometric Background */}
-            <div className="absolute inset-0 lg:fixed lg:inset-0 overflow-hidden pointer-events-none">
-              {/* Large abstract geometric shapes */}
-              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/10 transform rotate-45 rounded-3xl"></div>
-              <div className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-indigo-400/12 to-blue-400/8 transform -rotate-12 rounded-full"></div>
+            {/* Interactive Cuberto-style Abstract Geometric Background */}
+            <div className="absolute inset-0 lg:fixed lg:inset-0 overflow-hidden">
+              {/* Large abstract geometric shapes with hover effects */}
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/10 transform rotate-45 rounded-3xl transition-all duration-1000 hover:scale-110 hover:rotate-90 hover:from-blue-500/25 hover:to-purple-500/20 cursor-pointer animate-float-gentle"></div>
+              <div className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-indigo-400/12 to-blue-400/8 transform -rotate-12 rounded-full transition-all duration-700 hover:scale-125 hover:-rotate-45 hover:from-indigo-400/22 hover:to-blue-400/18 cursor-pointer animate-drift-slow"></div>
               
-              {/* Corner geometric elements */}
-              <div className="absolute top-0 right-0 w-32 h-32 border-l-2 border-b-2 border-blue-200/30 transform rotate-45"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 border-r-2 border-t-2 border-purple-200/30 transform -rotate-45"></div>
+              {/* Corner geometric elements with interactive borders */}
+              <div className="absolute top-0 right-0 w-32 h-32 border-l-2 border-b-2 border-blue-200/30 transform rotate-45 transition-all duration-500 hover:border-blue-400/60 hover:scale-110 hover:rotate-90 cursor-pointer"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 border-r-2 border-t-2 border-purple-200/30 transform -rotate-45 transition-all duration-500 hover:border-purple-400/60 hover:scale-110 hover:-rotate-90 cursor-pointer"></div>
               
-              {/* Abstract floating shapes */}
-              <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-gradient-to-tr from-blue-300/20 to-transparent transform rotate-45 rounded-lg"></div>
-              <div className="absolute top-2/3 right-1/6 w-12 h-32 bg-gradient-to-b from-purple-300/15 to-transparent transform -rotate-12 rounded-full"></div>
+              {/* Abstract floating shapes with hover animations */}
+              <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-gradient-to-tr from-blue-300/20 to-transparent transform rotate-45 rounded-lg transition-all duration-500 hover:scale-150 hover:rotate-180 hover:from-blue-400/40 cursor-pointer animate-pulse-slow"></div>
+              <div className="absolute top-2/3 right-1/6 w-12 h-32 bg-gradient-to-b from-purple-300/15 to-transparent transform -rotate-12 rounded-full transition-all duration-600 hover:scale-125 hover:rotate-12 hover:from-purple-400/30 cursor-pointer animate-drift-reverse"></div>
               
-              {/* Large background accent */}
-              <div className="absolute bottom-0 right-0 w-96 h-72 bg-gradient-to-tl from-blue-500/8 via-purple-500/5 to-transparent transform skew-x-12 rounded-tl-[100px]"></div>
+              {/* Large background accent with parallax hover */}
+              <div className="absolute bottom-0 right-0 w-96 h-72 bg-gradient-to-tl from-blue-500/8 via-purple-500/5 to-transparent transform skew-x-12 rounded-tl-[100px] transition-all duration-1000 hover:scale-105 hover:skew-x-6 hover:from-blue-500/16 hover:via-purple-500/12 cursor-pointer"></div>
+              
               {/* Bottom abstract geometric shapes */}
-              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/10 to-blue-500/15 transform -rotate-45 rounded-3xl"></div>
-              <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-gradient-to-bl from-indigo-400/12 to-blue-400/8 transform rotate-12 rounded-full"></div>
-              <div className="absolute bottom-8 left-1/6 w-16 h-16 bg-gradient-to-tr from-purple-300/20 to-transparent transform -rotate-12 rounded-lg"></div>
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/10 to-blue-500/15 transform -rotate-45 rounded-3xl transition-all duration-1000 hover:scale-110 hover:-rotate-90 hover:from-purple-500/20 hover:to-blue-500/25 cursor-pointer animate-rotate-slow"></div>
+              <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-gradient-to-bl from-indigo-400/12 to-blue-400/8 transform rotate-12 rounded-full transition-all duration-800 hover:scale-115 hover:rotate-45 hover:from-indigo-400/22 hover:to-blue-400/18 cursor-pointer animate-float-elegant"></div>
+              <div className="absolute bottom-8 left-1/6 w-16 h-16 bg-gradient-to-tr from-purple-300/20 to-transparent transform -rotate-12 rounded-lg transition-all duration-500 hover:scale-140 hover:-rotate-45 hover:from-purple-400/35 cursor-pointer animate-particle-float"></div>
+              
+              {/* New interactive particles */}
+              <div className="absolute top-1/4 left-1/3 w-8 h-8 bg-gradient-to-br from-cyan-400/25 to-transparent rounded-full transition-all duration-400 hover:scale-200 hover:from-cyan-500/50 cursor-pointer animate-particle-orbit"></div>
+              <div className="absolute bottom-1/3 right-1/3 w-6 h-6 bg-gradient-to-tr from-pink-400/30 to-transparent rounded-full transition-all duration-300 hover:scale-250 hover:from-pink-500/60 cursor-pointer animate-particle-orbit-reverse"></div>
+              
+              {/* Hover-triggered overlay effects */}
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-blue-500/5 opacity-0 transition-opacity duration-1000 hover:opacity-100 pointer-events-none"></div>
             </div>
             
             {/* Content Overlay */}
@@ -238,125 +771,31 @@ export default function HomePage() {
 
                 {/* Desktop links */}
                 <nav className="hidden lg:flex items-center space-x-10">
+                  <button
+                    onClick={() => handleSectionChange('home')}
+                    className={`desktop-nav-link inline-block relative text-sm font-medium transition-colors duration-300 ${
+                      currentSection === 'home' ? 'text-[#219EBC]' : 'text-gray-700 hover:text-[#219EBC]'
+                    }`}
+                  >
+                    Home
+                  </button>
                   {menuItems.map((item) => (
-                    <Link
+                    <button
                       key={item.name}
-                      href={item.href}
-                      className="desktop-nav-link inline-block relative text-sm font-medium text-gray-700 hover:text-[#219EBC] transition-colors duration-300"
+                      onClick={() => handleSectionChange(item.section)}
+                      className={`desktop-nav-link inline-block relative text-sm font-medium transition-colors duration-300 ${
+                        currentSection === item.section ? 'text-[#219EBC]' : 'text-gray-700 hover:text-[#219EBC]'
+                      }`}
                     >
                       {item.name}
-                    </Link>
+                    </button>
                   ))}
                 </nav>
               </div>
 
               {/* Center - Main Content */}
               <div className="flex-1 flex flex-col justify-center py-16">
-                {/* Description */}
-                <div className="mb-24 animate-fade-in" style={{ animationDelay: '0.8s' }}>
-                  <h3 className="text-4xl lg:text-5xl font-light text-gray-900 mb-8 leading-tight max-w-xl">
-                    The password manager that 
-                    <span className="text-blue-600 font-medium"> actually</span> protects you
-                  </h3>
-                  
-                  <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
-                    Stop worrying about data breaches. Your passwords are encrypted on your device before they ever reach our servers.
-                  </p>
-                  <p className="text-lg text-gray-900 font-medium">
-                    Even we can&apos;t see them.
-                  </p>
-                </div>
-
-                {/* Features */}
-                <div className="space-y-8 animate-fade-in" style={{ animationDelay: '1s' }}>
-                  <div className="flex items-center space-x-6">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div>
-                      <h4 className="text-xl font-medium text-gray-900 mb-2">
-                        Zero-Knowledge Security
-                      </h4>
-                      <p className="text-gray-600 leading-relaxed max-w-md">
-                        Your master password never leaves your device. We can&apos;t read your data, even if we wanted to.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-6">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <div>
-                      <h4 className="text-xl font-medium text-gray-900 mb-2">
-                        Bank-Grade Encryption
-                      </h4>
-                      <p className="text-gray-600 leading-relaxed max-w-md">
-                        The same encryption used by banks and governments to protect their most sensitive data.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-6">
-                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                    <div>
-                      <h4 className="text-xl font-medium text-gray-900 mb-2">
-                        No Tracking, Ever
-                      </h4>
-                      <p className="text-gray-600 leading-relaxed max-w-md">
-                        We don&apos;t track you, sell your data, or show ads. Your privacy is not our product.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Content for Scroll Demo */}
-                <div className="mt-24 space-y-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
-                  <div className="border-t border-gray-200 pt-16">
-                    <h4 className="text-3xl font-light text-gray-900 mb-12">How It Works</h4>
-                    
-                    <div className="space-y-12">
-                      <div className="flex items-start space-x-8">
-                        <div className="text-4xl font-light text-blue-500">01</div>
-                        <div>
-                          <h5 className="text-xl font-medium text-gray-900 mb-3">Create Your Master Password</h5>
-                          <p className="text-gray-600 leading-relaxed max-w-md">Choose a strong password that only you know. This becomes your key to everything.</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-8">
-                        <div className="text-4xl font-light text-purple-500">02</div>
-                        <div>
-                          <h5 className="text-xl font-medium text-gray-900 mb-3">Add Your Passwords</h5>
-                          <p className="text-gray-600 leading-relaxed max-w-md">Store all your passwords securely. They&apos;re encrypted before leaving your device.</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-8">
-                        <div className="text-4xl font-light text-indigo-500">03</div>
-                        <div>
-                          <h5 className="text-xl font-medium text-gray-900 mb-3">Access Anywhere</h5>
-                          <p className="text-gray-600 leading-relaxed max-w-md">Use your passwords on any device. Your data syncs securely across all platforms.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* More Content for Better Scroll Experience */}
-                  <div className="border-t border-gray-100 pt-16">
-                    <h4 className="text-2xl font-light text-gray-900 mb-8">Why Choose Privault?</h4>
-                    <div className="space-y-8">
-                      <div>
-                        <h5 className="font-medium text-gray-900 mb-2">Complete Privacy</h5>
-                        <p className="text-gray-500 leading-relaxed">Unlike other password managers, we use true zero-knowledge architecture. Your data is completely invisible to us.</p>
-                      </div>
-                      <div>
-                        <h5 className="font-medium text-gray-900 mb-2">Open Source Security</h5>
-                        <p className="text-gray-500 leading-relaxed">Our encryption methods are transparent and auditable. No hidden backdoors or proprietary algorithms.</p>
-                      </div>
-                      <div>
-                        <h5 className="font-medium text-gray-900 mb-2">Cross-Platform Sync</h5>
-                        <p className="text-gray-500 leading-relaxed">Access your passwords on any device, anywhere. Seamless synchronization across all platforms.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderRightPanelContent()}
               </div>
 
               {/* Bottom - Trust Indicators */}
@@ -461,7 +900,7 @@ export default function HomePage() {
                 className="inline-flex items-center group"
               >
                 <div className="relative mr-6">
-                  <span className="text-lg font-medium text-white group-hover:text-gray-200 transition-colors duration-300">Get Started</span>
+                  <span className="text-lg font-medium text-white">Get Started</span>
                   <div className="absolute -bottom-0.5 left-0 w-full h-0.5 bg-white/0 group-hover:bg-white/25 transition-colors duration-400"></div>
                 </div>
                 
@@ -496,7 +935,7 @@ export default function HomePage() {
                 {menuItems.map((item) => (
                   <Link
                     key={item.name}
-                    href={item.href}
+                    href={`#${item.section}`}
                     className="text-sm text-gray-500 hover:text-gray-900"
                   >
                     {item.name}
@@ -546,17 +985,24 @@ export default function HomePage() {
           <div className="fixed top-24 right-4 z-50 lg:hidden">
             <div className={`w-48 rounded-xl bg-white/10 backdrop-blur-lg shadow-lg ring-1 ring-white/20 p-3 flex flex-col space-y-1 origin-top-right ${isMenuClosing ? 'animate-menu-exit' : 'animate-menu-pop'}`}
             >
+              <button
+                onClick={() => handleSectionChange('home')}
+                className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-white/20 transition-colors text-left ${
+                  currentSection === 'home' ? 'bg-white/20' : ''
+                }`}
+              >
+                Home
+              </button>
               {menuItems.map((item) => (
-                <Link
+                <button
                   key={item.name}
-                  href={item.href}
-                  onClick={closeMenu}
-                  className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-white/20 transition-colors ${
-                    item.name === 'Sign In' ? 'border border-white text-white hover:bg-white/30' : ''
+                  onClick={() => handleSectionChange(item.section)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-white/20 transition-colors text-left ${
+                    currentSection === item.section ? 'bg-white/20' : ''
                   }`}
                 >
                   {item.name}
-                </Link>
+                </button>
               ))}
             </div>
           </div>
@@ -1012,6 +1458,30 @@ export default function HomePage() {
 
         .animate-particle-float-gentle {
           animation: particle-float-gentle 8s ease-in-out infinite;
+        }
+
+        /* New gentle floating animation for background elements */
+        @keyframes float-gentle {
+          0%, 100% {
+            transform: translateY(0px) translateX(0px) scale(1);
+            opacity: 0.8;
+          }
+          25% {
+            transform: translateY(-8px) translateX(4px) scale(1.02);
+            opacity: 0.9;
+          }
+          50% {
+            transform: translateY(-15px) translateX(-2px) scale(1.05);
+            opacity: 1;
+          }
+          75% {
+            transform: translateY(-5px) translateX(-6px) scale(1.02);
+            opacity: 0.9;
+          }
+        }
+
+        .animate-float-gentle {
+          animation: float-gentle 12s ease-in-out infinite;
         }
 
         .animate-word-accent-flow {
