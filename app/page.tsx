@@ -129,7 +129,7 @@ export default function HomePage() {
                     Privacy by Design
                   </h4>
                   <p className="text-gray-600 leading-relaxed max-w-md">
-                    Every feature is built with privacy as the foundation. We can't access your data because we designed it that way.
+                    Every feature is built with privacy as the foundation. We can&apos;t access your data because we designed it that way.
                   </p>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function HomePage() {
                     User-Centric Approach
                   </h4>
                   <p className="text-gray-600 leading-relaxed max-w-md">
-                    Built by security professionals who understand that usability and security aren't mutually exclusive.
+                    Built by security professionals who understand that usability and security aren&apos;t mutually exclusive.
                   </p>
                 </div>
               </div>
@@ -245,7 +245,7 @@ export default function HomePage() {
                     Client-Side Encryption
                   </h4>
                   <p className="text-gray-600 leading-relaxed max-w-md">
-                    Your data is encrypted on your device before it ever leaves. Even we can't decrypt your passwords.
+                    Your data is encrypted on your device before it ever leaves. Even we can&apos;t decrypt your passwords.
                   </p>
                 </div>
               </div>
@@ -290,7 +290,7 @@ export default function HomePage() {
               </h3>
               
               <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
-                We're here to help with any questions about Privault, security, or privacy.
+                We&apos;re here to help with any questions about Privault, security, or privacy.
               </p>
               <p className="text-lg text-gray-900 font-medium">
                 Your privacy is our priority, even in communication.
@@ -469,7 +469,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Is my data backed up?</h5>
-                    <p className="text-gray-500 leading-relaxed">Your encrypted vault is automatically backed up to our secure servers. However, since it's encrypted with your master password, it's only useful if you remember your master password. We also recommend keeping local backups.</p>
+                    <p className="text-gray-500 leading-relaxed">Your encrypted vault is automatically backed up to our secure servers. However, since it&apos;s encrypted with your master password, it&apos;s only useful if you remember your master password. We also recommend keeping local backups.</p>
                   </div>
                 </div>
               </div>
@@ -478,7 +478,7 @@ export default function HomePage() {
                 <h4 className="text-2xl font-light text-gray-900 mb-8">Need More Help?</h4>
                 <div className="space-y-6">
                   <p className="text-gray-500 leading-relaxed">
-                    Check our comprehensive documentation or reach out to our support team. We're committed to helping you maintain the highest level of security.
+                    Check our comprehensive documentation or reach out to our support team. We&apos;re committed to helping you maintain the highest level of security.
                   </p>
                   <div className="flex space-x-4">
                     <a href="mailto:support@privault.security" className="text-blue-600 hover:text-blue-700 font-medium">Contact Support</a>
