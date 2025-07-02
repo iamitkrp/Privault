@@ -149,7 +149,7 @@ const Features = () => {
           <h2 className="text-heading-2 font-bold bg-gradient-to-r from-white via-indigo-200 to-cyan-200 bg-clip-text text-transparent mb-6">
             Built for Maximum Security & Privacy
           </h2>
-          <p className="text-body-large text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-body-large max-w-2xl mx-auto leading-relaxed font-suisse-regular" style={{ color: '#9ca3af' }}>
             Experience the future of password management with cutting-edge encryption and 
             zero-knowledge architecture that puts you in complete control.
           </p>
@@ -237,7 +237,7 @@ const Features = () => {
             <h3 className="text-heading-3 font-semibold text-white mb-6">
               Ready to Secure Your Digital Life?
             </h3>
-            <p className="text-slate-300 text-body leading-relaxed mb-8 max-w-2xl mx-auto">
+            <p className="text-body leading-relaxed mb-8 max-w-2xl mx-auto font-suisse-regular" style={{ color: '#9ca3af' }}>
               Join thousands of privacy-conscious users who trust their passwords to our 
               zero-knowledge architecture. Start your secure journey today.
             </p>

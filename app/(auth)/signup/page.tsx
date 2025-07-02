@@ -202,7 +202,7 @@ export default function SignupPage() {
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             </div>
           </div>
-          <p className="text-gray-600 font-light animate-pulse">
+          <p className="font-light animate-pulse font-suisse-regular" style={{ color: '#333333' }}>
             {user ? 'Redirecting to your vault...' : 'Authenticating...'}
           </p>
         </div>
@@ -216,7 +216,7 @@ export default function SignupPage() {
         <h2 className="text-3xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
           Create your account
         </h2>
-        <p className="text-gray-600">
+        <p className="font-suisse-regular" style={{ color: '#333333' }}>
           Start securing your passwords with zero-knowledge encryption
         </p>
       </div>
@@ -471,7 +471,7 @@ export default function SignupPage() {
 
         {/* Sign in link */}
         <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm font-suisse-regular" style={{ color: '#333333' }}>
             Already have an account?{' '}
             <Link href={ROUTES.LOGIN} className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
               Sign in

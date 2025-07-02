@@ -59,7 +59,7 @@ const Footer = () => {
                 {APP_NAME}
               </div>
             </div>
-            <p className="text-slate-300 text-body leading-relaxed mb-6 max-w-md">
+            <p className="text-body leading-relaxed mb-6 max-w-md font-suisse-regular" style={{ color: '#9ca3af' }}>
               The most secure password manager with zero-knowledge architecture. 
               Your privacy is our priority, your security is our promise.
             </p>
