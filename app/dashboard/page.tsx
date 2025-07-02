@@ -134,7 +134,7 @@ export default function DashboardPage() {
                  Performance
                  <span className="block font-medium text-orange-600">Monitor</span>
                </h1>
-               <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+               <p className="text-xl text-gray-600 font-neuemontreal-medium max-w-2xl mx-auto leading-relaxed">
                  Track application performance, load times, and optimization metrics. 
                  <span className="block mt-2 text-gray-500 font-light">Advanced analytics coming soon...</span>
                </p>
@@ -363,9 +363,9 @@ export default function DashboardPage() {
          <div className="text-center mb-20">
            <h2 className="text-5xl lg:text-6xl font-light text-gray-900 mb-6 leading-relaxed">
              Your Personal
-             <span className="block font-medium bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent py-2">Digital Space</span>
+             <span className="block font-bold italic bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent py-2 pb-4 text-7xl lg:text-8xl">Digital Space</span>
            </h2>
-           <p className="text-xl text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
+           <p className="text-xl text-gray-600 font-neuemontreal-medium max-w-2xl mx-auto leading-relaxed">
              Manage your digital life securely and efficiently
              <span className="block mt-2 text-gray-500">Everything encrypted, everything private</span>
            </p>

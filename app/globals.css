@@ -193,3 +193,9 @@ button:not(:disabled):hover {
   font-family: var(--font-suisse);
   font-weight: 400;
 }
+
+/* NeueMontreal Medium Utility */
+.font-neuemontreal-medium {
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
