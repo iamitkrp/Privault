@@ -81,7 +81,7 @@ const Hero = () => {
         </div>
 
         {/* Subtitle */}
-        <p ref={subtitleRef} className="text-body-large text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+        <p ref={subtitleRef} className="text-body-large text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed font-suisse-regular">
           Secure your passwords with military-grade encryption. Your data is encrypted locally before it ever leaves your device.
           <span className="block mt-2 text-indigo-300 font-medium">Experience true privacy in the digital age.</span>
         </p>

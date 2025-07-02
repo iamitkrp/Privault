@@ -112,7 +112,7 @@ export default function HomePage() {
                 <span className="text-blue-600 font-medium"> Privault</span>
               </h3>
               
-              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+              <p className="text-xl font-light leading-relaxed max-w-lg mb-4 font-suisse-regular" style={{ color: '#333333' }}>
                 Born from the need for truly private password management, Privault represents the future of digital security.
               </p>
               <p className="text-lg text-gray-900 font-medium">
@@ -128,7 +128,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Privacy by Design
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Every feature is built with privacy as the foundation. We can&apos;t access your data because we designed it that way.
                   </p>
                 </div>
@@ -140,7 +140,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Transparent Security
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Our encryption methods are open source and auditable. No hidden backdoors, no proprietary algorithms.
                   </p>
                 </div>
@@ -152,7 +152,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     User-Centric Approach
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Built by security professionals who understand that usability and security aren&apos;t mutually exclusive.
                   </p>
                 </div>
@@ -169,7 +169,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-blue-500">01</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Democratize Privacy</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Make enterprise-grade security accessible to everyone, not just large corporations.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Make enterprise-grade security accessible to everyone, not just large corporations.</p>
                     </div>
                   </div>
                   
@@ -177,7 +177,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-purple-500">02</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Rebuild Trust</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Restore confidence in digital security through transparency and proven technology.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Restore confidence in digital security through transparency and proven technology.</p>
                     </div>
                   </div>
                   
@@ -185,7 +185,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-indigo-500">03</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Protect Freedom</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Preserve digital privacy as a fundamental right in an increasingly connected world.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Preserve digital privacy as a fundamental right in an increasingly connected world.</p>
                     </div>
                   </div>
                 </div>
@@ -204,7 +204,7 @@ export default function HomePage() {
                 <span className="text-blue-600 font-medium"> security</span>
               </h3>
               
-              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+              <p className="text-xl font-light leading-relaxed max-w-lg mb-4 font-suisse-regular" style={{ color: '#333333' }}>
                 Your passwords are protected by the same encryption used by governments and financial institutions worldwide.
               </p>
               <p className="text-lg text-gray-900 font-medium">
@@ -220,7 +220,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     AES-256 Encryption
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     The gold standard in encryption. Used by the NSA for top secret information and trusted globally.
                   </p>
                 </div>
@@ -232,7 +232,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     PBKDF2 Key Derivation
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Your master password is strengthened using 100,000+ iterations, making brute force attacks computationally impossible.
                   </p>
                 </div>
@@ -244,7 +244,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Client-Side Encryption
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Your data is encrypted on your device before it ever leaves. Even we can&apos;t decrypt your passwords.
                   </p>
                 </div>
@@ -259,19 +259,19 @@ export default function HomePage() {
                 <div className="space-y-12">
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Zero-Knowledge Architecture</h5>
-                    <p className="text-gray-500 leading-relaxed">Your master password never leaves your device. All encryption and decryption happens locally, ensuring complete privacy.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Your master password never leaves your device. All encryption and decryption happens locally, ensuring complete privacy.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Secure Remote Password Protocol</h5>
-                    <p className="text-gray-500 leading-relaxed">Even our authentication system follows zero-knowledge principles. We never see your password, not even during login.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Even our authentication system follows zero-knowledge principles. We never see your password, not even during login.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">End-to-End Encrypted Sync</h5>
-                    <p className="text-gray-500 leading-relaxed">Data synchronization across devices maintains the same security standards. Your encrypted vault is the only thing that travels.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Data synchronization across devices maintains the same security standards. Your encrypted vault is the only thing that travels.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Regular Security Audits</h5>
-                    <p className="text-gray-500 leading-relaxed">Our codebase undergoes regular third-party security audits to ensure the highest standards are maintained.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Our codebase undergoes regular third-party security audits to ensure the highest standards are maintained.</p>
                   </div>
                 </div>
               </div>
@@ -289,7 +289,7 @@ export default function HomePage() {
                 <span className="text-blue-600 font-medium"> touch</span>
               </h3>
               
-              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+              <p className="text-xl font-light leading-relaxed max-w-lg mb-4 font-suisse-regular" style={{ color: '#333333' }}>
                 We&apos;re here to help with any questions about Privault, security, or privacy.
               </p>
               <p className="text-lg text-gray-900 font-medium">
@@ -305,7 +305,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Email Support
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md mb-2">
+                  <p className="leading-relaxed max-w-md mb-2 font-suisse-regular" style={{ color: '#333333' }}>
                     Get help with your account, security questions, or technical issues.
                   </p>
                   <a href="mailto:support@privault.security" className="text-blue-600 hover:text-blue-700 font-medium">
@@ -320,7 +320,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Security Reports
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md mb-2">
+                  <p className="leading-relaxed max-w-md mb-2 font-suisse-regular" style={{ color: '#333333' }}>
                     Found a security vulnerability? We take all reports seriously and respond quickly.
                   </p>
                   <a href="mailto:security@privault.security" className="text-purple-600 hover:text-purple-700 font-medium">
@@ -355,7 +355,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-blue-500">24h</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">General Support</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Account issues, billing questions, and general inquiries.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Account issues, billing questions, and general inquiries.</p>
                     </div>
                   </div>
                   
@@ -363,7 +363,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-purple-500">4h</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Security Reports</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Critical security vulnerabilities get immediate attention.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Critical security vulnerabilities get immediate attention.</p>
                     </div>
                   </div>
                   
@@ -371,7 +371,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-indigo-500">48h</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Business Inquiries</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Partnership and enterprise solution discussions.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Partnership and enterprise solution discussions.</p>
                     </div>
                   </div>
                 </div>
@@ -402,7 +402,7 @@ export default function HomePage() {
                 <span className="text-blue-600 font-medium"> support</span>
               </h3>
               
-              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+              <p className="text-xl font-light leading-relaxed max-w-lg mb-4 font-suisse-regular" style={{ color: '#333333' }}>
                 Everything you need to get started with Privault and manage your passwords securely.
               </p>
               <p className="text-lg text-gray-900 font-medium">
@@ -418,7 +418,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Getting Started
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Step-by-step guides to create your account, set up your master password, and import existing passwords.
                   </p>
                 </div>
@@ -430,7 +430,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Managing Passwords
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Learn how to add, edit, organize, and generate strong passwords for all your accounts.
                   </p>
                 </div>
@@ -442,7 +442,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Security Best Practices
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Tips and recommendations for maintaining maximum security with your password vault.
                   </p>
                 </div>
@@ -457,19 +457,19 @@ export default function HomePage() {
                 <div className="space-y-12">
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">What if I forget my master password?</h5>
-                    <p className="text-gray-500 leading-relaxed">Unfortunately, due to our zero-knowledge architecture, we cannot recover your master password. However, this is by design - it ensures that only you can access your data. We recommend using account recovery hints and storing a secure backup of your master password.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Unfortunately, due to our zero-knowledge architecture, we cannot recover your master password. However, this is by design - it ensures that only you can access your data. We recommend using account recovery hints and storing a secure backup of your master password.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">How does sync work across devices?</h5>
-                    <p className="text-gray-500 leading-relaxed">Your encrypted vault syncs across all your devices in real-time. The encryption happens locally on each device using your master password, so the data traveling between devices is always encrypted.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Your encrypted vault syncs across all your devices in real-time. The encryption happens locally on each device using your master password, so the data traveling between devices is always encrypted.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Can I import passwords from other managers?</h5>
-                    <p className="text-gray-500 leading-relaxed">Yes! Privault supports importing from most popular password managers including LastPass, 1Password, Bitwarden, and others. The import process maintains security by encrypting your data immediately.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Yes! Privault supports importing from most popular password managers including LastPass, 1Password, Bitwarden, and others. The import process maintains security by encrypting your data immediately.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Is my data backed up?</h5>
-                    <p className="text-gray-500 leading-relaxed">Your encrypted vault is automatically backed up to our secure servers. However, since it&apos;s encrypted with your master password, it&apos;s only useful if you remember your master password. We also recommend keeping local backups.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Your encrypted vault is automatically backed up to our secure servers. However, since it&apos;s encrypted with your master password, it&apos;s only useful if you remember your master password. We also recommend keeping local backups.</p>
                   </div>
                 </div>
               </div>
@@ -477,7 +477,7 @@ export default function HomePage() {
               <div className="border-t border-gray-100 pt-16">
                 <h4 className="text-2xl font-light text-gray-900 mb-8">Need More Help?</h4>
                 <div className="space-y-6">
-                  <p className="text-gray-500 leading-relaxed">
+                  <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>
                     Check our comprehensive documentation or reach out to our support team. We&apos;re committed to helping you maintain the highest level of security.
                   </p>
                   <div className="flex space-x-4">
@@ -501,7 +501,7 @@ export default function HomePage() {
                 <span className="text-blue-600 font-medium"> actually</span> protects you
               </h3>
               
-              <p className="text-xl text-gray-600 font-light leading-relaxed max-w-lg mb-4">
+              <p className="text-xl font-light leading-relaxed max-w-lg mb-4 font-suisse-regular" style={{ color: '#333333' }}>
                 Stop worrying about data breaches. Your passwords are encrypted on your device before they ever reach our servers.
               </p>
               <p className="text-lg text-gray-900 font-medium">
@@ -517,7 +517,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Zero-Knowledge Security
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     Your master password never leaves your device. We can&apos;t read your data, even if we wanted to.
                   </p>
                 </div>
@@ -529,7 +529,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     Bank-Grade Encryption
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     The same encryption used by banks and governments to protect their most sensitive data.
                   </p>
                 </div>
@@ -541,7 +541,7 @@ export default function HomePage() {
                   <h4 className="text-xl font-medium text-gray-900 mb-2">
                     No Tracking, Ever
                   </h4>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>
                     We don&apos;t track you, sell your data, or show ads. Your privacy is not our product.
                   </p>
                 </div>
@@ -558,7 +558,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-blue-500">01</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Create Your Master Password</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Choose a strong password that only you know. This becomes your key to everything.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Choose a strong password that only you know. This becomes your key to everything.</p>
                     </div>
                   </div>
                   
@@ -566,7 +566,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-purple-500">02</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Add Your Passwords</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Store all your passwords securely. They&apos;re encrypted before leaving your device.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Store all your passwords securely. They&apos;re encrypted before leaving your device.</p>
                     </div>
                   </div>
                   
@@ -574,7 +574,7 @@ export default function HomePage() {
                     <div className="text-4xl font-light text-indigo-500">03</div>
                     <div>
                       <h5 className="text-xl font-medium text-gray-900 mb-3">Access Anywhere</h5>
-                      <p className="text-gray-600 leading-relaxed max-w-md">Use your passwords on any device. Your data syncs securely across all platforms.</p>
+                      <p className="leading-relaxed max-w-md font-suisse-regular" style={{ color: '#333333' }}>Use your passwords on any device. Your data syncs securely across all platforms.</p>
                     </div>
                   </div>
                 </div>
@@ -586,15 +586,15 @@ export default function HomePage() {
                 <div className="space-y-8">
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Complete Privacy</h5>
-                    <p className="text-gray-500 leading-relaxed">Unlike other password managers, we use true zero-knowledge architecture. Your data is completely invisible to us.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Unlike other password managers, we use true zero-knowledge architecture. Your data is completely invisible to us.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Open Source Security</h5>
-                    <p className="text-gray-500 leading-relaxed">Our encryption methods are transparent and auditable. No hidden backdoors or proprietary algorithms.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Our encryption methods are transparent and auditable. No hidden backdoors or proprietary algorithms.</p>
                   </div>
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Cross-Platform Sync</h5>
-                    <p className="text-gray-500 leading-relaxed">Access your passwords on any device, anywhere. Seamless synchronization across all platforms.</p>
+                    <p className="leading-relaxed font-suisse-regular" style={{ color: '#333333' }}>Access your passwords on any device, anywhere. Seamless synchronization across all platforms.</p>
                   </div>
                 </div>
               </div>

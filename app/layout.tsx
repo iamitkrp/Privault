@@ -19,6 +19,26 @@ const neueMontreal = localFont({
       style: "italic",
     },
     {
+      path: "./fonts/NeueMontreal-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/NeueMontreal-Italic.otf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "./fonts/NeueMontreal-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/NeueMontreal-MediumItalic.otf",
+      weight: "500",
+      style: "italic",
+    },
+    {
       path: "./fonts/NeueMontreal-Bold.otf",
       weight: "700",
       style: "normal",
@@ -30,6 +50,33 @@ const neueMontreal = localFont({
     },
   ],
   variable: "--font-neue-montreal",
+  display: "swap",
+});
+
+const suisseIntl = localFont({
+  src: [
+    {
+      path: "./fonts/SuisseIntl-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "./fonts/SuisseIntl-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/SuisseIntl-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/SuisseIntl-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-suisse-intl",
   display: "swap",
 });
 
@@ -66,7 +113,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${neueMontreal.variable} font-sans antialiased`}
+        className={`${neueMontreal.variable} ${suisseIntl.variable} font-sans antialiased`}
       >
         {/* Skip link for keyboard navigation */}
         <a href="#main-content" className="skip-link">

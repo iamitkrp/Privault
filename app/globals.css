@@ -67,6 +67,7 @@
   --color-ring: hsl(var(--ring));
   
   --font-sans: var(--font-neue-montreal), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-suisse: var(--font-suisse-intl), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
   
   /* NeueMontreal Font Weight Mapping */
@@ -181,4 +182,14 @@ button:not(:disabled):hover {
 
 .skip-link:focus {
   top: 6px;
+}
+
+/* SuisseIntl Font Utilities */
+.font-suisse {
+  font-family: var(--font-suisse);
+}
+
+.font-suisse-regular {
+  font-family: var(--font-suisse);
+  font-weight: 400;
 }

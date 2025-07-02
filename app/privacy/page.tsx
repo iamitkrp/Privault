@@ -22,33 +22,33 @@ export default function PrivacyPage() {
           
           <h1 className="text-3xl font-light text-gray-900 mb-6">Privacy Policy</h1>
           
-          <div className="prose max-w-none text-gray-600">
-            <p className="mb-4">
+          <div className="prose max-w-none">
+            <p className="mb-4 font-suisse-regular" style={{ color: '#333333' }}>
               This is a placeholder for the Privacy Policy page. In a production environment, this would contain the actual privacy policy for Privault.
             </p>
             
             <h2 className="text-xl font-medium text-gray-800 mt-6 mb-3">1. Data Collection</h2>
-            <p className="mb-4">
+            <p className="mb-4 font-suisse-regular" style={{ color: '#333333' }}>
               Privault collects minimal personal information necessary to provide our services. Your passwords and sensitive data are encrypted on your device before being stored.
             </p>
             
             <h2 className="text-xl font-medium text-gray-800 mt-6 mb-3">2. Zero-Knowledge Architecture</h2>
-            <p className="mb-4">
+            <p className="mb-4 font-suisse-regular" style={{ color: '#333333' }}>
               Our zero-knowledge architecture means that we cannot access your encrypted data. Your master password and encryption keys never leave your device.
             </p>
             
             <h2 className="text-xl font-medium text-gray-800 mt-6 mb-3">3. Data Security</h2>
-            <p className="mb-4">
+            <p className="mb-4 font-suisse-regular" style={{ color: '#333333' }}>
               We employ industry-standard security measures to protect your data from unauthorized access, alteration, or destruction.
             </p>
             
             <h2 className="text-xl font-medium text-gray-800 mt-6 mb-3">4. Third-Party Services</h2>
-            <p className="mb-4">
+            <p className="mb-4 font-suisse-regular" style={{ color: '#333333' }}>
               We may use third-party services for infrastructure and analytics. These services are carefully selected and bound by confidentiality obligations.
             </p>
             
             <h2 className="text-xl font-medium text-gray-800 mt-6 mb-3">5. Terms of Service</h2>
-            <p className="mb-4">
+            <p className="mb-4 font-suisse-regular" style={{ color: '#333333' }}>
               This Privacy Policy is part of our <Link href={ROUTES.TERMS} className="text-blue-600 hover:text-blue-800">Terms of Service</Link>.
             </p>
           </div>

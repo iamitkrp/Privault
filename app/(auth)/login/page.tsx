@@ -119,7 +119,7 @@ export default function LoginPage() {
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             </div>
           </div>
-          <p className="text-gray-600 font-light animate-pulse">
+          <p className="font-light animate-pulse font-suisse-regular" style={{ color: '#333333' }}>
             {user ? 'Redirecting to your vault...' : 'Authenticating...'}
           </p>
         </div>
@@ -133,7 +133,7 @@ export default function LoginPage() {
         <h2 className="text-3xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
           Welcome back
         </h2>
-        <p className="text-gray-600">
+        <p className="font-suisse-regular" style={{ color: '#333333' }}>
           Access your secure vault with zero-knowledge encryption
         </p>
       </div>
@@ -280,7 +280,7 @@ export default function LoginPage() {
 
         {/* Sign up link */}
         <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm font-suisse-regular" style={{ color: '#333333' }}>
             Don&apos;t have an account?{' '}
             <Link href={ROUTES.SIGNUP} className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
               Create an account
@@ -295,7 +295,7 @@ export default function LoginPage() {
           <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
-          <p>Your master password is never stored on our servers</p>
+          <p className="font-suisse-regular" style={{ color: '#333333' }}>Your master password is never stored on our servers</p>
         </div>
       </div>
     </div>
