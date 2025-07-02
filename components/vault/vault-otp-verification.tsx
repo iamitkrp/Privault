@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { OTPService } from '@/services/otp.service';
+import { useRouter } from 'next/navigation';
 
 interface VaultOTPVerificationProps {
   user: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -24,6 +26,9 @@ export default function VaultOTPVerification({
   const [countdown, setCountdown] = useState(0);
   const [hasSentInitialOTP, setHasSentInitialOTP] = useState(false);
   const [isManualResend, setIsManualResend] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isExiting, setIsExiting] = useState(false);
+  const router = useRouter();
 
   // Auto-send OTP on component mount (with duplicate prevention)
   useEffect(() => {
@@ -43,6 +48,19 @@ export default function VaultOTPVerification({
       return () => clearTimeout(timer);
     }
   }, [countdown]);
+
+  // Track mouse movement for parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX - window.innerWidth / 2) / 50,
+        y: (e.clientY - window.innerHeight / 2) / 50
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const sendOTP = async () => {
     // Prevent multiple simultaneous sends
@@ -130,6 +148,18 @@ export default function VaultOTPVerification({
     sendOTP();
   };
 
+  // Handle back navigation
+  const handleBackToDashboard = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      if (onCancel) {
+        onCancel();
+      } else {
+        router.push('/dashboard');
+      }
+    }, 500);
+  };
+
   const purposeText = purpose === 'vault_access' ? 'Vault Access' : 'Vault Password Change';
   const purposeIcon = purpose === 'vault_access' ? (
     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,146 +172,112 @@ export default function VaultOTPVerification({
   );
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-8 text-center">
-          <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-            {purposeIcon}
+    <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 overflow-hidden transition-all duration-500 ease-in-out ${isExiting ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+      {/* Back to Dashboard */}
+      <button
+        onClick={handleBackToDashboard}
+        disabled={isExiting || isVerifying || isSending}
+        className="absolute top-8 left-8 z-20 inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        <span className="font-neuemontreal-medium">Back to Dashboard</span>
+      </button>
+
+      {/* Geometric background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-500/15 to-purple-500/10 transform rotate-45 rounded-3xl transition-transform duration-300 ease-out"
+          style={{ transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px) rotate(45deg)` }}
+        ></div>
+        <div
+          className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-purple-400/12 to-indigo-400/8 transform -rotate-12 rounded-full transition-transform duration-300 ease-out"
+          style={{ transform: `translate(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px) rotate(-12deg)` }}
+        ></div>
+        <div
+          className="absolute bottom-0 left-0 w-24 h-24 border-r-2 border-t-2 border-indigo-200/30 transform -rotate-45 transition-transform duration-300 ease-out"
+          style={{ transform: `translate(${mousePosition.x * -0.3}px, ${mousePosition.y * -0.3}px) rotate(-45deg)` }}
+        ></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-8">
+        <div className={`w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center transition-all duration-500 ease-in-out ${isExiting ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}>  
+          {/* Left Info */}
+          <div className="text-left">
+            <div className="w-20 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl flex items-center justify-center mb-8 shadow-lg">
+              {purposeIcon}
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-light text-gray-900 mb-6 leading-tight">
+              Security
+              <span className="block font-medium bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Verification</span>
+            </h1>
+            <p className="text-xl text-gray-600 font-neuemontreal-medium mb-6 leading-relaxed">
+              Enter the OTP sent to your email for {purposeText}
+            </p>
+            <p className="text-gray-500 font-light leading-relaxed">OTP codes expire in 10 minutes.</p>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Security Verification</h2>
-          <p className="text-indigo-100">Enter the OTP sent to your email for {purposeText}</p>
-        </div>
 
-        {/* Form */}
-        <div className="px-6 py-8">
-          <form onSubmit={handleVerifyOTP} className="space-y-6">
-            {/* Email display */}
-            <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
-                OTP sent to: <strong>{user.email}</strong>
-              </p>
-            </div>
-
-            {/* OTP Input */}
-            <div>
-              <label htmlFor="otpCode" className="block text-sm font-medium text-gray-700 mb-2">
-                6-Digit OTP Code
-              </label>
-              <input
-                id="otpCode"
-                type="text"
-                value={otpCode}
-                onChange={(e) => handleOTPInput(e.target.value)}
-                className="block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white transition-colors text-center text-lg font-mono tracking-widest"
-                placeholder="000000"
-                disabled={isVerifying}
-                autoFocus
-                maxLength={6}
-              />
-            </div>
-
-            {/* Success message */}
-            {success && (
-              <div className="bg-green-50 border border-green-300 rounded-md p-3">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-green-700">{success}</p>
-                  </div>
-                </div>
+          {/* Right Form */}
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-white/50 p-8 shadow-lg">
+            <form onSubmit={handleVerifyOTP} className="space-y-6">
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-4">OTP sent to: <strong>{user.email}</strong></p>
               </div>
-            )}
-
-            {/* Error message */}
-            {error && (
-              <div className="bg-red-50 border border-red-300 rounded-md p-3">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <div className="text-sm text-red-700 whitespace-pre-line">{error}</div>
-                  </div>
-                </div>
+              <div>
+                <label htmlFor="otpCode" className="block text-sm font-medium text-gray-700 mb-2">6-Digit OTP Code</label>
+                <input
+                  id="otpCode"
+                  type="text"
+                  value={otpCode}
+                  onChange={(e) => handleOTPInput(e.target.value)}
+                  className="block w-full px-4 py-4 border border-gray-300 rounded-2xl shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 backdrop-blur-sm transition-all duration-200 text-center text-lg font-mono tracking-widest"
+                  placeholder="000000"
+                  disabled={isVerifying}
+                  autoFocus
+                  maxLength={6}
+                />
               </div>
-            )}
 
-            {/* Action buttons */}
-            <div className="space-y-3">
+              {success && (
+                <div className="bg-green-50 border border-green-300 rounded-2xl p-4">
+                  <p className="text-sm text-green-700">{success}</p>
+                </div>
+              )}
+
+              {error && (
+                <div className="bg-red-50 border border-red-300 rounded-2xl p-4">
+                  <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={isVerifying || otpCode.length !== 6}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-2xl text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {isVerifying ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Verifying...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Verify OTP
-                  </>
-                )}
+                {isVerifying ? 'Verifying...' : 'Verify OTP'}
               </button>
 
-              {/* Resend OTP */}
               <button
                 type="button"
                 onClick={handleResendOTP}
                 disabled={isSending || countdown > 0}
-                className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center items-center py-4 px-6 border border-indigo-600 rounded-2xl text-base font-medium text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {isSending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2 inline-block"></div>
-                    Sending...
-                  </>
-                ) : countdown > 0 ? (
-                  `Resend OTP (${countdown}s)`
-                ) : (
-                  'Resend OTP'
-                )}
+                {isSending ? 'Sending...' : countdown > 0 ? `Resend OTP (${countdown})` : 'Resend OTP'}
               </button>
 
-              {/* Cancel button (if provided) */}
-              {onCancel && (
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  disabled={isVerifying || isSending}
-                  className="w-full py-2 px-4 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:underline disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
-
-          {/* Security notice */}
-          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-amber-700">
-                  <strong>Security Notice:</strong> OTP codes expire in 10 minutes. Check your email inbox and spam folder for the verification code.
-                </p>
-              </div>
-            </div>
+              <button
+                type="button"
+                onClick={handleBackToDashboard}
+                disabled={isVerifying || isSending}
+                className="w-full py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:underline disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Cancel
+              </button>
+            </form>
           </div>
         </div>
       </div>

@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     console.log('📤 Sending email with Resend...');
     const result = await resend.emails.send({
-      from: 'Privault Security <onboarding@resend.dev>', // Using Resend's default sender
+      from: 'Privault <no-reply@privault.shop>', // Verified sender from your domain
       to: email,
       subject: `Privault Security Code: ${otpCode}`,
       html: emailContent,

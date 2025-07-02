@@ -228,61 +228,65 @@ export default function VaultPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">🔒 Privault</h1>
-              {isUnlocked && (
-                <div className="ml-4 flex items-center text-sm text-gray-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span>Unlocked • {Math.ceil((sessionInfo.timeRemaining || 0) / 60000)}m remaining</span>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user.email}
-              </span>
-              <button
-                onClick={handleSignOut}
-                className="text-sm text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
-              >
-                Sign out
-              </button>
+      {/* Header - only show when not changing password or unlocking vault */}
+      {vaultAction !== 'change-password' && !(vaultExists && !isUnlocked) && (
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <h1 className="text-2xl font-bold text-gray-900">🔒 Privault</h1>
+                {isUnlocked && (
+                  <div className="ml-4 flex items-center text-sm text-gray-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    <span>Unlocked • {Math.ceil((sessionInfo.timeRemaining || 0) / 60000)}m remaining</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  {user.email}
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
+                >
+                  Sign out
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Breadcrumb */}
-          <nav className="flex mb-6" aria-label="Breadcrumb">
-            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-              <li className="inline-flex items-center">
-                <Link
-                  href={ROUTES.DASHBOARD}
-                  className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                  </svg>
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
-                  </svg>
-                  <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2">Password Vault</span>
-                </div>
-              </li>
-            </ol>
-          </nav>
+      <main className={`${vaultAction === 'change-password' || (vaultExists && !isUnlocked) ? '' : 'max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'}`}>
+        <div className={`${vaultAction === 'change-password' || (vaultExists && !isUnlocked) ? '' : 'px-4 py-6 sm:px-0'}`}>
+          {/* Breadcrumb - only show when not changing password or unlocking vault */}
+          {vaultAction !== 'change-password' && !(vaultExists && !isUnlocked) && (
+            <nav className="flex mb-6" aria-label="Breadcrumb">
+              <ol className="inline-flex items-center space-x-1 md:space-x-3">
+                <li className="inline-flex items-center">
+                  <Link
+                    href={ROUTES.DASHBOARD}
+                    className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                    </svg>
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <div className="flex items-center">
+                    <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
+                    </svg>
+                    <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2">Password Vault</span>
+                  </div>
+                </li>
+              </ol>
+            </nav>
+          )}
 
           {vaultAction === 'change-password' ? (
             // Password change now handles its own OTP verification internally
