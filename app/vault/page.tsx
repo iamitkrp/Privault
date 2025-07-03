@@ -132,15 +132,10 @@ export default function VaultPage() {
         // Mark profile as initialized
         setProfileInitialized(true);
 
-        // Check if vault exists by looking for vault setup flag in profile metadata
-        // For Phase 5 demo: use localStorage to track vault setup status
-        if (typeof window !== 'undefined') {
-          const vaultSetupCompleted = localStorage.getItem(`vault-setup-${user.id}`);
-          setVaultExists(vaultSetupCompleted === 'true');
-        } else {
-          // SSR fallback - assume vault exists to show unlock screen
-          setVaultExists(true);
-        }
+        // Check if vault exists by looking for vault_verification_data in profile
+        // This is more reliable than localStorage as it checks actual database state
+        const hasVaultVerificationData = !!profile.vault_verification_data;
+        setVaultExists(hasVaultVerificationData);
 
       } catch (err) {
         console.error('Failed to initialize user crypto:', err);

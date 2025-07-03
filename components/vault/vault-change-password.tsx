@@ -106,12 +106,22 @@ export default function VaultChangePassword({
       const testData = 'VAULT_PASSWORD_VERIFICATION_DATA';
       const { encrypt } = await import('@/lib/crypto/crypto-utils');
       
+      console.log('🔐 Creating new verification data with test string:', testData);
       const encryptionResult = await encrypt(testData, newSessionResult.cryptoKey);
+      console.log('✅ Encryption successful:', {
+        encryptedDataLength: encryptionResult.encryptedData.length,
+        ivLength: encryptionResult.iv.length
+      });
       
       // Combine encrypted data and IV into a single string for storage
       const newVerificationData = JSON.stringify({
         encryptedData: encryptionResult.encryptedData,
         iv: encryptionResult.iv
+      });
+
+      console.log('💾 Storing verification data:', {
+        dataLength: newVerificationData.length,
+        preview: newVerificationData.substring(0, 100) + '...'
       });
 
       // Store the new encrypted verification data in the user's profile
@@ -123,7 +133,7 @@ export default function VaultChangePassword({
         throw new Error('Failed to save new password verification data');
       }
 
-      console.log('Vault password changed successfully with OTP verification!');
+      console.log('✅ Vault password changed successfully with OTP verification!');
       
       // Show success feedback briefly, then smooth transition
       setIsChanging(false);

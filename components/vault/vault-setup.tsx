@@ -19,6 +19,7 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Track mouse movement for parallax effect
   useEffect(() => {
@@ -114,10 +115,9 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
         throw new Error('Failed to initialize vault storage');
       }
 
-      // Mark vault as set up for this user
-      localStorage.setItem(`vault-setup-${user.id}`, 'true');
-
-      console.log('Vault created successfully!');
+      // Show success feedback briefly, then smooth transition
+      setIsCreating(false);
+      setIsSuccess(true);
       
       // Notify parent component that vault is created
       onVaultCreated();
