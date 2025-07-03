@@ -7,7 +7,6 @@ import PasswordFormModal from './password-form-modal';
 import VaultStatsCard from './vault-stats-card';
 import CategoryFilter from './category-filter';
 import PasswordList from './password-list';
-import ThemeToggle from '@/components/ui/theme-toggle';
 import ImportExportModal from './import-export-modal';
 import type { Credential, VaultStats } from '@/types';
 import { PASSWORD_CATEGORIES } from '@/types';
@@ -410,10 +409,17 @@ export default function VaultDashboard({}: VaultDashboardProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading your vault...</p>
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-2xl border-t-2 border-blue-500 animate-spin"></div>
+            <div className="absolute inset-2 rounded-2xl border-t-2 border-blue-400 animate-spin" style={{ animationDuration: '1.5s' }}></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <h3 className="text-xl font-light text-gray-900 mb-2">Loading your vault...</h3>
+          <p className="text-gray-600 font-light">Decrypting your passwords</p>
         </div>
       </div>
     );
@@ -421,19 +427,21 @@ export default function VaultDashboard({}: VaultDashboardProps) {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-300 rounded-md p-6 max-w-2xl mx-auto">
+      <div className="bg-white/60 backdrop-blur-lg border border-red-200/50 rounded-2xl p-8 max-w-2xl mx-auto">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center">
+              <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
           </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800">Error</h3>
-            <p className="mt-1 text-sm text-red-700">{error}</p>
+          <div className="ml-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Vault Error</h3>
+            <p className="text-gray-600 font-light mb-4 leading-relaxed">{error}</p>
             <button
               onClick={loadVaultItems}
-              className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
+              className="px-4 py-2 bg-[#219EBC] text-white rounded-xl font-medium hover:bg-[#1a7a93] focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02]"
             >
               Try again
             </button>
@@ -444,13 +452,13 @@ export default function VaultDashboard({}: VaultDashboardProps) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Vault Statistics */}
       <VaultStatsCard stats={vaultStats} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar with filters */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-6">
           {/* Category Filter */}
           <CategoryFilter
             selectedCategory={selectedCategory}
@@ -459,23 +467,23 @@ export default function VaultDashboard({}: VaultDashboardProps) {
           />
 
           {/* Quick Filters */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Quick Filters</h3>
-            <div className="space-y-2">
+          <div className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-sm border border-white/20 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Filters</h3>
+            <div className="space-y-3">
               <button
                 onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all duration-200 ${
                   showFavoritesOnly
-                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-200 font-medium'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    ? 'bg-[#219EBC] text-white border border-[#219EBC] font-medium'
+                    : 'text-gray-700 hover:bg-white/70 border border-transparent'
                 }`}
               >
                 <div className="flex items-center">
-                  <span className="mr-2">⭐</span>
+                  <span className="mr-3 text-lg">⭐</span>
                   <span>Favorites Only</span>
                 </div>
                 {showFavoritesOnly && (
-                  <span className="bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 px-2 py-1 text-xs rounded-full">
+                  <span className="bg-white/20 text-white px-2 py-1 text-xs rounded-full font-medium">
                     Active
                   </span>
                 )}
@@ -484,21 +492,21 @@ export default function VaultDashboard({}: VaultDashboardProps) {
           </div>
 
           {/* Import/Export */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Backup & Import</h3>
-            <div className="space-y-2">
+          <div className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-sm border border-white/20 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Backup & Import</h3>
+            <div className="space-y-3">
               <button
                 onClick={() => setShowExportModal(true)}
-                className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="w-full flex items-center px-4 py-3 rounded-xl text-sm text-gray-700 hover:bg-[#219EBC] hover:text-white transition-all duration-200 border border-transparent hover:border-[#219EBC]"
               >
-                <span className="mr-2">💾</span>
+                <span className="mr-3 text-lg">💾</span>
                 <span>Export Vault</span>
               </button>
               <button
                 onClick={() => setShowImportModal(true)}
-                className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="w-full flex items-center px-4 py-3 rounded-xl text-sm text-gray-700 hover:bg-[#219EBC] hover:text-white transition-all duration-200 border border-transparent hover:border-[#219EBC]"
               >
-                <span className="mr-2">📥</span>
+                <span className="mr-3 text-lg">📥</span>
                 <span>Import Passwords</span>
               </button>
             </div>
@@ -508,39 +516,36 @@ export default function VaultDashboard({}: VaultDashboardProps) {
         {/* Main Content */}
         <div className="lg:col-span-3">
           {/* Header with search and controls */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+          <div className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-sm border border-white/20 p-6 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Your Vault</h1>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <h1 className="text-3xl font-light text-gray-900">Your <span className="font-medium">Vault</span></h1>
+                <p className="mt-2 text-sm text-gray-600 font-light">
                   {filteredAndSortedItems.length} of {items.length} passwords
                   {selectedCategory !== 'ALL' && ` in ${PASSWORD_CATEGORIES[selectedCategory as keyof typeof PASSWORD_CATEGORIES] || selectedCategory}`}
                   {showFavoritesOnly && ' (favorites)'}
                 </p>
               </div>
               
-              <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-                {/* Theme Toggle */}
-                <ThemeToggle />
-                
+              <div className="mt-6 sm:mt-0 flex items-center space-x-4">
                 {/* View Mode Toggle */}
-                <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <div className="flex items-center bg-white/80 backdrop-blur-lg rounded-xl p-1 border border-white/30">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                    className={`px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
                       viewMode === 'list'
-                        ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-gray-100'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                        ? 'bg-[#219EBC] text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                     }`}
                   >
                     List
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                    className={`px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
                       viewMode === 'grid'
-                        ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-gray-100'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                        ? 'bg-[#219EBC] text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                     }`}
                   >
                     Grid
@@ -550,7 +555,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
                 {/* Add button */}
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#219EBC] hover:bg-[#1a7a93] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#219EBC] transition-all duration-200 transform hover:scale-[1.02]"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -561,10 +566,10 @@ export default function VaultDashboard({}: VaultDashboardProps) {
             </div>
 
             {/* Search and Sort Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
               {/* Search */}
               <div className="flex-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -574,17 +579,17 @@ export default function VaultDashboard({}: VaultDashboardProps) {
                   placeholder="Search passwords, usernames, notes, or tags..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800"
+                  className="block w-full pl-12 pr-4 py-3 border border-gray-200/50 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white/80 backdrop-blur-lg transition-all duration-200"
                   aria-label="Search passwords"
                   aria-describedby="search-help"
                 />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded"
                     aria-label="Clear search"
                   >
-                    <svg className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -595,15 +600,15 @@ export default function VaultDashboard({}: VaultDashboardProps) {
               </div>
 
               {/* Sort Controls */}
-              <div className="flex items-center space-x-2">
-                <label htmlFor="sort-select" className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+              <div className="flex items-center space-x-3">
+                <label htmlFor="sort-select" className="text-sm text-gray-700 whitespace-nowrap font-medium">
                   Sort by:
                 </label>
                 <select
                   id="sort-select"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'name' | 'date' | 'category' | 'strength')}
-                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="px-4 py-2 border border-gray-200/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-lg text-gray-900 transition-all duration-200"
                   aria-label="Sort passwords by"
                 >
                   <option value="name">Name</option>
@@ -614,7 +619,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
                 
                 <button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded"
+                  className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-xl hover:bg-white/50 transition-all duration-200"
                   aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                   title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                 >
@@ -632,26 +637,35 @@ export default function VaultDashboard({}: VaultDashboardProps) {
 
           {/* Content Area */}
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-16">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Loading your vault...</p>
+                <div className="relative w-16 h-16 mx-auto mb-6">
+                  <div className="absolute inset-0 rounded-2xl border-t-2 border-blue-500 animate-spin"></div>
+                  <div className="absolute inset-2 rounded-2xl border-t-2 border-blue-400 animate-spin" style={{ animationDuration: '1.5s' }}></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+                <h3 className="text-xl font-light text-gray-900 mb-2">Loading your vault...</h3>
+                <p className="text-gray-600 font-light">Decrypting your passwords</p>
               </div>
             </div>
           ) : error ? (
-            <div className="bg-red-50 border border-red-300 rounded-md p-6">
+            <div className="bg-white/60 backdrop-blur-lg border border-red-200/50 rounded-2xl p-8">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
+                  <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
                 </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error</h3>
-                  <p className="mt-1 text-sm text-red-700">{error}</p>
+                <div className="ml-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Vault Error</h3>
+                  <p className="text-gray-600 font-light mb-4 leading-relaxed">{error}</p>
                   <button
                     onClick={loadVaultItems}
-                    className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02]"
                   >
                     Try again
                   </button>
@@ -659,26 +673,26 @@ export default function VaultDashboard({}: VaultDashboardProps) {
               </div>
             </div>
           ) : filteredAndSortedItems.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <div className="text-center py-16">
+              <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-2xl font-light text-gray-900 mb-3">
                 {searchTerm || selectedCategory !== 'ALL' || showFavoritesOnly
                   ? 'No passwords found'
                   : 'No passwords yet'}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 font-light mb-8 max-w-md mx-auto leading-relaxed">
                 {searchTerm || selectedCategory !== 'ALL' || showFavoritesOnly
-                  ? 'Try adjusting your search term or filters.'
-                  : 'Get started by adding your first password to the vault.'}
+                  ? 'Try adjusting your search term or filters to find what you\'re looking for.'
+                  : 'Get started by adding your first password to the vault. Your data will be encrypted and stored securely.'}
               </p>
               {!searchTerm && selectedCategory === 'ALL' && !showFavoritesOnly && (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#219EBC] hover:bg-[#1a7a93] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#219EBC] transition-all duration-200 transform hover:scale-[1.02]"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -750,14 +764,27 @@ export default function VaultDashboard({}: VaultDashboardProps) {
 
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed top-4 right-4 px-4 py-2 rounded-md shadow-lg z-50 transition-all duration-300 ${
-          toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        <div className={`fixed top-6 right-6 px-6 py-4 rounded-2xl shadow-lg backdrop-blur-lg border z-50 transition-all duration-300 transform translate-x-0 ${
+          toast.type === 'success' 
+            ? 'bg-green-500/90 text-white border-green-400/50' 
+            : 'bg-red-500/90 text-white border-red-400/50'
         }`}>
           <div className="flex items-center">
-            <span>{toast.message}</span>
+            <div className="mr-3">
+              {toast.type === 'success' ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+            </div>
+            <span className="font-medium">{toast.message}</span>
             <button
               onClick={() => setToast(null)}
-              className="ml-2 text-white hover:text-gray-200"
+              className="ml-4 text-white/80 hover:text-white transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

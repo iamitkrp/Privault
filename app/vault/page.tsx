@@ -21,7 +21,7 @@ import { OTPService } from '@/services/otp.service';
 export default function VaultPage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const { isUnlocked, sessionInfo, isLoading: sessionLoading } = usePassphraseSession();
+  const { isUnlocked, isLoading: sessionLoading } = usePassphraseSession();
   const [isInitializing, setIsInitializing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profileInitialized, setProfileInitialized] = useState(false);
@@ -166,12 +166,28 @@ export default function VaultPage() {
   // Loading state
   if (loading || isInitializing || sessionLoading || vaultExists === null || accessFromDashboard === null) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center overflow-hidden">
+        {/* Modern geometric background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/10 transform rotate-45 rounded-3xl animate-pulse"></div>
+          <div className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-indigo-400/12 to-blue-400/8 transform -rotate-12 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-gradient-to-tr from-blue-300/20 to-transparent transform rotate-45 rounded-lg animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/10 to-blue-500/15 transform -rotate-45 rounded-3xl animate-pulse"></div>
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="relative w-20 h-20 mx-auto mb-8">
+            <div className="absolute inset-0 rounded-2xl border-t-2 border-blue-500 animate-spin"></div>
+            <div className="absolute inset-2 rounded-2xl border-t-2 border-blue-400 animate-spin" style={{ animationDuration: '1.5s' }}></div>
+            <div className="absolute inset-4 rounded-2xl border-t-2 border-blue-300 animate-spin" style={{ animationDuration: '2s' }}></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <h3 className="text-2xl font-light text-gray-900 mb-2">
             {loading ? 'Loading...' : sessionLoading ? 'Checking vault status...' : 'Initializing vault...'}
-          </p>
+          </h3>
+          <p className="text-gray-600 font-light animate-pulse">Preparing your secure vault...</p>
         </div>
       </div>
     );
@@ -185,18 +201,25 @@ export default function VaultPage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center overflow-hidden">
+        {/* Modern geometric background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-red-500/10 to-orange-500/8 transform rotate-45 rounded-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-gradient-to-tr from-red-300/15 to-transparent transform rotate-45 rounded-lg"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-orange-500/8 to-red-500/10 transform -rotate-45 rounded-3xl"></div>
+        </div>
+        
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 max-w-md w-full mx-4 border border-white/20 relative z-10">
+          <div className="flex items-center mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center mr-4">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h1 className="text-lg font-semibold text-gray-900">Vault Error</h1>
+            <h1 className="text-xl font-medium text-gray-900">Vault Error</h1>
           </div>
           
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 mb-6 font-light leading-relaxed">{error}</p>
           
           <div className="flex space-x-3">
             <button
@@ -205,13 +228,13 @@ export default function VaultPage() {
                 setIsInitializing(false);
                 setProfileInitialized(false);
               }}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-3 bg-[#219EBC] text-white rounded-xl font-medium hover:bg-[#1a7a93] focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02]"
             >
               Retry
             </button>
             <button
               onClick={handleSignOut}
-              className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
             >
               Sign Out
             </button>
@@ -222,67 +245,35 @@ export default function VaultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-hidden">
+      {/* Modern geometric background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 to-purple-500/8 transform rotate-45 rounded-3xl"></div>
+        <div className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-indigo-400/8 to-blue-400/6 transform -rotate-12 rounded-full"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 border-l-2 border-b-2 border-blue-200/20 transform rotate-45"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-gradient-to-tr from-blue-300/15 to-transparent transform rotate-45 rounded-lg"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-72 bg-gradient-to-tl from-blue-500/5 via-purple-500/3 to-transparent transform skew-x-12 rounded-tl-[100px]"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/8 to-blue-500/10 transform -rotate-45 rounded-3xl"></div>
+      </div>
+
       {/* Header - only show when not changing password or unlocking vault */}
       {vaultAction !== 'change-password' && vaultExists && isUnlocked && (
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-gray-900">🔒 Privault</h1>
-                {isUnlocked && (
-                  <div className="ml-4 flex items-center text-sm text-gray-600">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    <span>Unlocked • {Math.ceil((sessionInfo.timeRemaining || 0) / 60000)}m remaining</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  {user.email}
-                </span>
-                <button
-                  onClick={handleSignOut}
-                  className="text-sm text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
-                >
-                  Sign out
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
+        <div className="relative z-20 p-6">
+          <Link
+            href={ROUTES.DASHBOARD}
+            className="inline-flex items-center text-sm text-gray-600 hover:text-[#219EBC] transition-colors font-medium"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+          </Link>
+        </div>
       )}
 
       {/* Main Content */}
-      <main className={`${vaultAction === 'change-password' || !vaultExists || (vaultExists && !isUnlocked) ? '' : 'max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'}`}>
+      <main className={`relative z-10 ${vaultAction === 'change-password' || !vaultExists || (vaultExists && !isUnlocked) ? '' : 'max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'}`}>
         <div className={`${vaultAction === 'change-password' || !vaultExists || (vaultExists && !isUnlocked) ? '' : 'px-4 py-6 sm:px-0'}`}>
-          {/* Breadcrumb - only show when not changing password or unlocking vault */}
-          {vaultAction !== 'change-password' && vaultExists && !(vaultExists && !isUnlocked) && (
-            <nav className="flex mb-6" aria-label="Breadcrumb">
-              <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                <li className="inline-flex items-center">
-                  <Link
-                    href={ROUTES.DASHBOARD}
-                    className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                    </svg>
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <div className="flex items-center">
-                    <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
-                    </svg>
-                    <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2">Password Vault</span>
-                  </div>
-                </li>
-              </ol>
-            </nav>
-          )}
-
           {vaultAction === 'change-password' ? (
             // Password change now handles its own OTP verification internally
             <VaultChangePassword 
