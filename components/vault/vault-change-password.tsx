@@ -216,13 +216,13 @@ export default function VaultChangePassword({
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         {/* Large abstract geometric shapes */}
         <div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-orange-500/15 to-amber-500/10 transform rotate-45 rounded-3xl transition-transform duration-300 ease-out"
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-500/15 to-emerald-500/10 transform rotate-45 rounded-3xl transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px) rotate(45deg)`
           }}
         ></div>
         <div 
-          className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-amber-400/12 to-orange-400/8 transform -rotate-12 rounded-full transition-transform duration-300 ease-out"
+          className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-emerald-400/12 to-green-400/8 transform -rotate-12 rounded-full transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px) rotate(-12deg)`
           }}
@@ -230,13 +230,13 @@ export default function VaultChangePassword({
         
         {/* Corner geometric elements */}
         <div 
-          className="absolute top-0 right-0 w-32 h-32 border-l-2 border-b-2 border-orange-200/30 transform rotate-45 transition-transform duration-300 ease-out"
+          className="absolute top-0 right-0 w-32 h-32 border-l-2 border-b-2 border-green-200/30 transform rotate-45 transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px) rotate(45deg)`
           }}
         ></div>
         <div 
-          className="absolute bottom-0 left-0 w-24 h-24 border-r-2 border-t-2 border-amber-200/30 transform -rotate-45 transition-transform duration-300 ease-out"
+          className="absolute bottom-0 left-0 w-24 h-24 border-r-2 border-t-2 border-emerald-200/30 transform -rotate-45 transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * -0.3}px, ${mousePosition.y * -0.3}px) rotate(-45deg)`
           }}
@@ -244,19 +244,19 @@ export default function VaultChangePassword({
         
         {/* Abstract floating shapes */}
         <div 
-          className="absolute top-1/4 right-1/3 w-12 h-12 bg-gradient-to-br from-orange-300/30 to-transparent transform rotate-45 rounded-lg transition-transform duration-300 ease-out"
+          className="absolute top-1/4 right-1/3 w-12 h-12 bg-gradient-to-br from-green-300/30 to-transparent transform rotate-45 rounded-lg transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 1.2}px, ${mousePosition.y * 1.2}px) rotate(45deg)`
           }}
         ></div>
         <div 
-          className="absolute bottom-1/3 left-1/4 w-8 h-8 bg-gradient-to-tr from-amber-300/20 to-transparent transform -rotate-12 rounded-lg transition-transform duration-300 ease-out"
+          className="absolute bottom-1/3 left-1/4 w-8 h-8 bg-gradient-to-tr from-emerald-300/20 to-transparent transform -rotate-12 rounded-lg transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * -0.8}px, ${mousePosition.y * -0.8}px) rotate(-12deg)`
           }}
         ></div>
         <div 
-          className="absolute bottom-8 left-1/6 w-16 h-16 bg-gradient-to-tr from-amber-300/20 to-transparent transform -rotate-12 rounded-lg transition-transform duration-300 ease-out"
+          className="absolute bottom-8 left-1/6 w-16 h-16 bg-gradient-to-tr from-emerald-300/20 to-transparent transform -rotate-12 rounded-lg transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * -1.2}px, ${mousePosition.y * -1.2}px) rotate(-12deg)`
           }}
@@ -283,15 +283,15 @@ export default function VaultChangePassword({
               </button>
             </div>
 
-            <div className="w-20 h-20 bg-gradient-to-r from-orange-600 to-amber-600 rounded-3xl flex items-center justify-center mb-8 shadow-lg">
+            <div className="w-20 h-20 bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl flex items-center justify-center mb-8 shadow-lg">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
               </svg>
             </div>
             
             <h1 className="text-4xl lg:text-5xl font-light text-gray-900 mb-6 leading-tight">
               Change Vault
-              <span className="block font-medium bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">Password</span>
+              <span className="block font-medium bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Password</span>
             </h1>
             
             <p className="text-xl text-gray-600 font-neuemontreal-medium mb-6 leading-relaxed">
@@ -303,16 +303,16 @@ export default function VaultChangePassword({
             </p>
 
             {/* Security info */}
-            <div className="mt-8 p-6 bg-orange-50/80 backdrop-blur-sm rounded-2xl border border-orange-200/50">
+            <div className="mt-8 p-6 bg-green-50/80 backdrop-blur-sm rounded-2xl border border-green-200/50">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-orange-400 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <svg className="h-6 w-6 text-green-400 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-base font-medium text-orange-800 mb-2">Enhanced Security</h3>
-                  <p className="text-sm text-orange-700 leading-relaxed">
+                  <h3 className="text-base font-medium text-green-800 mb-2">Enhanced Security</h3>
+                  <p className="text-sm text-green-700 leading-relaxed">
                     We'll send a verification code to your email before updating your vault password. This ensures only you can make security changes to your vault.
                   </p>
                 </div>
@@ -334,7 +334,7 @@ export default function VaultChangePassword({
                     type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="block w-full px-4 py-4 border-0 rounded-2xl bg-white/60 backdrop-blur-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:bg-white/80 transition-all duration-200 pr-12 shadow-sm"
+                    className="block w-full px-4 py-4 border-0 rounded-2xl bg-white/60 backdrop-blur-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:bg-white/80 transition-all duration-200 pr-12 shadow-sm"
                     placeholder="Enter your new password"
                     disabled={isChanging || isSuccess}
                     autoFocus
@@ -403,7 +403,7 @@ export default function VaultChangePassword({
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full px-4 py-4 border-0 rounded-2xl bg-white/60 backdrop-blur-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:bg-white/80 transition-all duration-200 pr-12 shadow-sm"
+                    className="block w-full px-4 py-4 border-0 rounded-2xl bg-white/60 backdrop-blur-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:bg-white/80 transition-all duration-200 pr-12 shadow-sm"
                     placeholder="Confirm your new password"
                     disabled={isChanging || isSuccess}
                   />
@@ -452,7 +452,7 @@ export default function VaultChangePassword({
                 className={`w-full py-4 px-6 border border-transparent rounded-2xl shadow-sm text-base font-medium text-white transition-all duration-200 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed ${
                   isSuccess 
                     ? 'bg-gradient-to-r from-green-600 to-emerald-600 focus:ring-green-500' 
-                    : 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 focus:ring-orange-500 disabled:opacity-50'
+                    : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:ring-green-500 disabled:opacity-50'
                 }`}
               >
                 {isSuccess ? (
@@ -480,4 +480,4 @@ export default function VaultChangePassword({
       </div>
     </div>
   );
-} 
+}

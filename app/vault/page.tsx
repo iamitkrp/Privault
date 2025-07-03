@@ -224,7 +224,7 @@ export default function VaultPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header - only show when not changing password or unlocking vault */}
-      {vaultAction !== 'change-password' && !(vaultExists && !isUnlocked) && (
+      {vaultAction !== 'change-password' && vaultExists && isUnlocked && (
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
@@ -254,10 +254,10 @@ export default function VaultPage() {
       )}
 
       {/* Main Content */}
-      <main className={`${vaultAction === 'change-password' || (vaultExists && !isUnlocked) ? '' : 'max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'}`}>
-        <div className={`${vaultAction === 'change-password' || (vaultExists && !isUnlocked) ? '' : 'px-4 py-6 sm:px-0'}`}>
+      <main className={`${vaultAction === 'change-password' || !vaultExists || (vaultExists && !isUnlocked) ? '' : 'max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'}`}>
+        <div className={`${vaultAction === 'change-password' || !vaultExists || (vaultExists && !isUnlocked) ? '' : 'px-4 py-6 sm:px-0'}`}>
           {/* Breadcrumb - only show when not changing password or unlocking vault */}
-          {vaultAction !== 'change-password' && !(vaultExists && !isUnlocked) && (
+          {vaultAction !== 'change-password' && vaultExists && !(vaultExists && !isUnlocked) && (
             <nav className="flex mb-6" aria-label="Breadcrumb">
               <ol className="inline-flex items-center space-x-1 md:space-x-3">
                 <li className="inline-flex items-center">
