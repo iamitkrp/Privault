@@ -107,73 +107,73 @@ export default function PasswordFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative w-full max-w-lg bg-white/80 backdrop-blur-md border border-white/50 shadow-2xl rounded-3xl p-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-neuemontreal-medium text-gray-900">{title}</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 focus:outline-none"
+            className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-neuemontreal-medium text-gray-700 mb-2">
               Name <span className="text-red-500">*</span>
             </label>
-                         <input
-               type="text"
-               id="name"
-               value={formData.name}
-               onChange={(e) => handleInputChange('name', e.target.value)}
-               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-               placeholder="e.g., GitHub, Gmail, Facebook"
-               required
-             />
+            <input
+              type="text"
+              id="name"
+              value={formData.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              className="block w-full px-4 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:border-[#219EBC] text-gray-900 bg-white/70 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400"
+              placeholder="e.g., GitHub, Gmail, Facebook"
+              required
+            />
           </div>
 
           {/* Website */}
           <div>
-            <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="website" className="block text-sm font-neuemontreal-medium text-gray-700 mb-2">
               Website
             </label>
-                         <input
-               type="url"
-               id="website"
-               value={formData.website}
-               onChange={(e) => handleInputChange('website', e.target.value)}
-               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-               placeholder="https://example.com"
-             />
+            <input
+              type="url"
+              id="website"
+              value={formData.website}
+              onChange={(e) => handleInputChange('website', e.target.value)}
+              className="block w-full px-4 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:border-[#219EBC] text-gray-900 bg-white/70 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400"
+              placeholder="https://example.com"
+            />
           </div>
 
           {/* Username */}
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="username" className="block text-sm font-neuemontreal-medium text-gray-700 mb-2">
               Username/Email <span className="text-red-500">*</span>
             </label>
-                         <input
-               type="text"
-               id="username"
-               value={formData.username}
-               onChange={(e) => handleInputChange('username', e.target.value)}
-               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-               placeholder="username or email@example.com"
-               required
-             />
+            <input
+              type="text"
+              id="username"
+              value={formData.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
+              className="block w-full px-4 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:border-[#219EBC] text-gray-900 bg-white/70 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400"
+              placeholder="username or email@example.com"
+              required
+            />
           </div>
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-neuemontreal-medium text-gray-700 mb-2">
               Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -182,7 +182,7 @@ export default function PasswordFormModal({
                 id="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                className="block w-full px-3 py-2 pr-20 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                className="block w-full px-4 py-3 pr-24 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:border-[#219EBC] text-gray-900 bg-white/70 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400"
                 placeholder="Enter password"
                 required
               />
@@ -192,11 +192,11 @@ export default function PasswordFormModal({
                   type="button"
                   onClick={generatePassword}
                   disabled={isGeneratingPassword}
-                  className="px-2 py-1 text-xs text-blue-600 hover:text-blue-500 focus:outline-none focus:bg-gray-100 rounded transition-colors disabled:opacity-50 z-20"
+                  className="px-3 py-1 text-xs text-[#219EBC] hover:text-[#1a7a94] focus:outline-none focus:bg-gray-100/50 rounded-xl transition-colors disabled:opacity-50 z-20"
                   title="Generate secure password"
                 >
                   {isGeneratingPassword ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#219EBC]"></div>
                   ) : (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -208,7 +208,7 @@ export default function PasswordFormModal({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="px-2 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:bg-gray-100 rounded transition-colors z-20"
+                  className="px-3 py-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:bg-gray-100/50 rounded-xl transition-colors z-20"
                   title={showPassword ? "Hide password" : "Show password"}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -229,14 +229,14 @@ export default function PasswordFormModal({
 
           {/* Category */}
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="category" className="block text-sm font-neuemontreal-medium text-gray-700 mb-2">
               Category
             </label>
             <select
               id="category"
               value={formData.category}
               onChange={(e) => handleInputChange('category', e.target.value)}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+              className="block w-full px-4 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:border-[#219EBC] text-gray-900 bg-white/70 backdrop-blur-sm transition-all duration-200"
             >
               {Object.entries(PASSWORD_CATEGORIES).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -248,7 +248,7 @@ export default function PasswordFormModal({
 
           {/* Notes */}
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="notes" className="block text-sm font-neuemontreal-medium text-gray-700 mb-2">
               Notes
             </label>
             <textarea
@@ -256,7 +256,7 @@ export default function PasswordFormModal({
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
               rows={3}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+              className="block w-full px-4 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:border-[#219EBC] text-gray-900 bg-white/70 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400 resize-none"
               placeholder="Additional notes or information..."
             />
           </div>
@@ -268,25 +268,25 @@ export default function PasswordFormModal({
               type="checkbox"
               checked={formData.isFavorite}
               onChange={(e) => handleInputChange('isFavorite', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-[#219EBC] focus:ring-[#219EBC] border-gray-300 rounded transition-colors"
             />
-            <label htmlFor="isFavorite" className="ml-2 block text-sm text-gray-700">
+            <label htmlFor="isFavorite" className="ml-3 block text-sm font-neuemontreal-medium text-gray-700">
               Add to favorites
             </label>
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-3 pt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="px-6 py-3 text-sm font-neuemontreal-medium text-gray-700 bg-gray-100/80 backdrop-blur-sm border border-gray-200 rounded-2xl hover:bg-gray-200/80 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-6 py-3 text-sm font-neuemontreal-medium text-white bg-[#219EBC] border border-transparent rounded-2xl hover:bg-[#1a7a94] focus:outline-none focus:ring-2 focus:ring-[#219EBC] focus:ring-offset-2 transition-all duration-200 shadow-lg"
             >
               {initialData ? 'Update' : 'Save'}
             </button>
