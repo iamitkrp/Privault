@@ -62,10 +62,18 @@ export default function VaultUnlock({ user }: VaultUnlockProps) {
         throw new Error('No vault verification data found. Please set up your vault first.');
       }
 
+      console.log('🔍 Raw verification data from database:', {
+        data: verificationData,
+        type: typeof verificationData,
+        length: verificationData.length
+      });
+
       let parsedVerificationData;
       try {
         parsedVerificationData = JSON.parse(verificationData);
-      } catch {
+        console.log('✅ Parsed verification data:', parsedVerificationData);
+      } catch (parseErr) {
+        console.error('❌ JSON parse error:', parseErr);
         throw new Error('Invalid vault verification data format');
       }
 
@@ -73,6 +81,13 @@ export default function VaultUnlock({ user }: VaultUnlockProps) {
       if (!encryptedData || !iv) {
         throw new Error('Missing verification data components');
       }
+
+      console.log('🔍 Verification data components:', {
+        encryptedDataLength: encryptedData.length,
+        ivLength: iv.length,
+        encryptedDataSample: encryptedData.substring(0, 50) + '...',
+        ivSample: iv
+      });
 
       // Try to unlock with the entered password
       const result = await passphraseManager.initializeSession(
@@ -84,11 +99,15 @@ export default function VaultUnlock({ user }: VaultUnlockProps) {
         throw new Error('Failed to initialize session');
       }
 
+      console.log('🔑 Session initialized successfully, attempting decryption...');
+
       // Verify the password by trying to decrypt the verification data
       const { decrypt } = await import('@/lib/crypto/crypto-utils');
       
       try {
-        const decryptedData = await decrypt(encryptedData, result.cryptoKey, iv);
+        console.log('🔓 Attempting to decrypt verification data...');
+        const decryptedData = await decrypt(encryptedData, iv, result.cryptoKey);
+        console.log('✅ Decryption successful:', decryptedData);
         
         if (decryptedData !== 'VAULT_PASSWORD_VERIFICATION_DATA') {
           throw new Error('Invalid master password');
