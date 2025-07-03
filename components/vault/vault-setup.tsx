@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthService } from '@/services/auth.service';
 import { passphraseManager } from '@/lib/crypto/passphrase-manager';
 import { SECURITY_CONFIG } from '@/constants';
 import zxcvbn from 'zxcvbn';
+import { useRouter } from 'next/navigation';
 
 interface VaultSetupProps {
   user: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -20,6 +21,8 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const router = useRouter();
 
   // Track mouse movement for parallax effect
   useEffect(() => {
@@ -131,6 +134,10 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
     }
   };
 
+  const handleBackToDashboard = () => {
+    router.push('/dashboard');
+  };
+
   const getStrengthColor = (score: number) => {
     switch (score) {
       case 0:
@@ -165,7 +172,7 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-hidden flex items-center justify-center">
       {/* Cuberto-style Abstract Geometric Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         {/* Large abstract geometric shapes */}
@@ -218,11 +225,25 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
       </div>
 
       {/* Content Overlay */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Header Section */}
-          <div className="text-center mb-12">
-            <div className="w-20 h-20 bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+      <div className="relative z-10 w-full h-full flex items-center justify-center px-8">
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center transition-all duration-500 ease-in-out">
+
+          {/* Left Side – Header Content (matches change-password page) */}
+          <div className="text-left">
+            {/* Back Button – moved to top to match change-password layout */}
+            <div className="mb-8">
+              <button
+                onClick={handleBackToDashboard}
+                className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-200"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="font-neuemontreal-medium">Back to Dashboard</span>
+              </button>
+            </div>
+
+            <div className="w-20 h-20 bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl flex items-center justify-center mb-8 shadow-lg">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
               </svg>
@@ -231,13 +252,32 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
               Create Your
               <span className="block font-medium bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Vault</span>
             </h1>
-            <p className="text-xl text-gray-600 font-neuemontreal-medium max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 font-neuemontreal-medium mb-6 leading-relaxed">
               Set up your vault master password to get started
-              <span className="block mt-2 text-gray-500 font-light">Your passwords will be encrypted with military-grade security</span>
             </p>
+            <p className="text-gray-500 font-light leading-relaxed">
+              Your passwords will be encrypted with military-grade security
+            </p>
+
+            {/* Security info – reuse existing */}
+            <div className="mt-8 p-6 bg-green-50/80 backdrop-blur-sm rounded-2xl border border-green-200/50">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-green-400 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-base font-medium text-green-800 mb-2">Secure by Design</h3>
+                  <p className="text-sm text-green-700 leading-relaxed">
+                    Your vault master password is never sent to our servers. All encryption happens locally in your browser for maximum security.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Form Card */}
+          {/* Right Side – Form Card (existing form) */}
           <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-white/50 p-8 shadow-lg">
             <form onSubmit={handleCreateVault} className="space-y-6">
               {/* Master Password field */}
@@ -381,26 +421,9 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
                 )}
               </button>
             </form>
-
-            {/* Security info */}
-            <div className="mt-8 p-4 bg-green-50/80 backdrop-blur-sm rounded-2xl border border-green-200/50">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-green-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">Secure by Design</h3>
-                  <div className="mt-2 text-sm text-green-700">
-                    <p>Your vault master password is never sent to our servers. All encryption happens locally in your browser for maximum security.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

@@ -40,6 +40,18 @@ export default function VaultDashboard({}: VaultDashboardProps) {
 
   // Calculate vault statistics
   const vaultStats = useMemo((): VaultStats => {
+    if (items.length === 0) {
+      return {
+        totalPasswords: 0,
+        weakPasswords: 0,
+        reusedPasswords: 0,
+        oldPasswords: 0,
+        averagePasswordStrength: 0,
+        categoryCounts: {},
+        recentlyAdded: 0
+      };
+    }
+
     const totalPasswords = items.length;
     const weakPasswords = items.filter(item => (item.passwordStrength || 0) < 2).length;
     const oldPasswords = items.filter(item => {
@@ -50,12 +62,16 @@ export default function VaultDashboard({}: VaultDashboardProps) {
       return changeDate < ninetyDaysAgo;
     }).length;
 
-    // Count reused passwords
-    const passwordCounts = items.reduce((acc, item) => {
-      acc[item.password] = (acc[item.password] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    const reusedPasswords = Object.values(passwordCounts).filter(count => count > 1).reduce((sum, count) => sum + count, 0);
+    // Count reused passwords (optimized)
+    const passwordCounts = new Map<string, number>();
+    let reusedPasswords = 0;
+    
+    for (const item of items) {
+      const count = passwordCounts.get(item.password) || 0;
+      passwordCounts.set(item.password, count + 1);
+      if (count === 1) reusedPasswords += 2; // First reuse
+      else if (count > 1) reusedPasswords += 1; // Additional reuse
+    }
 
     // Average password strength
     const totalStrength = items.reduce((sum, item) => sum + (item.passwordStrength || 0), 0);
@@ -101,10 +117,10 @@ export default function VaultDashboard({}: VaultDashboardProps) {
         throw new Error(result.error || 'Failed to load vault');
       }
 
-      // Enhance items with password strength if not already calculated
-      const enhancedItems = (result.credentials || []).map(item => ({
+      // Set items without password strength calculations initially for faster loading
+      const basicItems = (result.credentials || []).map(item => ({
         ...item,
-        passwordStrength: item.passwordStrength ?? calculatePasswordStrength(item.password).score,
+        passwordStrength: item.passwordStrength ?? null, // Don't calculate yet
         lastPasswordChange: item.lastPasswordChange ?? item.updated_at,
         accessCount: item.accessCount ?? 0,
         isFavorite: item.isFavorite ?? false,
@@ -112,11 +128,39 @@ export default function VaultDashboard({}: VaultDashboardProps) {
         category: item.category ?? 'OTHER'
       }));
 
-      setItems(enhancedItems);
+      setItems(basicItems);
+      setIsLoading(false);
+
+      // Calculate password strengths asynchronously in batches to avoid blocking
+      setTimeout(async () => {
+        const batchSize = 10;
+        const enhancedItems = [...basicItems];
+        
+        for (let i = 0; i < basicItems.length; i += batchSize) {
+          const batch = basicItems.slice(i, i + batchSize);
+          
+          batch.forEach((item, index) => {
+            if (item.passwordStrength === null) {
+              enhancedItems[i + index] = {
+                ...item,
+                passwordStrength: calculatePasswordStrength(item.password).score
+              };
+            }
+          });
+          
+          // Update state with this batch and yield control
+          setItems([...enhancedItems]);
+          
+          // Small delay to keep UI responsive
+          if (i + batchSize < basicItems.length) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+        }
+      }, 100);
+
     } catch (err) {
       console.error('Failed to load vault items:', err);
       setError(err instanceof Error ? err.message : 'Failed to load your passwords');
-    } finally {
       setIsLoading(false);
     }
   }, [user]);
