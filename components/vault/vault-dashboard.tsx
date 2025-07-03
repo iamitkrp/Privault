@@ -21,6 +21,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
   const { user } = useAuth();
   const [items, setItems] = useState<Credential[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDecrypting, setIsDecrypting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -107,6 +108,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
       }
 
       setIsLoading(true);
+      setIsDecrypting(true);
       setError(null);
 
       // Load encrypted vault from backend
@@ -119,7 +121,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
       // Set items without password strength calculations initially for faster loading
       const basicItems = (result.credentials || []).map(item => ({
         ...item,
-        passwordStrength: item.passwordStrength ?? null, // Don't calculate yet
+        passwordStrength: item.passwordStrength ?? undefined, // Don't calculate yet
         lastPasswordChange: item.lastPasswordChange ?? item.updated_at,
         accessCount: item.accessCount ?? 0,
         isFavorite: item.isFavorite ?? false,
@@ -128,6 +130,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
       }));
 
       setItems(basicItems);
+      setIsDecrypting(false);
       setIsLoading(false);
 
       // Calculate password strengths asynchronously in batches to avoid blocking
@@ -139,7 +142,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
           const batch = basicItems.slice(i, i + batchSize);
           
           batch.forEach((item, index) => {
-            if (item.passwordStrength === null) {
+            if (item.passwordStrength === undefined) {
               enhancedItems[i + index] = {
                 ...item,
                 passwordStrength: calculatePasswordStrength(item.password).score
@@ -161,6 +164,7 @@ export default function VaultDashboard({}: VaultDashboardProps) {
       console.error('Failed to load vault items:', err);
       setError(err instanceof Error ? err.message : 'Failed to load your passwords');
       setIsLoading(false);
+      setIsDecrypting(false);
     }
   }, [user]);
 
@@ -407,19 +411,53 @@ export default function VaultDashboard({}: VaultDashboardProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isDecrypting) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-2xl border-t-2 border-blue-500 animate-spin"></div>
-            <div className="absolute inset-2 rounded-2xl border-t-2 border-blue-400 animate-spin" style={{ animationDuration: '1.5s' }}></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center overflow-hidden">
+        {/* Modern geometric background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/10 transform rotate-45 rounded-3xl animate-pulse"></div>
+          <div className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-indigo-400/12 to-blue-400/8 transform -rotate-12 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-gradient-to-tr from-blue-300/20 to-transparent transform rotate-45 rounded-lg animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/10 to-blue-500/15 transform -rotate-45 rounded-3xl animate-pulse"></div>
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="relative w-24 h-24 mx-auto mb-8">
+            <div className="absolute inset-0 rounded-3xl border-t-3 border-[#219EBC] animate-spin"></div>
+            <div className="absolute inset-3 rounded-3xl border-t-3 border-[#219EBC]/60 animate-spin" style={{ animationDuration: '1.5s' }}></div>
+            <div className="absolute inset-6 rounded-3xl border-t-3 border-[#219EBC]/40 animate-spin" style={{ animationDuration: '2s' }}></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-4 h-4 bg-[#219EBC] rounded-full animate-pulse"></div>
             </div>
           </div>
-          <h3 className="text-xl font-light text-gray-900 mb-2">Loading your vault...</h3>
-          <p className="text-gray-600 font-light">Decrypting your passwords</p>
+          
+          <h3 className="text-3xl font-neuemontreal-medium text-gray-900 mb-3">
+            {isDecrypting ? 'Decrypting Vault' : 'Loading Vault'}
+          </h3>
+          <p className="text-lg text-gray-600 font-neuemontreal-regular mb-4">
+            {isDecrypting 
+              ? 'Decrypting your passwords with zero-knowledge encryption...' 
+              : 'Preparing your secure vault...'}
+          </p>
+          
+          {/* Progress indicators */}
+          <div className="max-w-xs mx-auto">
+            <div className="flex justify-between text-sm text-gray-500 mb-2 font-neuemontreal-regular">
+              <span>Processing</span>
+              <span>Please wait</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div 
+                className="bg-gradient-to-r from-[#219EBC] to-[#219EBC]/80 h-1.5 rounded-full animate-pulse" 
+                style={{ width: '75%' }}
+              ></div>
+            </div>
+          </div>
+          
+          <div className="mt-8 text-sm text-gray-500 font-neuemontreal-regular">
+            <p>⚡ Advanced encryption processing may take 5-6 seconds</p>
+          </div>
         </div>
       </div>
     );
