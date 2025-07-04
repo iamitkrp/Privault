@@ -20,7 +20,6 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const router = useRouter();
 
@@ -120,7 +119,6 @@ export default function VaultSetup({ user, onVaultCreated }: VaultSetupProps) {
 
       // Show success feedback briefly, then smooth transition
       setIsCreating(false);
-      setIsSuccess(true);
       
       // Notify parent component that vault is created
       onVaultCreated();

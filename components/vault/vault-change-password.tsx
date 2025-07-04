@@ -313,7 +313,7 @@ export default function VaultChangePassword({
                 <div className="ml-4">
                   <h3 className="text-base font-medium text-green-800 mb-2">Enhanced Security</h3>
                   <p className="text-sm text-green-700 leading-relaxed">
-                    We'll send a verification code to your email before updating your vault password. This ensures only you can make security changes to your vault.
+                    We&apos;ll send a verification code to your email before updating your vault password. This ensures only you can make security changes to your vault.
                   </p>
                 </div>
               </div>
