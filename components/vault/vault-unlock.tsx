@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { passphraseManager } from '@/lib/crypto/passphrase-manager';
 import { AuthService } from '@/services/auth.service';
-import { ERROR_MESSAGES } from '@/constants';
-import { SecurityEvent } from '@/types';
 import { useRouter } from 'next/navigation';
 
 interface VaultUnlockProps {
