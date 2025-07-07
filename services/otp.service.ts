@@ -4,7 +4,7 @@ export interface OTPVerification {
   id: string;
   user_id: string;
   otp_code: string;
-  purpose: 'vault_access' | 'vault_password_change';
+  purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete';
   expires_at: string;
   is_used: boolean;
   created_at: string;
@@ -23,12 +23,12 @@ export class OTPService {
   }
 
   /**
-   * Send OTP via email using API route
+   * Send OTP email using the API route
    */
   private static async sendEmail(
     email: string,
     otpCode: string,
-    purpose: 'vault_access' | 'vault_password_change',
+    purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete',
     expiresAt: Date
   ): Promise<{ success: boolean; error?: string }> {
     try {
@@ -67,13 +67,34 @@ export class OTPService {
   static async sendVaultOTP(
     userId: string, 
     email: string, 
-    purpose: 'vault_access' | 'vault_password_change',
+    purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete',
     isResend: boolean = false
   ): Promise<{ success: boolean; error?: string; message?: string; fallback?: boolean }> {
     try {
       if (!supabase) {
         throw new Error('Supabase client not initialized');
       }
+
+      // In-memory deduplication per user & purpose for this browser/tab session
+      // Key format: `${userId}-${purpose}`
+      if (!('browserOtpDedupMap' in globalThis)) {
+        // @ts-ignore assign to global object
+        globalThis.browserOtpDedupMap = new Map<string, number>();
+      }
+      // @ts-ignore
+      const dedupMap: Map<string, number> = globalThis.browserOtpDedupMap;
+      const dedupKey = `${userId}-${purpose}`;
+      const nowMs = Date.now();
+      const lastSentAt = dedupMap.get(dedupKey) || 0;
+      if (nowMs - lastSentAt < 10000) { // 10-second window
+        console.log('🛑 Local duplicate OTP request suppressed (', (nowMs - lastSentAt)/1000, 's).');
+        return {
+          success: true,
+          message: 'OTP already sent to your email address'
+        };
+      }
+      // Record the timestamp immediately to block other parallel calls in this tab
+      dedupMap.set(dedupKey, nowMs);
 
       // Smart duplicate prevention: Only check for rapid resends, not initial loads
       if (isResend) {
@@ -94,6 +115,27 @@ export class OTPService {
           return { 
             success: false, 
             error: `Please wait ${waitTime} seconds before requesting another OTP code` 
+          };
+        }
+      }
+
+      // Early duplicate suppression: if an OTP was generated in the last 10 seconds, do not generate a new one.
+      const { data: recentAnyOTP, error: recentAnyError } = await supabase
+        .from('vault_otp_verifications')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('purpose', purpose)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!recentAnyError && recentAnyOTP) {
+        const secondsSinceLastOTP = (Date.now() - new Date(recentAnyOTP.created_at).getTime()) / 1000;
+        if (secondsSinceLastOTP < 10) {
+          console.log('⏱️ Duplicate OTP request suppressed – last OTP generated', secondsSinceLastOTP.toFixed(1), 'seconds ago.');
+          return {
+            success: true,
+            message: 'OTP already sent to your email address'
           };
         }
       }
@@ -145,7 +187,7 @@ export class OTPService {
 🔐 PRIVAULT SECURITY OTP (EMAIL FAILED - CONSOLE FALLBACK)
 ════════════════════════════════════════════════════════
 To: ${email}
-Purpose: ${purpose === 'vault_access' ? 'Vault Access' : 'Vault Password Change'}
+Purpose: ${purpose === 'vault_access' ? 'Vault Access' : purpose === 'vault_password_change' ? 'Vault Password Change' : purpose === 'email_update' ? 'Email Update' : 'Profile Delete'}
 Code: ${otpCode}
 Expires: ${expiresAt.toLocaleString()}
 Email Error: ${emailResult.error}
@@ -183,7 +225,7 @@ Email Error: ${emailResult.error}
   static async verifyOTP(
     userId: string,
     otpCode: string,
-    purpose: 'vault_access' | 'vault_password_change'
+    purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete'
   ): Promise<{ success: boolean; error?: string }> {
     try {
       if (!supabase) {

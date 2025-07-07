@@ -255,8 +255,8 @@ export default function DashboardPage() {
     );
   }
 
-      return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
         {/* Fixed Background with Parallax */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           {/* Large abstract geometric shapes */}
@@ -328,7 +328,7 @@ export default function DashboardPage() {
               transform: `translate(${mousePosition.x * -1.2}px, ${mousePosition.y * -1.2}px) rotate(-12deg)`
             }}
           ></div>
-                </div>
+        </div>
         
         {/* Scrollable Content Overlay */}
         <div className="relative z-10 min-h-screen flex flex-col p-8 lg:p-16 bg-transparent">
@@ -501,7 +501,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between mb-8">
                   <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl flex items-center justify-center shadow-lg">
                     <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
                   </div>
                   <span className="inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
@@ -541,10 +541,13 @@ export default function DashboardPage() {
                </div>
                
                <div className="space-y-4">
-                 <button className="w-full px-6 py-4 text-left bg-blue-50 hover:bg-blue-100 rounded-2xl border border-blue-200 transition-colors group">
-                   <h4 className="text-lg font-medium text-gray-900 mb-1 group-hover:text-blue-600">Update Email</h4>
-                   <p className="text-gray-600">Change your account email address</p>
-                 </button>
+                 <Link
+                   href="/manage-email"
+                   className="block w-full px-6 py-4 text-left bg-blue-50 hover:bg-blue-100 rounded-2xl border border-blue-200 transition-colors group"
+                 >
+                   <h4 className="text-lg font-medium text-gray-900 mb-1 group-hover:text-blue-600">Manage Email</h4>
+                   <p className="text-gray-600">Change your account email address or delete profile</p>
+                 </Link>
                  
                  <Link
                    href={ROUTES.VAULT}
@@ -568,7 +571,7 @@ export default function DashboardPage() {
              <p className="text-gray-500 font-light">© 2024 {APP_NAME}. Your digital security companion.</p>
            </div>
          </div>
-      </div>
+        </div>
     </div>
   );
 } 
