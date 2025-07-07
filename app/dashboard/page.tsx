@@ -1,5 +1,8 @@
 'use client';
 
+// Disable prerendering / pre-export because this page relies on client-only libraries (e.g., Supabase)
+export const dynamic = 'force-dynamic';
+
 import { useAuth } from '@/lib/auth/auth-context';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';

@@ -1,5 +1,4 @@
 'use client';
-// @ts-nocheck
 import { useEffect,useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -8,7 +7,7 @@ export default function AccountDeletedView(){
   const[countdown,setCountdown]=useState(6);
   useEffect(()=>{const i=setInterval(()=>setCountdown(c=>c-1),1000);const t=setTimeout(()=>router.push('/'),6000);return()=>{clearInterval(i);clearTimeout(t);};},[router]);
   const[mouse,setMouse]=useState({x:0,y:0});
-  useEffect(()=>{const h=(e)=>setMouse({x:(e.clientX-window.innerWidth/2)/60,y:(e.clientY-window.innerHeight/2)/60});window.addEventListener('mousemove',h);return()=>window.removeEventListener('mousemove',h);},[]);
+  useEffect(()=>{const h=(e:MouseEvent)=>setMouse({x:(e.clientX-window.innerWidth/2)/60,y:(e.clientY-window.innerHeight/2)/60});window.addEventListener('mousemove',h);return()=>window.removeEventListener('mousemove',h);},[]);
   return(<div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 overflow-hidden relative">
   <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
     <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-orange-500/15 to-yellow-400/10 rounded-3xl rotate-45 transition-transform duration-300 ease-out" style={{transform:`translate(${mouse.x*0.5}px,${mouse.y*0.5}px) rotate(45deg)`}}/>
