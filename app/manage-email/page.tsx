@@ -12,6 +12,11 @@ export default function ManageEmailPage() {
   // Fetch the current user session on mount
   useEffect(() => {
     const fetchSession = async () => {
+      if (!supabase) {
+        router.replace('/login');
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
