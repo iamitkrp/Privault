@@ -111,7 +111,7 @@ export interface Database {
           id: string;
           user_id: string;
           otp_code: string;
-          purpose: 'vault_access' | 'vault_password_change';
+          purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete';
           expires_at: string;
           is_used: boolean;
           created_at: string;
@@ -120,7 +120,7 @@ export interface Database {
           id?: string;
           user_id: string;
           otp_code: string;
-          purpose: 'vault_access' | 'vault_password_change';
+          purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete';
           expires_at: string;
           is_used?: boolean;
           created_at?: string;
@@ -129,7 +129,7 @@ export interface Database {
           id?: string;
           user_id?: string;
           otp_code?: string;
-          purpose?: 'vault_access' | 'vault_password_change';
+          purpose?: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete';
           expires_at?: string;
           is_used?: boolean;
           created_at?: string;

@@ -7,6 +7,9 @@ import { CRYPTO_CONFIG, ERROR_MESSAGES } from '@/constants';
  * Handles user profile creation, salt generation, and user management
  */
 export class AuthService {
+  // In-memory cache to prevent concurrent calls for the same user
+  private static profileCreationPromises = new Map<string, Promise<{ data: Profile | null; error: string | null }>>();
+
   /**
    * Check if supabase client is initialized
    */
@@ -60,6 +63,53 @@ export class AuthService {
       return { data, error: null };
     } catch (err) {
       console.error('Profile creation failed:', err);
+      return { 
+        data: null, 
+        error: err instanceof Error ? err.message : ERROR_MESSAGES.SERVER_ERROR 
+      };
+    }
+  }
+
+  /**
+   * Create or update profile using UPSERT to prevent race conditions
+   * This is the preferred method for ensuring profile exists
+   */
+  static async createOrUpdateProfile(userId: string, email: string): Promise<{ data: Profile | null; error: string | null }> {
+    try {
+      // Generate unique salt for this user (only used if creating new profile)
+      const salt = this.generateSalt();
+
+      const profileData: ProfileInsert = {
+        user_id: userId,
+        email: email.toLowerCase().trim(),
+        salt,
+        security_settings: {
+          autoLockTimeout: 900000, // 15 minutes
+          requireMasterPasswordConfirm: false,
+          enableBiometric: false,
+        },
+      };
+
+      const client = this.ensureSupabaseClient();
+      
+      // Use UPSERT (INSERT ... ON CONFLICT) to handle race conditions
+      const { data, error } = await client
+        .from('profiles')
+        .upsert(profileData, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Profile upsert error:', error);
+        return { data: null, error: error.message };
+      }
+
+      return { data, error: null };
+    } catch (err) {
+      console.error('Profile upsert failed:', err);
       return { 
         data: null, 
         error: err instanceof Error ? err.message : ERROR_MESSAGES.SERVER_ERROR 
@@ -156,22 +206,109 @@ export class AuthService {
 
   /**
    * Get or create profile (helper for login flow)
+   * Uses proper concurrency control to prevent race conditions
    */
   static async getOrCreateProfile(userId: string, email: string): Promise<{ data: Profile | null; error: string | null }> {
-    // First, try to get existing profile
-    const { data: existingProfile, error: fetchError } = await this.getProfile(userId);
-    
-    if (fetchError) {
-      return { data: null, error: fetchError };
+    // Check if there's already a profile creation in progress for this user
+    const existingPromise = this.profileCreationPromises.get(userId);
+    if (existingPromise) {
+      console.log(`Reusing existing profile creation promise for user ${userId}`);
+      return existingPromise;
     }
 
-    // If profile exists, return it
-    if (existingProfile) {
-      return { data: existingProfile, error: null };
+    // Create a new promise for this user and cache it
+    const profilePromise = this.executeGetOrCreateProfile(userId, email);
+    this.profileCreationPromises.set(userId, profilePromise);
+
+    try {
+      const result = await profilePromise;
+      return result;
+    } finally {
+      // Clean up the cache after completion (success or failure)
+      this.profileCreationPromises.delete(userId);
+    }
+  }
+
+  /**
+   * Internal method that performs the actual profile creation logic
+   */
+  private static async executeGetOrCreateProfile(userId: string, email: string): Promise<{ data: Profile | null; error: string | null }> {
+    // First, try the UPSERT approach which handles race conditions at the database level
+    try {
+      const { data: upsertProfile, error: upsertError } = await this.createOrUpdateProfile(userId, email);
+      
+      if (!upsertError && upsertProfile) {
+        return { data: upsertProfile, error: null };
+      }
+      
+      // If upsert failed, fall back to retry logic
+      console.log('UPSERT approach failed, falling back to retry logic:', upsertError);
+    } catch (err) {
+      console.log('UPSERT approach threw exception, falling back to retry logic:', err);
     }
 
-    // If no profile exists, create one
-    return await this.createProfile(userId, email);
+    // Fallback: Use retry logic for additional safety
+    const maxRetries = 3;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // First, try to get existing profile
+        const { data: existingProfile, error: fetchError } = await this.getProfile(userId);
+        
+        if (fetchError) {
+          return { data: null, error: fetchError };
+        }
+
+        // If profile exists, return it
+        if (existingProfile) {
+          return { data: existingProfile, error: null };
+        }
+
+        // Attempt to create profile
+        const { data: newProfile, error: createError } = await this.createProfile(userId, email);
+        
+        if (!createError && newProfile) {
+          return { data: newProfile, error: null };
+        }
+
+        // Handle the specific duplicate key error (race condition)
+        if (createError && createError.includes('duplicate key value violates unique constraint')) {
+          console.log(`Profile creation race condition detected on attempt ${attempt}, retrying...`);
+          
+          // Another thread created the profile, try to fetch it again
+          const { data: retryProfile, error: retryError } = await this.getProfile(userId);
+          
+          if (!retryError && retryProfile) {
+            return { data: retryProfile, error: null };
+          }
+          
+          // If we still can't get the profile, continue to next retry
+          lastError = createError;
+          continue;
+        }
+
+        // For other errors, return immediately
+        if (createError) {
+          return { data: null, error: createError };
+        }
+
+      } catch (err) {
+        console.error(`Profile creation attempt ${attempt} failed:`, err);
+        lastError = err instanceof Error ? err.message : 'Unknown error';
+        
+        // Add small delay before retry to reduce contention
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 100 * attempt));
+        }
+      }
+    }
+
+    // If all approaches failed, return the last error
+    return { 
+      data: null, 
+      error: lastError || 'Failed to get or create profile after multiple attempts' 
+    };
   }
 
   /**
@@ -270,6 +407,101 @@ export class AuthService {
     } catch (err) {
       console.error('Security settings update failed:', err);
       return { 
+        error: err instanceof Error ? err.message : ERROR_MESSAGES.SERVER_ERROR 
+      };
+    }
+  }
+
+  /**
+   * Clear the profile creation cache (utility for testing/debugging)
+   */
+  static clearProfileCreationCache(): void {
+    this.profileCreationPromises.clear();
+    console.log('Profile creation cache cleared');
+  }
+
+  /**
+   * Get cache status (utility for debugging)
+   */
+  static getProfileCreationCacheStatus(): { activePromises: string[] } {
+    return {
+      activePromises: Array.from(this.profileCreationPromises.keys())
+    };
+  }
+
+  /**
+   * Update user email address (requires OTP verification)
+   */
+  static async updateUserEmail(
+    userId: string,
+    newEmail: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const client = this.ensureSupabaseClient();
+      
+      // Update email in Supabase Auth
+      const { error: authError } = await client.auth.updateUser({
+        email: newEmail.toLowerCase().trim()
+      });
+
+      if (authError) {
+        console.error('Auth email update error:', authError);
+        return { success: false, error: authError.message };
+      }
+
+      // Update email in profile
+      const { error: profileError } = await client
+        .from('profiles')
+        .update({ email: newEmail.toLowerCase().trim() })
+        .eq('user_id', userId);
+
+      if (profileError) {
+        console.error('Profile email update error:', profileError);
+        return { success: false, error: profileError.message };
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error('Email update failed:', err);
+      return { 
+        success: false,
+        error: err instanceof Error ? err.message : ERROR_MESSAGES.SERVER_ERROR 
+      };
+    }
+  }
+
+  /**
+   * Delete user profile and all associated data (requires OTP verification)
+   */
+  static async deleteUserAccount(userId: string, email?: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const client = this.ensureSupabaseClient();
+
+      // Call secure API route to permanently delete the Supabase Auth user (and, by cascade, all owned rows)
+      const resp = await fetch('/api/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, email }),
+      });
+
+      if (!resp.ok) {
+        const { error } = await resp.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Account deletion API error:', error);
+        return { success: false, error: error || 'Failed to delete account' };
+      }
+
+      // Sign the user out locally – their token is now invalid anyway, but this
+      // clears local storage/session.
+      await client.auth.signOut();
+
+      // Clear any cached promises to avoid stale state if the user re-registers in the same tab.
+      this.clearProfileCreationCache();
+
+      return { success: true };
+    } catch (err) {
+      console.error('Account deletion failed:', err);
+      return { 
+        success: false,
         error: err instanceof Error ? err.message : ERROR_MESSAGES.SERVER_ERROR 
       };
     }

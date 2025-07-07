@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS vault_otp_verifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     otp_code TEXT NOT NULL, -- 6-digit OTP code
-    purpose TEXT NOT NULL CHECK (purpose IN ('vault_access', 'vault_password_change')),
+    purpose TEXT NOT NULL CHECK (purpose IN ('vault_access', 'vault_password_change', 'email_update', 'profile_delete')),
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     is_used BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
