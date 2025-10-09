@@ -194,7 +194,6 @@ BEGIN
         RAISE NOTICE 'Set dry_run = false to execute actual migration';
     END IF;
 END $$;
-
 -- ==========================================
 -- POST-MIGRATION VERIFICATION
 -- ==========================================
@@ -204,6 +203,7 @@ DECLARE
     v1_user_count INTEGER;
     v2_user_count INTEGER;
     orphaned_users INTEGER;
+    rec RECORD;  -- Add this declaration
 BEGIN
     RAISE NOTICE '========================================';
     RAISE NOTICE 'Post-Migration Verification';
