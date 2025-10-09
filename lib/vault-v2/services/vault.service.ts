@@ -257,18 +257,27 @@ export class VaultService {
 
       const expirationStatus = this.expirationService.calculateExpirationStatus(expiresAt);
 
-      // 9. Update credential
-      const updated = await this.repository.update(this.userId, credentialId, {
+      // 9. Construct partial update object with only defined fields
+      const updatePayload: Partial<VaultCredential> = {
         encrypted_data: encrypted,
         iv,
-        category: data.category,
-        tags: data.tags,
-        is_favorite: data.is_favorite,
-        expires_at: expiresAt,
-        expiration_status: expirationStatus,
-        last_password_change: passwordChanged ? new Date() : current.last_password_change,
         version: current.version + 1,
-      });
+      };
+
+      // Only include fields that are explicitly provided
+      if (data.category !== undefined) updatePayload.category = data.category;
+      if (data.tags !== undefined) updatePayload.tags = data.tags;
+      if (data.is_favorite !== undefined) updatePayload.is_favorite = data.is_favorite;
+      if (data.expiration_config !== undefined) {
+        updatePayload.expires_at = expiresAt;
+        updatePayload.expiration_status = expirationStatus;
+      }
+      if (passwordChanged) {
+        updatePayload.last_password_change = new Date();
+      }
+
+      // 10. Update credential
+      const updated = await this.repository.update(this.userId, credentialId, updatePayload);
 
       return success(updated);
     } catch (error) {
@@ -311,14 +320,36 @@ export class VaultService {
   }
 
   /**
-   * Searches credentials (requires decryption)
+   * Searches credentials using client-side fuzzy search
+   * 
+   * NOTE: For production, this should use Fuse.js with an in-memory index
+   * that's built from decrypted credentials after vault unlock. The index
+   * should be refreshed after any CRUD operation.
+   * 
+   * Current implementation: Simple substring match (not scalable for large vaults)
+   * Recommended: Fuse.js with weighted keys and threshold configuration
    */
   async searchCredentials(query: string): Promise<Result<DecryptedCredential[]>> {
     try {
-      // 1. Get all credentials
-      const credentials = await this.repository.findByUser(this.userId);
+      // TODO: Implement Fuse.js-based search index
+      // 1. On vault unlock, decrypt all credentials and build Fuse index
+      // 2. On search, use fuse.search(query) for fast fuzzy matching
+      // 3. Refresh index after create/update/delete operations
+      // 
+      // Example Fuse.js config:
+      // const fuse = new Fuse(decryptedCredentials, {
+      //   keys: [
+      //     { name: 'decrypted_data.site', weight: 0.5 },
+      //     { name: 'decrypted_data.username', weight: 0.3 },
+      //     { name: 'decrypted_data.url', weight: 0.1 },
+      //     { name: 'decrypted_data.notes', weight: 0.1 },
+      //   ],
+      //   threshold: 0.3,
+      //   includeScore: true,
+      // });
 
-      // 2. Decrypt and search
+      // Current simple implementation (for initial development)
+      const credentials = await this.repository.findByUser(this.userId);
       const results: DecryptedCredential[] = [];
       const searchLower = query.toLowerCase();
 
@@ -326,7 +357,7 @@ export class VaultService {
         try {
           const decryptedData = await this.decryptCredentialData(credential);
           
-          // Search in site, username, and notes
+          // Simple substring search
           const matchesSite = decryptedData.site.toLowerCase().includes(searchLower);
           const matchesUsername = decryptedData.username.toLowerCase().includes(searchLower);
           const matchesNotes = decryptedData.notes?.toLowerCase().includes(searchLower) || false;
@@ -375,6 +406,7 @@ export class VaultService {
       let weakCount = 0;
       let reusedCount = 0;
       let totalStrength = 0;
+      let analyzedCount = 0; // Track successfully decrypted credentials
       const categoryCount: Record<CredentialCategory, number> = {
         [CredentialCategory.SOCIAL]: 0,
         [CredentialCategory.WORK]: 0,
@@ -407,6 +439,7 @@ export class VaultService {
           const strength = this.passwordStrengthService.analyze(decryptedData.password);
           
           totalStrength += strength.score;
+          analyzedCount++; // Increment only on successful decryption
           
           if (strength.score < 3) {
             weakCount++;
@@ -422,6 +455,7 @@ export class VaultService {
           }
         } catch (err) {
           console.error(`Failed to analyze credential ${credential.id}:`, err);
+          // Don't increment analyzedCount for failed decryptions
         }
       }
 
@@ -430,11 +464,13 @@ export class VaultService {
       const expiredCount = credentials.filter(c => c.expiration_status === ExpirationStatus.EXPIRED).length;
       const favoriteCount = credentials.filter(c => c.is_favorite).length;
       const totalAccessCount = credentials.reduce((sum, c) => sum + c.access_count, 0);
-      const avgStrength = credentials.length > 0 ? totalStrength / credentials.length : 0;
+      
+      // Calculate average strength only from successfully analyzed credentials
+      const avgStrength = analyzedCount > 0 ? totalStrength / analyzedCount : 0;
 
-      // Calculate health score (0-100)
+      // Calculate health score (0-100) using analyzed count
       const healthScore = this.calculateHealthScore({
-        total: credentials.length,
+        total: analyzedCount, // Use analyzed count instead of total for accurate metrics
         weak: weakCount,
         reused: reusedCount,
         expired: expiredCount,

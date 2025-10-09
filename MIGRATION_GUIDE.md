@@ -267,64 +267,29 @@ psql privault_db < database/vault-schema-v2.sql
 
 **Migration Script:** `database/migrate-v1-to-v2.sql`
 
-```sql
--- Migration from vaults (blob) to vault_credentials (per-item)
-DO $$
-DECLARE
-    vault_record RECORD;
-    credential_record JSONB;
-    new_credential_id UUID;
-BEGIN
-    -- Loop through all vaults
-    FOR vault_record IN 
-        SELECT id, user_id, encrypted_data, created_at, updated_at 
-        FROM vaults
-    LOOP
-        -- Parse encrypted blob (would be decrypted and re-encrypted in practice)
-        -- This is a simplified example
-        FOR credential_record IN 
-            SELECT * FROM jsonb_array_elements(vault_record.encrypted_data::jsonb)
-        LOOP
-            new_credential_id := uuid_generate_v4();
-            
-            -- Insert into new vault_credentials table
-            INSERT INTO vault_credentials (
-                user_id,
-                credential_id,
-                encrypted_data,
-                iv,
-                category,
-                tags,
-                is_favorite,
-                expires_at,
-                expiration_status,
-                last_password_change,
-                access_count,
-                version,
-                created_at,
-                updated_at
-            ) VALUES (
-                vault_record.user_id,
-                new_credential_id,
-                credential_record->>'encrypted_data',
-                credential_record->>'iv',
-                COALESCE(credential_record->>'category', 'other'),
-                COALESCE((credential_record->>'tags')::text[], '{}'),
-                COALESCE((credential_record->>'isFavorite')::boolean, false),
-                NULL,  -- No expiration in V1
-                'active',
-                vault_record.created_at,
-                COALESCE((credential_record->>'accessCount')::integer, 0),
-                1,
-                vault_record.created_at,
-                vault_record.updated_at
-            );
-        END LOOP;
-        
-        RAISE NOTICE 'Migrated vault for user: %', vault_record.user_id;
-    END LOOP;
-END $$;
+Run the migration script in Supabase SQL Editor:
+
+```bash
+# From Supabase Dashboard:
+# 1. Go to SQL Editor
+# 2. Create a new query
+# 3. Copy contents from database/migrate-v1-to-v2.sql
+# 4. Run the query
+# 5. Review the migration log output
+
+# Or via CLI:
+psql -h db.YOUR_PROJECT.supabase.co -p 5432 -d postgres -U postgres -f database/migrate-v1-to-v2.sql
 ```
+
+The migration script:
+- Safely migrates encrypted vaults from single-blob to per-item storage
+- Preserves encrypted data as-is (client-side re-encryption on first access)
+- Creates migration logs for tracking
+- Includes dry-run mode for testing
+- Provides verification queries
+- Handles errors gracefully with rollback support
+
+See `database/migrate-v1-to-v2.sql` for the complete script with detailed documentation.
 
 #### 2.3 Verify Migration
 ```sql

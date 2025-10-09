@@ -1,7 +1,8 @@
 /**
  * Privault Vault V2 - Constants
  * 
- * Application-wide constants for the vault system.
+ * Consolidated constants for the vault V2 system.
+ * This is the single source of truth for all vault-related configuration.
  */
 
 // ==========================================
@@ -12,9 +13,10 @@ export const ENCRYPTION = {
   ALGORITHM: 'AES-GCM' as const,
   KEY_LENGTH: 256,
   IV_LENGTH: 12,
-  SALT_LENGTH: 16,
-  PBKDF2_ITERATIONS: 100000,
+  SALT_LENGTH: 32, // Aligned with crypto-utils
+  PBKDF2_ITERATIONS: 50000, // Aligned with crypto-utils for performance
   PBKDF2_HASH: 'SHA-256' as const,
+  TAG_LENGTH: 16, // AES-GCM tag length
 } as const;
 
 // ==========================================
@@ -190,6 +192,21 @@ export const STORAGE_KEYS = {
 } as const;
 
 // ==========================================
+// DATABASE TABLE NAMES (V2 Schema)
+// ==========================================
+
+export const TABLES = {
+  VAULT_CREDENTIALS: 'vault_credentials',
+  PASSWORD_HISTORY: 'password_history',
+  EXPIRATION_EVENTS: 'expiration_events',
+  VAULT_TAGS: 'vault_tags',
+  CREDENTIAL_TAGS: 'credential_tags',
+  // Legacy V1 tables (for migration reference)
+  LEGACY_VAULTS: 'vaults',
+  LEGACY_VAULT_ITEMS: 'vault_items',
+} as const;
+
+// ==========================================
 // FEATURE FLAGS
 // ==========================================
 
@@ -199,5 +216,22 @@ export const FEATURES = {
   ENABLE_BIOMETRIC: false,
   ENABLE_SHARING: false,
   ENABLE_2FA: true,
+  ENABLE_PASSWORD_HISTORY: true,
+  ENABLE_EXPIRATION_TRACKING: true,
+  ENABLE_IMPORT_EXPORT: true,
+} as const;
+
+// ==========================================
+// ROUTES (Vault V2 Specific)
+// ==========================================
+
+export const VAULT_ROUTES = {
+  MAIN: '/vault-v2',
+  IMPORT: '/vault-v2/import',
+  EXPORT: '/vault-v2/export',
+  SETTINGS: '/vault-v2/settings',
+  CREDENTIAL: (id: string) => `/vault-v2/${id}`,
+  CREDENTIAL_EDIT: (id: string) => `/vault-v2/${id}/edit`,
+  NEW_CREDENTIAL: '/vault-v2/new',
 } as const;
 

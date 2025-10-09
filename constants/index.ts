@@ -109,7 +109,8 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   RESET_PASSWORD: '/reset-password',
   VERIFY_EMAIL: '/verify-email',
-  VAULT: '/vault',
+  VAULT: '/vault', // DEPRECATED: Legacy V1 vault
+  VAULT_V2: '/vault-v2', // New vault system
   SETTINGS: '/settings',
   PROFILE: '/profile',
   TERMS: '/terms',
@@ -134,25 +135,31 @@ export const API_ENDPOINTS = {
     VERIFY_EMAIL: '/auth/verify-email',
   },
   VAULT: {
+    // DEPRECATED: Legacy V1 vault endpoints
     GET: '/api/vault',
     CREATE: '/api/vault',
     UPDATE: '/api/vault',
     DELETE: '/api/vault',
   },
   CREDENTIALS: {
+    // DEPRECATED: Legacy V1 credential endpoints
     LIST: '/api/credentials',
     CREATE: '/api/credentials',
     UPDATE: '/api/credentials',
     DELETE: '/api/credentials',
   },
+  
+  // For V2 API endpoints, import from: @/lib/vault-v2/core/constants API_ENDPOINTS
 } as const;
 
 // Supabase Table Names
 export const SUPABASE_TABLES = {
   PROFILES: 'profiles',
-  VAULTS: 'vaults',
-  VAULT_ITEMS: 'vault_items',
-  PASSWORD_HISTORY: 'password_history',
+  VAULTS: 'vaults', // DEPRECATED: Use lib/vault-v2/core/constants.ts TABLES.LEGACY_VAULTS
+  VAULT_ITEMS: 'vault_items', // DEPRECATED: Use lib/vault-v2/core/constants.ts TABLES.LEGACY_VAULT_ITEMS
+  PASSWORD_HISTORY: 'password_history', // DEPRECATED: Use lib/vault-v2/core/constants.ts TABLES.PASSWORD_HISTORY
+  
+  // For V2, import from: @/lib/vault-v2/core/constants TABLES
 } as const;
 
 // Theme Configuration
