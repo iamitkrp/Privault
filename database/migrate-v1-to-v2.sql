@@ -302,12 +302,18 @@ IMPORTANT: After migration, users will need to:
    SELECT * FROM vault_migration_log ORDER BY started_at DESC;
 */
 
-RAISE NOTICE '========================================';
-RAISE NOTICE 'Migration Complete!';
-RAISE NOTICE 'Next steps:';
-RAISE NOTICE '1. Review vault_migration_log for any failures';
-RAISE NOTICE '2. Deploy V2 client code for re-encryption';
-RAISE NOTICE '3. Monitor first vault access for each user';
-RAISE NOTICE '4. Keep vaults table for 90 days as backup';
-RAISE NOTICE '========================================';
+-- ==========================================
+-- FINAL MESSAGE
+-- ==========================================
 
+DO $$
+BEGIN
+    RAISE NOTICE '========================================';
+    RAISE NOTICE 'Migration Complete!';
+    RAISE NOTICE 'Next steps:';
+    RAISE NOTICE '1. Review vault_migration_log for any failures';
+    RAISE NOTICE '2. Deploy V2 client code for re-encryption';
+    RAISE NOTICE '3. Monitor first vault access for each user';
+    RAISE NOTICE '4. Keep vaults table for 90 days as backup';
+    RAISE NOTICE '========================================';
+END $$;
