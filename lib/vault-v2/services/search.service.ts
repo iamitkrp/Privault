@@ -3,16 +3,10 @@
  * 
  * Client-side fuzzy search implementation using Fuse.js.
  * Provides privacy-preserving search without server-side indexing.
- * 
- * TODO: Install fuse.js package to enable this service
- * npm install fuse.js
- * npm install --save-dev @types/fuse.js
  */
 
 import { DecryptedCredential } from '../core/types';
-
-// Uncomment when fuse.js is installed
-// import Fuse from 'fuse.js';
+import Fuse from 'fuse.js';
 
 export interface SearchOptions {
   threshold?: number; // 0.0 = perfect match, 1.0 = match anything
@@ -29,7 +23,7 @@ export interface SearchResult<T> {
  * Search Service for client-side credential search
  */
 export class SearchService {
-  // private searchIndex: Fuse<DecryptedCredential> | null = null;
+  private searchIndex: Fuse<DecryptedCredential> | null = null;
   private credentials: DecryptedCredential[] = [];
 
   /**
@@ -39,20 +33,19 @@ export class SearchService {
   buildIndex(credentials: DecryptedCredential[]): void {
     this.credentials = credentials;
 
-    // TODO: Uncomment when fuse.js is installed
-    // this.searchIndex = new Fuse(credentials, {
-    //   keys: [
-    //     { name: 'decrypted_data.site', weight: 0.5 },
-    //     { name: 'decrypted_data.username', weight: 0.3 },
-    //     { name: 'decrypted_data.url', weight: 0.1 },
-    //     { name: 'decrypted_data.notes', weight: 0.1 },
-    //     { name: 'tags', weight: 0.2 },
-    //   ],
-    //   threshold: 0.3,
-    //   includeScore: true,
-    //   minMatchCharLength: 2,
-    //   ignoreLocation: true,
-    // });
+    this.searchIndex = new Fuse(credentials, {
+      keys: [
+        { name: 'decrypted_data.site', weight: 0.5 },
+        { name: 'decrypted_data.username', weight: 0.3 },
+        { name: 'decrypted_data.url', weight: 0.1 },
+        { name: 'decrypted_data.notes', weight: 0.1 },
+        { name: 'tags', weight: 0.2 },
+      ],
+      threshold: 0.3,
+      includeScore: true,
+      minMatchCharLength: 2,
+      ignoreLocation: true,
+    });
   }
 
   /**
@@ -63,19 +56,19 @@ export class SearchService {
       return this.credentials.map(item => ({ item }));
     }
 
-    // TODO: Use Fuse.js when available
-    // if (this.searchIndex) {
-    //   const fuseResults = this.searchIndex.search(query, {
-    //     limit: options.limit,
-    //   });
-    //   
-    //   return fuseResults.map(result => ({
-    //     item: result.item,
-    //     score: options.includeScore ? result.score : undefined,
-    //   }));
-    // }
+    // Use Fuse.js for fuzzy search
+    if (this.searchIndex) {
+      const fuseResults = this.searchIndex.search(query, {
+        limit: options.limit,
+      });
+      
+      return fuseResults.map(result => ({
+        item: result.item,
+        score: options.includeScore ? result.score : undefined,
+      }));
+    }
 
-    // Fallback: Simple substring search
+    // Fallback: Simple substring search (if index not built)
     const searchLower = query.toLowerCase();
     const results: SearchResult<DecryptedCredential>[] = [];
 
@@ -128,7 +121,7 @@ export class SearchService {
    */
   clearIndex(): void {
     this.credentials = [];
-    // this.searchIndex = null;
+    this.searchIndex = null;
   }
 
   /**

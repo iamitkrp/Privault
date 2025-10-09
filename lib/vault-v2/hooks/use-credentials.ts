@@ -7,8 +7,9 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { VaultService } from '../services/vault.service';
+import { createSearchService } from '../services/search.service';
 import { 
   VaultCredential, 
   DecryptedCredential, 
@@ -50,6 +51,9 @@ export function useCredentials(
     searchResults: null,
   });
 
+  // Create search service instance (stable across renders)
+  const searchService = useMemo(() => createSearchService(), []);
+
   const loadCredentials = useCallback(async (filters?: CredentialFilters) => {
     if (!vaultService) {
       setState(prev => ({ ...prev, error: 'Vault service not initialized' }));
@@ -67,6 +71,29 @@ export function useCredentials(
           credentials: result.data,
           loading: false,
         }));
+
+        // Build search index from decrypted credentials
+        // Decrypt all credentials for search index
+        const decryptedList: DecryptedCredential[] = [];
+        for (const credential of result.data) {
+          try {
+            const decryptResult = await vaultService.getCredential(credential.credential_id);
+            if (decryptResult.success) {
+              decryptedList.push(decryptResult.data);
+              // Also cache the decrypted credential
+              setState(prev => {
+                const newDecrypted = new Map(prev.decryptedCredentials);
+                newDecrypted.set(credential.credential_id, decryptResult.data);
+                return { ...prev, decryptedCredentials: newDecrypted };
+              });
+            }
+          } catch (error) {
+            console.error(`Failed to decrypt credential ${credential.credential_id} for search:`, error);
+          }
+        }
+        
+        // Build search index with decrypted credentials
+        searchService.buildIndex(decryptedList);
       } else {
         setState(prev => ({
           ...prev,
@@ -81,7 +108,7 @@ export function useCredentials(
         loading: false,
       }));
     }
-  }, [vaultService]);
+  }, [vaultService, searchService]);
 
   const loadStats = useCallback(async () => {
     if (!vaultService) return;
@@ -115,6 +142,18 @@ export function useCredentials(
           loading: false,
         }));
         
+        // Update search index with new credential
+        const decryptResult = await vaultService.getCredential(result.data.credential_id);
+        if (decryptResult.success) {
+          searchService.updateCredential(decryptResult.data);
+          // Cache the decrypted credential
+          setState(prev => {
+            const newDecrypted = new Map(prev.decryptedCredentials);
+            newDecrypted.set(result.data.credential_id, decryptResult.data);
+            return { ...prev, decryptedCredentials: newDecrypted };
+          });
+        }
+        
         // Reload stats
         loadStats();
         
@@ -135,7 +174,7 @@ export function useCredentials(
       }));
       return null;
     }
-  }, [vaultService, loadStats]);
+  }, [vaultService, searchService, loadStats]);
 
   const updateCredential = useCallback(async (
     id: string, 
@@ -160,12 +199,24 @@ export function useCredentials(
           loading: false,
         }));
         
-        // Remove from decrypted cache to force re-decryption
-        setState(prev => {
-          const newDecrypted = new Map(prev.decryptedCredentials);
-          newDecrypted.delete(id);
-          return { ...prev, decryptedCredentials: newDecrypted };
-        });
+        // Update search index with updated credential
+        const decryptResult = await vaultService.getCredential(id);
+        if (decryptResult.success) {
+          searchService.updateCredential(decryptResult.data);
+          // Update cache with new decrypted credential
+          setState(prev => {
+            const newDecrypted = new Map(prev.decryptedCredentials);
+            newDecrypted.set(id, decryptResult.data);
+            return { ...prev, decryptedCredentials: newDecrypted };
+          });
+        } else {
+          // Remove from cache if decrypt failed
+          setState(prev => {
+            const newDecrypted = new Map(prev.decryptedCredentials);
+            newDecrypted.delete(id);
+            return { ...prev, decryptedCredentials: newDecrypted };
+          });
+        }
         
         // Reload stats
         loadStats();
@@ -187,7 +238,7 @@ export function useCredentials(
       }));
       return null;
     }
-  }, [vaultService, loadStats]);
+  }, [vaultService, searchService, loadStats]);
 
   const deleteCredential = useCallback(async (id: string, hard: boolean = false): Promise<boolean> => {
     if (!vaultService) {
@@ -206,6 +257,9 @@ export function useCredentials(
           credentials: prev.credentials.filter(c => c.credential_id !== id),
           loading: false,
         }));
+        
+        // Remove from search index
+        searchService.removeCredential(id);
         
         // Remove from decrypted cache
         setState(prev => {
@@ -234,7 +288,7 @@ export function useCredentials(
       }));
       return false;
     }
-  }, [vaultService, loadStats]);
+  }, [vaultService, searchService, loadStats]);
 
   const getDecryptedCredential = useCallback(async (id: string): Promise<DecryptedCredential | null> => {
     if (!vaultService) return null;
@@ -266,26 +320,20 @@ export function useCredentials(
   }, [vaultService, state.decryptedCredentials]);
 
   const searchCredentials = useCallback(async (query: string) => {
-    if (!vaultService) return;
-
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    if (!query || query.trim().length === 0) {
+      setState(prev => ({ ...prev, searchResults: null }));
+      return;
+    }
 
     try {
-      const result = await vaultService.searchCredentials(query);
+      // Use search service for client-side fuzzy search (no decryption needed)
+      const results = searchService.search(query, { limit: 50 });
       
-      if (result.success) {
-        setState(prev => ({
-          ...prev,
-          searchResults: result.data,
-          loading: false,
-        }));
-      } else {
-        setState(prev => ({
-          ...prev,
-          error: result.error.message,
-          loading: false,
-        }));
-      }
+      setState(prev => ({
+        ...prev,
+        searchResults: results.map(r => r.item),
+        loading: false,
+      }));
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -293,7 +341,7 @@ export function useCredentials(
         loading: false,
       }));
     }
-  }, [vaultService]);
+  }, [searchService]);
 
   const clearSearch = useCallback(() => {
     setState(prev => ({ ...prev, searchResults: null }));
