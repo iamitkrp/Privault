@@ -322,33 +322,18 @@ export class VaultService {
   /**
    * Searches credentials using client-side fuzzy search
    * 
-   * NOTE: For production, this should use Fuse.js with an in-memory index
-   * that's built from decrypted credentials after vault unlock. The index
-   * should be refreshed after any CRUD operation.
+   * @deprecated This method performs full decryption on every search query.
+   * Use the SearchService via useCredentials hook instead, which maintains
+   * a client-side Fuse.js index for fast, privacy-preserving search without
+   * per-query decryption.
    * 
-   * Current implementation: Simple substring match (not scalable for large vaults)
-   * Recommended: Fuse.js with weighted keys and threshold configuration
+   * This method is kept for backward compatibility and small datasets only.
+   * For production use with large vaults, always use hook-level search.
    */
   async searchCredentials(query: string): Promise<Result<DecryptedCredential[]>> {
     try {
-      // TODO: Implement Fuse.js-based search index
-      // 1. On vault unlock, decrypt all credentials and build Fuse index
-      // 2. On search, use fuse.search(query) for fast fuzzy matching
-      // 3. Refresh index after create/update/delete operations
-      // 
-      // Example Fuse.js config:
-      // const fuse = new Fuse(decryptedCredentials, {
-      //   keys: [
-      //     { name: 'decrypted_data.site', weight: 0.5 },
-      //     { name: 'decrypted_data.username', weight: 0.3 },
-      //     { name: 'decrypted_data.url', weight: 0.1 },
-      //     { name: 'decrypted_data.notes', weight: 0.1 },
-      //   ],
-      //   threshold: 0.3,
-      //   includeScore: true,
-      // });
-
-      // Current simple implementation (for initial development)
+      // Simple fallback implementation (not recommended for production)
+      // Use SearchService via useCredentials hook for better performance
       const credentials = await this.repository.findByUser(this.userId);
       const results: DecryptedCredential[] = [];
       const searchLower = query.toLowerCase();
