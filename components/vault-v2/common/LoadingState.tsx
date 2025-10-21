@@ -7,6 +7,7 @@
 'use client';
 
 import React from 'react';
+import { Spinner } from '@/components/ui';
 
 interface LoadingStateProps {
   type?: 'spinner' | 'skeleton' | 'dots';
@@ -19,12 +20,6 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   message = 'Loading...',
   size = 'md',
 }) => {
-  const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12',
-  };
-
   if (type === 'skeleton') {
     return (
       <div className="animate-pulse space-y-4">
@@ -49,7 +44,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center gap-3">
-      <div className={`${sizeClasses[size]} border-4 border-gray-200 dark:border-gray-700 border-t-blue-600 rounded-full animate-spin`}></div>
+      <Spinner size={size} />
       {message && (
         <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
       )}

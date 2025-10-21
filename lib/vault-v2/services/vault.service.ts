@@ -17,6 +17,8 @@ import {
   ExpirationStatus,
   CredentialCategory,
   ChangeReason,
+  ChangeMasterPasswordResult,
+  MasterPasswordChangeProgress,
 } from '../core/types';
 import {
   VaultError,
@@ -24,10 +26,16 @@ import {
   ConcurrencyError,
   EncryptionError,
   DecryptionError,
+  InvalidPassphraseError,
+  MasterPasswordChangeError,
+  RollbackError,
   success,
   failure,
   createVaultError,
 } from '../core/errors';
+import { generateSalt, deriveKey, createPassphraseVerification } from '@/lib/crypto/crypto-utils';
+import { passphraseManager } from '@/lib/crypto/passphrase-manager';
+import { supabase } from '@/lib/supabase/client';
 import { validateCreateCredential, validateUpdateCredential, sanitizeCredentialData } from '../core/validators';
 import { PAGINATION } from '../core/constants';
 
@@ -41,6 +49,7 @@ import { PAGINATION } from '../core/constants';
 export interface IVaultRepository {
   findById(userId: string, credentialId: string): Promise<VaultCredential | null>;
   findByUser(userId: string, filters?: CredentialFilters): Promise<VaultCredential[]>;
+  findAllByUser(userId: string): Promise<VaultCredential[]>;
   create(credential: Omit<VaultCredential, 'id' | 'created_at' | 'updated_at'>): Promise<VaultCredential>;
   update(userId: string, credentialId: string, data: Partial<VaultCredential>): Promise<VaultCredential>;
   delete(userId: string, credentialId: string, hard?: boolean): Promise<void>;
@@ -532,6 +541,336 @@ export class VaultService {
     const score = 100 - weakPenalty - reusePenalty - expiredPenalty + strengthBonus;
 
     return Math.max(0, Math.min(100, Math.round(score)));
+  }
+
+  /**
+   * Changes the master password and re-encrypts all credentials
+   */
+  async changeMasterPassword(
+    currentPassword: string,
+    newPassword: string,
+    progressCallback?: (progress: MasterPasswordChangeProgress) => void
+  ): Promise<Result<ChangeMasterPasswordResult>> {
+    try {
+      // Phase 1: Verification
+      progressCallback?.({
+        phase: 'verifying',
+        totalCredentials: 0,
+        processedCredentials: 0,
+        message: 'Verifying current password...',
+      });
+
+      // Verify current password matches the master key in session
+      const currentKey = passphraseManager.getDerivedKey();
+      if (!currentKey) {
+        throw new InvalidPassphraseError('No active session. Please unlock your vault first.');
+      }
+
+      // Additional verification: try to decrypt a test credential if any exist
+      const testCredentials = await this.repository.findByUser(this.userId, { limit: 1 });
+      if (testCredentials.length > 0) {
+        try {
+          await this.decryptCredentialData(testCredentials[0]);
+        } catch (error) {
+          throw new InvalidPassphraseError('Current password verification failed.');
+        }
+      }
+
+      // Phase 2: Fetch all credentials
+      progressCallback?.({
+        phase: 'fetching',
+        totalCredentials: 0,
+        processedCredentials: 0,
+        message: 'Fetching all credentials...',
+      });
+
+      const allCredentials = await this.repository.findAllByUser(this.userId);
+      const totalCredentials = allCredentials.length;
+
+      progressCallback?.({
+        phase: 'fetching',
+        totalCredentials,
+        processedCredentials: 0,
+        message: `Found ${totalCredentials} credential(s) to process.`,
+      });
+
+      // Phase 3: Decrypt all credentials
+      progressCallback?.({
+        phase: 'decrypting',
+        totalCredentials,
+        processedCredentials: 0,
+        message: 'Decrypting credentials...',
+      });
+
+      const decryptedCredentials: Array<{
+        credential: VaultCredential;
+        decryptedData: DecryptedCredentialData;
+        originalEncrypted: string;
+        originalIv: string;
+      }> = [];
+
+      for (let i = 0; i < allCredentials.length; i++) {
+        const credential = allCredentials[i];
+        try {
+          const decryptedData = await this.decryptCredentialData(credential);
+          decryptedCredentials.push({
+            credential,
+            decryptedData,
+            originalEncrypted: credential.encrypted_data,
+            originalIv: credential.iv,
+          });
+
+          progressCallback?.({
+            phase: 'decrypting',
+            totalCredentials,
+            processedCredentials: i + 1,
+            message: `Decrypted ${i + 1} of ${totalCredentials} credential(s)...`,
+          });
+        } catch (error) {
+          throw new DecryptionError(
+            `Failed to decrypt credential ${credential.credential_id}`,
+            { credentialId: credential.credential_id, error }
+          );
+        }
+      }
+
+      // Phase 4: Key Derivation
+      const newSalt = generateSalt();
+      const newMasterKey = await deriveKey(newPassword, newSalt);
+      const { testEncryptedData, testIv } = await createPassphraseVerification(newPassword, newSalt);
+
+      // Phase 5: Re-encrypt all credentials
+      progressCallback?.({
+        phase: 're-encrypting',
+        totalCredentials,
+        processedCredentials: 0,
+        message: 'Re-encrypting credentials with new password...',
+      });
+
+      const reencryptedCredentials: Array<{
+        credentialId: string;
+        encrypted: string;
+        iv: string;
+        version: number;
+      }> = [];
+
+      for (let i = 0; i < decryptedCredentials.length; i++) {
+        const { credential, decryptedData } = decryptedCredentials[i];
+        try {
+          const { encrypted, iv } = await this.encryptionService.encrypt(
+            JSON.stringify(decryptedData),
+            newMasterKey
+          );
+
+          reencryptedCredentials.push({
+            credentialId: credential.credential_id,
+            encrypted,
+            iv,
+            version: credential.version,
+          });
+
+          progressCallback?.({
+            phase: 're-encrypting',
+            totalCredentials,
+            processedCredentials: i + 1,
+            message: `Re-encrypted ${i + 1} of ${totalCredentials} credential(s)...`,
+          });
+        } catch (error) {
+          throw new EncryptionError(
+            `Failed to encrypt credential ${credential.credential_id}`,
+            { credentialId: credential.credential_id, error }
+          );
+        }
+      }
+
+      // Phase 6: Update database
+      progressCallback?.({
+        phase: 'updating',
+        totalCredentials,
+        processedCredentials: 0,
+        message: 'Updating credentials in database...',
+      });
+
+      const updatedCredentialIds: string[] = [];
+
+      for (let i = 0; i < reencryptedCredentials.length; i++) {
+        const reencrypted = reencryptedCredentials[i];
+        try {
+          await this.repository.update(this.userId, reencrypted.credentialId, {
+            encrypted_data: reencrypted.encrypted,
+            iv: reencrypted.iv,
+            version: reencrypted.version + 1,
+          });
+
+          updatedCredentialIds.push(reencrypted.credentialId);
+
+          progressCallback?.({
+            phase: 'updating',
+            totalCredentials,
+            processedCredentials: i + 1,
+            message: `Updated ${i + 1} of ${totalCredentials} credential(s)...`,
+          });
+        } catch (error) {
+          // Attempt rollback
+          console.error(`Failed to update credential ${reencrypted.credentialId}. Attempting rollback...`);
+          
+          try {
+            await this.rollbackCredentialUpdates(
+              decryptedCredentials.filter(dc => 
+                updatedCredentialIds.includes(dc.credential.credential_id)
+              )
+            );
+          } catch (rollbackError) {
+            throw new RollbackError(
+              'Failed to rollback credential updates',
+              error,
+              updatedCredentialIds,
+              { rollbackError }
+            );
+          }
+
+          throw new MasterPasswordChangeError(
+            `Failed to update credential ${reencrypted.credentialId}`,
+            'updating',
+            { error }
+          );
+        }
+      }
+
+      // Phase 7: Update profile verification data
+      progressCallback?.({
+        phase: 'finalizing',
+        totalCredentials,
+        processedCredentials: totalCredentials,
+        message: 'Updating profile verification data...',
+      });
+
+      try {
+        await this.updateProfileVerificationData(
+          this.userId,
+          newSalt,
+          testEncryptedData,
+          testIv
+        );
+      } catch (error) {
+        // Attempt rollback
+        console.error('Failed to update profile verification data. Attempting rollback...');
+        
+        try {
+          await this.rollbackCredentialUpdates(decryptedCredentials);
+        } catch (rollbackError) {
+          throw new RollbackError(
+            'Failed to rollback after profile update failure',
+            error,
+            updatedCredentialIds,
+            { rollbackError }
+          );
+        }
+
+        throw new MasterPasswordChangeError(
+          'Failed to update profile verification data',
+          'finalizing',
+          { error }
+        );
+      }
+
+      // Phase 8: Update PassphraseManager session
+      const updateResult = await passphraseManager.updateDerivedKey(
+        newPassword,
+        newSalt,
+        testEncryptedData,
+        testIv
+      );
+
+      if (!updateResult.success) {
+        console.error('Failed to update passphrase manager session:', updateResult.error);
+        // This is not critical - user can re-login
+      }
+
+      // Phase 9: Success
+      progressCallback?.({
+        phase: 'finalizing',
+        totalCredentials,
+        processedCredentials: totalCredentials,
+        message: 'Master password changed successfully!',
+      });
+
+      return success({
+        credentialsUpdated: totalCredentials,
+        verificationDataUpdated: true,
+        newSalt,
+      });
+    } catch (error) {
+      const vaultError = createVaultError(error);
+      return failure(vaultError);
+    }
+  }
+
+  /**
+   * Updates profile verification data in database
+   */
+  private async updateProfileVerificationData(
+    userId: string,
+    newSalt: string,
+    testEncryptedData: string,
+    testIv: string
+  ): Promise<void> {
+    if (!supabase) {
+      throw new Error('Supabase client not configured');
+    }
+
+    const verificationData = JSON.stringify({
+      testEncryptedData,
+      testIv,
+    });
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        salt: newSalt,
+        vault_verification_data: verificationData,
+      })
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new Error(`Failed to update profile verification data: ${error.message}`);
+    }
+  }
+
+  /**
+   * Rollback credential updates to original state
+   */
+  private async rollbackCredentialUpdates(
+    credentialsToRollback: Array<{
+      credential: VaultCredential;
+      originalEncrypted: string;
+      originalIv: string;
+    }>
+  ): Promise<void> {
+    const errors: Array<{ credentialId: string; error: unknown }> = [];
+
+    for (const { credential, originalEncrypted, originalIv } of credentialsToRollback) {
+      try {
+        await this.repository.update(this.userId, credential.credential_id, {
+          encrypted_data: originalEncrypted,
+          iv: originalIv,
+          version: credential.version, // Restore original version
+        });
+
+        console.log(`Rolled back credential ${credential.credential_id}`);
+      } catch (error) {
+        console.error(`Failed to rollback credential ${credential.credential_id}:`, error);
+        errors.push({
+          credentialId: credential.credential_id,
+          error,
+        });
+      }
+    }
+
+    if (errors.length > 0) {
+      console.error('Rollback completed with errors:', errors);
+      // Don't throw - this is best-effort rollback
+    }
   }
 }
 

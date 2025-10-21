@@ -288,6 +288,34 @@ export interface UpdateCredentialDTO {
 }
 
 /**
+ * DTO for changing master password
+ */
+export interface ChangeMasterPasswordDTO {
+  readonly currentPassword: string;
+  readonly newPassword: string;
+  readonly keepSalt?: boolean; // Optional flag to keep existing salt (default: false, generate new salt)
+}
+
+/**
+ * Result of master password change operation
+ */
+export interface ChangeMasterPasswordResult {
+  readonly credentialsUpdated: number;
+  readonly verificationDataUpdated: boolean;
+  readonly newSalt: string;
+}
+
+/**
+ * Progress tracking for master password change
+ */
+export interface MasterPasswordChangeProgress {
+  readonly phase: 'verifying' | 'fetching' | 'decrypting' | 're-encrypting' | 'updating' | 'finalizing';
+  readonly totalCredentials: number;
+  readonly processedCredentials: number;
+  readonly message: string;
+}
+
+/**
  * Filters for credential listing
  */
 export interface CredentialFilters {
@@ -454,6 +482,11 @@ export interface IVaultService {
   listCredentials(filters?: CredentialFilters): Promise<Result<readonly VaultCredential[]>>;
   searchCredentials(query: string): Promise<Result<readonly DecryptedCredential[]>>;
   getVaultStats(): Promise<Result<VaultStats>>;
+  changeMasterPassword(
+    currentPassword: string,
+    newPassword: string,
+    progressCallback?: (progress: MasterPasswordChangeProgress) => void
+  ): Promise<Result<ChangeMasterPasswordResult>>;
 }
 
 /**

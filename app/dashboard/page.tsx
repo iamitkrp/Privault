@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { ROUTES, APP_NAME } from '@/constants';
 import Link from 'next/link';
 import SecurityDashboard from '@/components/security/security-dashboard';
+import { LoadingOverlay } from '@/components/ui';
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
@@ -57,30 +58,7 @@ export default function DashboardPage() {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center overflow-hidden">
-        {/* Cuberto-style Abstract Geometric Background for Loading */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/10 transform rotate-45 rounded-3xl animate-pulse"></div>
-          <div className="absolute top-1/3 -right-20 w-64 h-64 bg-gradient-to-tl from-indigo-400/12 to-blue-400/8 transform -rotate-12 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-gradient-to-tr from-blue-300/20 to-transparent transform rotate-45 rounded-lg animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/10 to-blue-500/15 transform -rotate-45 rounded-3xl animate-pulse"></div>
-        </div>
-        
-        <div className="text-center relative z-10">
-          <div className="relative w-20 h-20 mx-auto mb-8">
-            <div className="absolute inset-0 rounded-2xl border-t-2 border-blue-500 animate-spin"></div>
-            <div className="absolute inset-2 rounded-2xl border-t-2 border-blue-400 animate-spin" style={{ animationDuration: '1.5s' }}></div>
-            <div className="absolute inset-4 rounded-2xl border-t-2 border-blue-300 animate-spin" style={{ animationDuration: '2s' }}></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-            </div>
-          </div>
-          <h3 className="text-2xl font-light text-gray-900 mb-2">Loading Your Space</h3>
-          <p className="text-gray-600 font-light animate-pulse">Preparing your secure dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingOverlay message="Loading Your Space" submessage="Preparing your secure dashboard..." size="xl" />;
   }
 
   // Not authenticated

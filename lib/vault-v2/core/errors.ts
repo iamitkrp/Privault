@@ -62,6 +62,11 @@ export enum VaultErrorCode {
   INVALID_PASSPHRASE = 'INVALID_PASSPHRASE',
   SESSION_EXPIRED = 'SESSION_EXPIRED',
   
+  // Master password change errors
+  MASTER_PASSWORD_CHANGE_FAILED = 'MASTER_PASSWORD_CHANGE_FAILED',
+  ROLLBACK_FAILED = 'ROLLBACK_FAILED',
+  VERIFICATION_DATA_UPDATE_FAILED = 'VERIFICATION_DATA_UPDATE_FAILED',
+  
   // Generic errors
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
   NETWORK_ERROR = 'NETWORK_ERROR',
@@ -389,6 +394,69 @@ export class InvalidPassphraseError extends VaultError {
       return `Invalid master password. ${this.attemptsRemaining} attempt(s) remaining.`;
     }
     return 'Invalid master password. Please try again.';
+  }
+}
+
+/**
+ * Error thrown when master password change fails
+ */
+export class MasterPasswordChangeError extends VaultError {
+  public readonly phase?: string;
+
+  constructor(message: string, phase?: string, details?: unknown) {
+    super(VaultErrorCode.MASTER_PASSWORD_CHANGE_FAILED, message, { phase, ...details });
+    this.name = 'MasterPasswordChangeError';
+    this.phase = phase;
+  }
+
+  getUserMessage(): string {
+    if (this.phase) {
+      switch (this.phase) {
+        case 'verifying':
+          return 'Failed to verify current master password. Please check and try again.';
+        case 'fetching':
+          return 'Failed to retrieve your credentials. Please try again.';
+        case 'decrypting':
+          return 'Failed to decrypt credentials with current password. Please try again.';
+        case 're-encrypting':
+          return 'Failed to encrypt credentials with new password. Please try again.';
+        case 'updating':
+          return 'Failed to update credentials in database. Please try again.';
+        case 'finalizing':
+          return 'Failed to finalize password change. Please try again.';
+        default:
+          return `Master password change failed during ${this.phase}. Please try again.`;
+      }
+    }
+    return 'Failed to change master password. Please try again.';
+  }
+}
+
+/**
+ * Error thrown when rollback fails after partial master password change
+ */
+export class RollbackError extends VaultError {
+  public readonly originalError?: unknown;
+  public readonly partiallyUpdatedCredentials?: readonly string[];
+
+  constructor(message: string, originalError?: unknown, partiallyUpdatedCredentials?: readonly string[], details?: unknown) {
+    super(
+      VaultErrorCode.ROLLBACK_FAILED,
+      message,
+      { originalError, partiallyUpdatedCredentials, ...details },
+      false
+    );
+    this.name = 'RollbackError';
+    this.originalError = originalError;
+    this.partiallyUpdatedCredentials = partiallyUpdatedCredentials;
+  }
+
+  getUserMessage(): string {
+    const count = this.partiallyUpdatedCredentials?.length || 0;
+    if (count > 0) {
+      return `Master password change failed and rollback was unsuccessful. ${count} credential(s) may be in an inconsistent state. Please contact support.`;
+    }
+    return 'Master password change failed and rollback encountered an error. Your vault may need recovery. Please contact support.';
   }
 }
 

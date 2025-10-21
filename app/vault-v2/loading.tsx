@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { Spinner } from '@/components/ui';
 
 export default function VaultV2Loading() {
   return (
@@ -14,6 +15,11 @@ export default function VaultV2Loading() {
         <div className="mb-8 animate-pulse">
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-2"></div>
           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
+        </div>
+
+        {/* Centered Spinner */}
+        <div className="flex justify-center items-center py-8">
+          <Spinner size="lg" />
         </div>
 
         {/* Stats Skeleton */}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
 import { ROUTES, ERROR_MESSAGES, VALIDATION_RULES, SECURITY_CONFIG } from '@/constants';
+import { Spinner } from '@/components/ui';
 
 interface SignupFormData {
   email: string;
@@ -457,10 +458,7 @@ export default function SignupPage() {
           >
             {isSubmitting ? (
               <>
-                <div className="relative w-5 h-5 mr-3">
-                  <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
-                  <div className="absolute inset-0 rounded-full border-t-2 border-white animate-spin"></div>
-                </div>
+                <Spinner size="sm" className="mr-3" />
                 <span>Creating account...</span>
               </>
             ) : (

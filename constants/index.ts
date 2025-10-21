@@ -109,8 +109,9 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   RESET_PASSWORD: '/reset-password',
   VERIFY_EMAIL: '/verify-email',
-  VAULT: '/vault', // DEPRECATED: Legacy V1 vault
-  VAULT_V2: '/vault-v2', // New vault system
+  VAULT: '/vault-v2', // Primary vault route (V2)
+  VAULT_LEGACY: '/vault', // DEPRECATED: Legacy V1 vault - DO NOT USE
+  VAULT_V2: '/vault-v2', // Alias for VAULT
   SETTINGS: '/settings',
   PROFILE: '/profile',
   TERMS: '/terms',

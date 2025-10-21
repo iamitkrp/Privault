@@ -230,6 +230,23 @@ class PassphraseManager {
     }
     this.clearSession();
   }
+
+  /**
+   * Update the derived key with new passphrase and salt
+   * Used during master password change operation
+   */
+  async updateDerivedKey(
+    newPassphrase: string,
+    newSalt: string,
+    testEncryptedData: string,
+    testIv: string
+  ): Promise<{ success: boolean; error?: string }> {
+    // Clear existing session
+    this.clearSession();
+    
+    // Initialize with new parameters
+    return await this.initializeSession(newPassphrase, newSalt, testEncryptedData, testIv);
+  }
 }
 
 // Create a singleton instance

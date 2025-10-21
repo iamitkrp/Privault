@@ -121,6 +121,29 @@ export class SupabaseVaultRepository implements IVaultRepository {
   }
 
   /**
+   * Find ALL credentials by user without pagination or filters
+   * Used for operations that need to process every credential (e.g., master password change)
+   */
+  async findAllByUser(userId: string): Promise<VaultCredential[]> {
+    if (!supabase) {
+      throw new Error('Supabase client not configured');
+    }
+
+    const { data, error } = await supabase
+      .from('vault_credentials')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to find all credentials: ${error.message}`);
+    }
+
+    return (data || []).map(item => this.mapToVaultCredential(item));
+  }
+
+  /**
    * Create a new credential
    */
   async create(credential: Omit<VaultCredential, 'id' | 'created_at' | 'updated_at'>): Promise<VaultCredential> {
