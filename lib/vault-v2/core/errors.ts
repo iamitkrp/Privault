@@ -494,11 +494,16 @@ export function createVaultError(error: unknown): VaultError {
  */
 export function wrapError(error: unknown, context: string): VaultError {
   const vaultError = createVaultError(error);
-  vaultError.details = {
-    ...vaultError.details,
-    context,
-  };
-  return vaultError;
+  // Create a new VaultError with merged details to avoid mutating readonly property
+  return new VaultError(
+    vaultError.code,
+    vaultError.message,
+    {
+      ...vaultError.details,
+      context,
+    },
+    vaultError.isOperational
+  );
 }
 
 /**

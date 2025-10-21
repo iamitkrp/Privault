@@ -302,6 +302,7 @@ export interface ChangeMasterPasswordDTO {
 export interface ChangeMasterPasswordResult {
   readonly credentialsUpdated: number;
   readonly verificationDataUpdated: boolean;
+  readonly sessionUpdated: boolean;
   readonly newSalt: string;
 }
 
@@ -485,7 +486,8 @@ export interface IVaultService {
   changeMasterPassword(
     currentPassword: string,
     newPassword: string,
-    progressCallback?: (progress: MasterPasswordChangeProgress) => void
+    progressCallback?: (progress: MasterPasswordChangeProgress) => void,
+    keepSalt?: boolean
   ): Promise<Result<ChangeMasterPasswordResult>>;
 }
 

@@ -19,6 +19,8 @@ import {
   ChangeReason,
   ChangeMasterPasswordResult,
   MasterPasswordChangeProgress,
+  IEncryptionService,
+  DecryptionInput,
 } from '../core/types';
 import {
   VaultError,
@@ -33,11 +35,12 @@ import {
   failure,
   createVaultError,
 } from '../core/errors';
-import { generateSalt, deriveKey, createPassphraseVerification } from '@/lib/crypto/crypto-utils';
+import { generateSalt, deriveKey, createPassphraseVerification, verifyPassphrase } from '@/lib/crypto/crypto-utils';
 import { passphraseManager } from '@/lib/crypto/passphrase-manager';
 import { supabase } from '@/lib/supabase/client';
 import { validateCreateCredential, validateUpdateCredential, sanitizeCredentialData } from '../core/validators';
 import { PAGINATION } from '../core/constants';
+import { CRYPTO_CONFIG } from '@/constants';
 
 // ==========================================
 // INTERFACES FOR DEPENDENCIES
@@ -55,14 +58,6 @@ export interface IVaultRepository {
   delete(userId: string, credentialId: string, hard?: boolean): Promise<void>;
   count(userId: string): Promise<number>;
   incrementAccessCount(userId: string, credentialId: string): Promise<void>;
-}
-
-/**
- * Encryption service interface
- */
-export interface IEncryptionService {
-  encrypt(data: string, key: CryptoKey): Promise<{ encrypted: string; iv: string }>;
-  decrypt(encrypted: string, iv: string, key: CryptoKey): Promise<string>;
 }
 
 /**
@@ -100,7 +95,7 @@ export class VaultService {
     private readonly expirationService: IExpirationService,
     private readonly passwordStrengthService: IPasswordStrengthService,
     private readonly userId: string,
-    private readonly masterKey: CryptoKey
+    private masterKey: CryptoKey
   ) {}
 
   /**
@@ -499,8 +494,10 @@ export class VaultService {
   private async decryptCredentialData(credential: VaultCredential): Promise<DecryptedCredentialData> {
     try {
       const decryptedJson = await this.encryptionService.decrypt(
-        credential.encrypted_data,
-        credential.iv,
+        {
+          encrypted: credential.encrypted_data,
+          iv: credential.iv,
+        },
         this.masterKey
       );
 
@@ -549,7 +546,8 @@ export class VaultService {
   async changeMasterPassword(
     currentPassword: string,
     newPassword: string,
-    progressCallback?: (progress: MasterPasswordChangeProgress) => void
+    progressCallback?: (progress: MasterPasswordChangeProgress) => void,
+    keepSalt?: boolean
   ): Promise<Result<ChangeMasterPasswordResult>> {
     try {
       // Phase 1: Verification
@@ -566,13 +564,53 @@ export class VaultService {
         throw new InvalidPassphraseError('No active session. Please unlock your vault first.');
       }
 
-      // Additional verification: try to decrypt a test credential if any exist
-      const testCredentials = await this.repository.findByUser(this.userId, { limit: 1 });
-      if (testCredentials.length > 0) {
+      // Fetch user's profile to get vault_verification_data and salt
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('vault_verification_data, salt')
+        .eq('user_id', this.userId)
+        .single();
+
+      if (profileError || !profile) {
+        throw new Error('Failed to fetch user profile for verification');
+      }
+
+      if (!profile.salt) {
+        throw new Error('User profile missing salt for verification');
+      }
+
+      // Verify current password using profile verification data
+      if (profile.vault_verification_data) {
         try {
-          await this.decryptCredentialData(testCredentials[0]);
+          const verificationData = JSON.parse(profile.vault_verification_data);
+          const { testEncryptedData, testIv } = verificationData;
+          
+          const isValid = await verifyPassphrase(
+            currentPassword,
+            profile.salt,
+            testEncryptedData,
+            testIv,
+            CRYPTO_CONFIG.PASSPHRASE_TEST_STRING
+          );
+
+          if (!isValid) {
+            throw new InvalidPassphraseError('Current password verification failed.');
+          }
         } catch (error) {
+          if (error instanceof InvalidPassphraseError) {
+            throw error;
+          }
           throw new InvalidPassphraseError('Current password verification failed.');
+        }
+      } else {
+        // Fallback: If no verification data exists, try to decrypt a credential if any exist
+        const testCredentials = await this.repository.findByUser(this.userId, { limit: 1 });
+        if (testCredentials.length > 0) {
+          try {
+            await this.decryptCredentialData(testCredentials[0]);
+          } catch (error) {
+            throw new InvalidPassphraseError('Current password verification failed.');
+          }
         }
       }
 
@@ -635,7 +673,8 @@ export class VaultService {
       }
 
       // Phase 4: Key Derivation
-      const newSalt = generateSalt();
+      // If keepSalt is true, reuse existing salt; otherwise generate new salt
+      const newSalt = keepSalt ? profile.salt : generateSalt();
       const newMasterKey = await deriveKey(newPassword, newSalt);
       const { testEncryptedData, testIv } = await createPassphraseVerification(newPassword, newSalt);
 
@@ -774,7 +813,7 @@ export class VaultService {
         );
       }
 
-      // Phase 8: Update PassphraseManager session
+      // Phase 8: Update PassphraseManager session and masterKey
       const updateResult = await passphraseManager.updateDerivedKey(
         newPassword,
         newSalt,
@@ -782,9 +821,14 @@ export class VaultService {
         testIv
       );
 
+      let sessionUpdated = false;
       if (!updateResult.success) {
         console.error('Failed to update passphrase manager session:', updateResult.error);
         // This is not critical - user can re-login
+      } else {
+        sessionUpdated = true;
+        // Update the VaultService masterKey to use the new key
+        this.masterKey = newMasterKey;
       }
 
       // Phase 9: Success
@@ -798,6 +842,7 @@ export class VaultService {
       return success({
         credentialsUpdated: totalCredentials,
         verificationDataUpdated: true,
+        sessionUpdated,
         newSalt,
       });
     } catch (error) {
