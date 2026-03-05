@@ -16,3 +16,34 @@ export type {
     OTPVerification,
     PasswordHistoryEntry,
 } from "./index";
+
+export interface Database {
+    public: {
+        Tables: {
+            [key: string]: {
+                Row: any;
+                Insert: any;
+                Update: any;
+            };
+        };
+        Views: {
+            [key: string]: {
+                Row: any;
+                Insert: any;
+                Update: any;
+            };
+        };
+        Functions: {
+            [key: string]: {
+                Args: any;
+                Returns: any;
+            };
+        };
+        Enums: {
+            [key: string]: any;
+        };
+        CompositeTypes: {
+            [key: string]: any;
+        };
+    };
+}
