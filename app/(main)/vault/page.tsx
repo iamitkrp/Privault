@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
-import { VaultUnlock } from "@/components/vault/vault-unlock";
 import { ShieldCheck, LockOpen } from "lucide-react";
+import { CredentialList } from "@/components/vault/credential-list";
+import { VaultUnlock } from "@/components/vault/vault-unlock";
 
 export default function VaultPage() {
     const { user, signOut } = useAuth();
@@ -53,13 +54,8 @@ export default function VaultPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass p-6 rounded-xl shadow-glass md:col-span-2">
-                    <h2 className="text-lg font-semibold mb-4 text-foreground flex items-center gap-2">
-                        Credentials
-                    </h2>
-                    <div className="h-64 border border-dashed border-border/50 rounded-lg flex items-center justify-center text-sm text-secondary">
-                        Empty Vault. We will build the Vault Core in Phase 4!
-                    </div>
+                <div className="glass p-6 md:p-8 rounded-xl shadow-glass md:col-span-3">
+                    <CredentialList />
                 </div>
 
                 <div className="glass p-6 rounded-xl shadow-glass flex flex-col">

@@ -11,13 +11,9 @@
 export type {
     EncryptedCredential,
     UserProfile,
-    AuditLogEntry,
-    SecurityEvent,
-    OTPVerification,
-    PasswordHistoryEntry,
-} from "./index";
+};
 
-import type { UserProfile } from "./index";
+import type { UserProfile, EncryptedCredential } from "./index";
 
 export interface Database {
     public: {
@@ -26,6 +22,11 @@ export interface Database {
                 Row: UserProfile;
                 Insert: Partial<UserProfile> & { user_id: string, email: string, salt: string };
                 Update: Partial<UserProfile>;
+            };
+            vault_credentials: {
+                Row: EncryptedCredential;
+                Insert: any;
+                Update: any;
             };
             [key: string]: {
                 Row: any;
