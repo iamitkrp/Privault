@@ -17,9 +17,16 @@ export type {
     PasswordHistoryEntry,
 } from "./index";
 
+import type { UserProfile } from "./index";
+
 export interface Database {
     public: {
         Tables: {
+            profiles: {
+                Row: UserProfile;
+                Insert: Partial<UserProfile> & { user_id: string, email: string, salt: string };
+                Update: Partial<UserProfile>;
+            };
             [key: string]: {
                 Row: any;
                 Insert: any;
