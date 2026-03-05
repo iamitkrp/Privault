@@ -24,6 +24,7 @@ export const CREDENTIAL_CATEGORIES = [
     "education",
     "travel",
     "government",
+    "secure_note",
     "other",
 ] as const;
 

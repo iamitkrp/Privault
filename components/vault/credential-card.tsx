@@ -70,35 +70,45 @@ export function CredentialCard({ credential, onEdit, onDelete }: CredentialCardP
                         )}
                     </div>
                 </div>
-
-                <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between text-sm bg-background/40 hover:bg-background/80 rounded-md p-2 transition-colors border border-transparent hover:border-border/50">
-                        <span className="text-secondary truncate mr-2" title={credential.decrypted.username}>
-                            {credential.decrypted.username}
-                        </span>
-                        <button
-                            onClick={() => handleCopy("username")}
-                            className="text-secondary hover:text-brand transition-colors p-1"
-                            title="Copy Username"
-                        >
-                            {copied === "username" ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
-                        </button>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm bg-background/40 hover:bg-background/80 rounded-md p-2 transition-colors border border-transparent hover:border-border/50">
-                        <div className="text-secondary font-mono tracking-widest flex items-center gap-2">
-                            <KeyRound className="w-3.5 h-3.5" />
-                            ••••••••
+                {credential.category === "secure_note" ? (
+                    <div className="space-y-2 mb-4 flex-1">
+                        <div className="text-sm text-secondary bg-background/30 rounded-md p-3 border border-border/30 h-full max-h-32 overflow-hidden relative">
+                            <p className="whitespace-pre-wrap font-mono text-xs">{credential.decrypted.notes || "No content"}</p>
+                            {credential.decrypted.notes && credential.decrypted.notes.length > 100 && (
+                                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent" />
+                            )}
                         </div>
-                        <button
-                            onClick={() => handleCopy("password")}
-                            className="text-secondary hover:text-success transition-colors p-1"
-                            title="Copy Password safely"
-                        >
-                            {copied === "password" ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
-                        </button>
                     </div>
-                </div>
+                ) : (
+                    <div className="space-y-2 mb-4">
+                        <div className="flex items-center justify-between text-sm bg-background/40 hover:bg-background/80 rounded-md p-2 transition-colors border border-transparent hover:border-border/50">
+                            <span className="text-secondary truncate mr-2" title={credential.decrypted.username}>
+                                {credential.decrypted.username}
+                            </span>
+                            <button
+                                onClick={() => handleCopy("username")}
+                                className="text-secondary hover:text-brand transition-colors p-1"
+                                title="Copy Username"
+                            >
+                                {copied === "username" ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm bg-background/40 hover:bg-background/80 rounded-md p-2 transition-colors border border-transparent hover:border-border/50">
+                            <div className="text-secondary font-mono tracking-widest flex items-center gap-2">
+                                <KeyRound className="w-3.5 h-3.5" />
+                                ••••••••
+                            </div>
+                            <button
+                                onClick={() => handleCopy("password")}
+                                className="text-secondary hover:text-success transition-colors p-1"
+                                title="Copy Password safely"
+                            >
+                                {copied === "password" ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Bottom Metadata */}

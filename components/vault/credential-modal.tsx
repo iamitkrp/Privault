@@ -22,6 +22,12 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
     const [notes, setNotes] = useState(existingCredential?.decrypted.notes || "");
     const [category, setCategory] = useState(existingCredential?.category || "other");
 
+    // Type selection: "login" or "secure_note"
+    // We derive initial state based on the category. If it was explicitly a secure_note, default to that tab.
+    const [type, setType] = useState<"login" | "secure_note">(
+        existingCredential?.category === "secure_note" ? "secure_note" : "login"
+    );
+
     const [showPassword, setShowPassword] = useState(false);
     const [showGenerator, setShowGenerator] = useState(!isEditing);
     const [copied, setCopied] = useState(false);
@@ -50,13 +56,16 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
         try {
             const decrypted: DecryptedCredential = {
                 site_name: siteName,
-                username,
-                password,
-                url: url || undefined,
+                username: type === "login" ? username : "",
+                password: type === "login" ? password : "",
+                url: type === "login" && url ? url : undefined,
                 notes: notes || undefined
             };
 
-            const metadata = { category };
+            const metadata = {
+                category: type === "secure_note" ? "secure_note" : category
+            };
+
             await onSave(decrypted, metadata);
             onClose();
         } catch (err: any) {
@@ -92,9 +101,32 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                     )}
 
                     <form id="cred-form" onSubmit={handleSubmit} className="space-y-5">
+
+                        {/* Type Tabs */}
+                        {!isEditing && (
+                            <div className="flex bg-background/50 border border-border rounded-lg p-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setType("login")}
+                                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${type === "login" ? "bg-white/10 text-foreground shadow-sm" : "text-secondary hover:text-foreground"}`}
+                                >
+                                    Login
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setType("secure_note")}
+                                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${type === "secure_note" ? "bg-white/10 text-foreground shadow-sm" : "text-secondary hover:text-foreground"}`}
+                                >
+                                    Secure Note
+                                </button>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5 col-span-2 md:col-span-1">
-                                <label className="text-sm font-medium text-secondary">Service / Site Name <span className="text-error">*</span></label>
+                            <div className={`space-y-1.5 ${type === "secure_note" ? "col-span-2" : "col-span-2 md:col-span-1"}`}>
+                                <label className="text-sm font-medium text-secondary">
+                                    {type === "secure_note" ? "Note Title" : "Service / Site Name"} <span className="text-error">*</span>
+                                </label>
                                 <input
                                     type="text" required autoFocus
                                     value={siteName} onChange={e => setSiteName(e.target.value)}
@@ -117,75 +149,83 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                             </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-secondary">Username / Email <span className="text-error">*</span></label>
-                            <input
-                                type="text" required spellCheck="false"
-                                value={username} onChange={e => setUsername(e.target.value)}
-                                className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand"
-                                placeholder="name@example.com"
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <div className="flex justify-between items-end">
-                                <label className="text-sm font-medium text-secondary">Password <span className="text-error">*</span></label>
-                                <button type="button" onClick={() => setShowGenerator(!showGenerator)} className="text-xs text-brand hover:text-brand-hover hover:underline transition-colors focus:outline-none">
-                                    {showGenerator ? "Hide Generator" : "Generate Secure Password"}
-                                </button>
-                            </div>
-
-                            <div className="relative flex items-center">
-                                <input
-                                    type={showPassword ? "text" : "password"} required spellCheck="false"
-                                    value={password} onChange={e => setPassword(e.target.value)}
-                                    className="w-full bg-background/50 border border-border rounded-lg pl-3 pr-20 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand font-mono"
-                                />
-                                <div className="absolute right-2 flex gap-1 bg-background/50 backdrop-blur-sm rounded px-1">
-                                    <button
-                                        type="button" tabIndex={-1}
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="p-1.5 text-secondary hover:text-foreground transition-colors rounded focus:outline-none"
-                                    >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                    <button
-                                        type="button" tabIndex={-1}
-                                        onClick={copyPassword}
-                                        className="p-1.5 text-secondary hover:text-success transition-colors rounded focus:outline-none"
-                                    >
-                                        {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
-                                    </button>
+                        {type === "login" && (
+                            <>
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-secondary">Username / Email <span className="text-error">*</span></label>
+                                    <input
+                                        type="text" required spellCheck="false"
+                                        value={username} onChange={e => setUsername(e.target.value)}
+                                        className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand"
+                                        placeholder="name@example.com"
+                                    />
                                 </div>
-                            </div>
-                        </div>
 
-                        {showGenerator && (
-                            <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <PasswordGenerator
-                                    onSelectPattern={(generated) => {
-                                        // Auto-updates the password field when generator runs, 
-                                        // only if empty or explicitly commanded.
-                                        // But here we'll just safely update it so it mirrors.
-                                        setPassword(generated);
-                                    }}
-                                />
-                            </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex justify-between items-end">
+                                        <label className="text-sm font-medium text-secondary">Password <span className="text-error">*</span></label>
+                                        <button type="button" onClick={() => setShowGenerator(!showGenerator)} className="text-xs text-brand hover:text-brand-hover hover:underline transition-colors focus:outline-none">
+                                            {showGenerator ? "Hide Generator" : "Generate Secure Password"}
+                                        </button>
+                                    </div>
+
+                                    <div className="relative flex items-center">
+                                        <input
+                                            type={showPassword ? "text" : "password"} required spellCheck="false"
+                                            value={password} onChange={e => setPassword(e.target.value)}
+                                            className="w-full bg-background/50 border border-border rounded-lg pl-3 pr-20 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand font-mono"
+                                        />
+                                        <div className="absolute right-2 flex gap-1 bg-background/50 backdrop-blur-sm rounded px-1">
+                                            <button
+                                                type="button" tabIndex={-1}
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="p-1.5 text-secondary hover:text-foreground transition-colors rounded focus:outline-none"
+                                            >
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                            <button
+                                                type="button" tabIndex={-1}
+                                                onClick={copyPassword}
+                                                className="p-1.5 text-secondary hover:text-success transition-colors rounded focus:outline-none"
+                                            >
+                                                {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {showGenerator && (
+                                    <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <PasswordGenerator
+                                            onSelectPattern={(generated) => {
+                                                // Auto-updates the password field when generator runs, 
+                                                // only if empty or explicitly commanded.
+                                                // But here we'll just safely update it so it mirrors.
+                                                setPassword(generated);
+                                            }}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-secondary">Website URL</label>
+                                    <input
+                                        type="url" placeholder="https://"
+                                        value={url} onChange={e => setUrl(e.target.value)}
+                                        className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand"
+                                    />
+                                </div>
+                            </>
                         )}
 
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-secondary">Website URL</label>
-                            <input
-                                type="url" placeholder="https://"
-                                value={url} onChange={e => setUrl(e.target.value)}
-                                className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand"
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-secondary">Secure Notes</label>
+                            <label className="text-sm font-medium text-secondary">
+                                {type === "secure_note" ? "Secure Note Content" : "Additional Notes"}
+                                {type === "secure_note" && <span className="text-error ml-1">*</span>}
+                            </label>
                             <textarea
-                                rows={3}
+                                rows={type === "secure_note" ? 10 : 3}
+                                required={type === "secure_note"}
                                 value={notes} onChange={e => setNotes(e.target.value)}
                                 className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand resize-none"
                                 placeholder="Any additional recovery codes or notes..."
@@ -204,7 +244,8 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                         Cancel
                     </button>
                     <button
-                        form="cred-form" type="submit" disabled={isSaving || !siteName || !username || !password}
+                        form="cred-form" type="submit"
+                        disabled={isSaving || !siteName || (type === "login" && (!username || !password)) || (type === "secure_note" && !notes)}
                         className="px-6 py-2 rounded-lg font-semibold bg-brand text-brand-foreground hover:bg-brand-hover hover:scale-105 active:scale-95 transition-all shadow-glow disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2"
                     >
                         {isSaving ? (
@@ -215,8 +256,7 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                         ) : "Save securely"}
                     </button>
                 </div>
-
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

@@ -3,15 +3,18 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
-import { ShieldCheck, LockOpen } from "lucide-react";
+import { LockOpen } from "lucide-react";
 import { CredentialList } from "@/components/vault/credential-list";
 import { VaultUnlock } from "@/components/vault/vault-unlock";
+import { VaultHealth } from "@/components/vault/vault-health";
+import { VaultCredential } from "@/types";
 
 export default function VaultPage() {
-    const { user, signOut } = useAuth();
+    const { user } = useAuth();
 
     // Track unlock state reactively
     const [isUnlocked, setIsUnlocked] = useState(passphraseManager.isUnlocked());
+    const [credentials, setCredentials] = useState<VaultCredential[]>([]);
 
     useEffect(() => {
         // Subscribe to memory manager lock/unlock events so UI perfectly syncs
@@ -21,10 +24,6 @@ export default function VaultPage() {
         });
         return unsubscribe;
     }, []);
-
-    const handleManualLock = () => {
-        passphraseManager.lock();
-    };
 
     // 1. Vault is locked -> Show Unlock Screen
     if (!isUnlocked) {
@@ -44,39 +43,15 @@ export default function VaultPage() {
                         Welcome back, {user?.email}
                     </p>
                 </div>
-
-                <button
-                    onClick={handleManualLock}
-                    className="px-6 py-2 rounded-lg bg-error/10 hover:bg-error/20 text-error transition-colors text-sm font-medium border border-error/20"
-                >
-                    Lock Vault Now
-                </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass p-6 md:p-8 rounded-xl shadow-glass md:col-span-3">
-                    <CredentialList />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+                <div className="md:col-span-3">
+                    <CredentialList onCredentialsLoad={setCredentials} />
                 </div>
 
-                <div className="glass p-6 rounded-xl shadow-glass flex flex-col">
-                    <h2 className="text-lg font-semibold mb-4 text-foreground">Security Health</h2>
-                    <div className="space-y-4 flex-1">
-                        <div className="bg-success/10 text-success p-3 rounded-md text-sm flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4" />
-                            Vault is currently unlocked
-                        </div>
-
-                        <p className="text-xs text-secondary leading-relaxed">
-                            Your cryptographic keys are currently held dynamically in memory. They will be securely purged after 15 minutes of inactivity.
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={signOut}
-                        className="w-full px-4 py-2 mt-4 rounded-md bg-secondary/10 hover:bg-secondary/20 text-foreground transition-colors text-sm font-medium border border-border"
-                    >
-                        Sign Out
-                    </button>
+                <div className="sticky top-6">
+                    <VaultHealth credentials={credentials} />
                 </div>
             </div>
         </div>

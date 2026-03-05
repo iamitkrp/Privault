@@ -8,8 +8,11 @@ import { VaultCredential, DecryptedCredential } from "@/types";
 import { Plus, Search, ServerCrash, KeyRound } from "lucide-react";
 import { CredentialCard } from "./credential-card";
 import { CredentialModal } from "./credential-modal";
+interface CredentialListProps {
+    onCredentialsLoad?: (credentials: VaultCredential[]) => void;
+}
 
-export function CredentialList() {
+export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
     const { user } = useAuth();
 
     const [credentials, setCredentials] = useState<VaultCredential[]>([]);
@@ -31,6 +34,7 @@ export function CredentialList() {
 
             if (result.success) {
                 setCredentials(result.data);
+                if (onCredentialsLoad) onCredentialsLoad(result.data);
             } else {
                 setError(result.error.message || "Failed to sync vault");
             }
@@ -49,13 +53,21 @@ export function CredentialList() {
             const result = await vaultService.updateCredential(editingCred.id, decrypted, metadata);
             if (!result.success) throw result.error;
 
-            setCredentials(prev => prev.map(c => c.id === editingCred.id ? result.data! : c));
+            setCredentials(prev => {
+                const newCreds = prev.map(c => c.id === editingCred.id ? result.data! : c);
+                if (onCredentialsLoad) onCredentialsLoad(newCreds);
+                return newCreds;
+            });
         } else {
             // Add
             const result = await vaultService.addCredential(user.id, decrypted, metadata);
             if (!result.success) throw result.error;
 
-            setCredentials(prev => [result.data!, ...prev]);
+            setCredentials(prev => {
+                const newCreds = [result.data!, ...prev];
+                if (onCredentialsLoad) onCredentialsLoad(newCreds);
+                return newCreds;
+            });
         }
     };
 
@@ -64,7 +76,11 @@ export function CredentialList() {
 
         const result = await vaultService.deleteCredential(id);
         if (result.success) {
-            setCredentials(prev => prev.filter(c => c.id !== id));
+            setCredentials(prev => {
+                const newCreds = prev.filter(c => c.id !== id);
+                if (onCredentialsLoad) onCredentialsLoad(newCreds);
+                return newCreds;
+            });
         } else {
             alert("Failed to delete credential");
         }
