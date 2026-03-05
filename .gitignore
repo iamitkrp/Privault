@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# plan folder (private planning docs)
+/plan
 
 # vercel
 .vercel
