@@ -120,17 +120,17 @@ export class AuthService {
     }
 
     /**
-     * Private helper to ensure a user's `profiles` row exists.
+     * Helper to ensure a user's `profiles` row exists.
      * Supabase doesn't automatically create tables unless a trigger does so.
      */
-    private async ensureProfileExists(user: any): Promise<void> {
+    async ensureProfileExists(user: any): Promise<void> {
         try {
             // 1. Check if it already exists
             const { data: existingProfile } = await this.supabase
                 .from('profiles')
                 .select('id')
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
 
             if (existingProfile) return; // All good
 

@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (session?.user && mounted) {
                     setUser(session.user);
+                    await authService.ensureProfileExists(session.user);
                     const profileResult = await authService.getProfile(session.user.id);
                     if (profileResult.success) {
                         setProfile(profileResult.data);
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (session?.user) {
                     setUser(session.user);
+                    await authService.ensureProfileExists(session.user);
                     const profileResult = await authService.getProfile(session.user.id);
                     if (profileResult.success) {
                         setProfile(profileResult.data);
