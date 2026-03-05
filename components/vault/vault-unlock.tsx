@@ -46,6 +46,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 const supabase = createClient();
                 const { error: dbError } = await supabase
                     .from("profiles")
+                    // @ts-expect-error
                     .update({ vault_verification_data: newVerificationData })
                     .eq("id", profile.id);
 

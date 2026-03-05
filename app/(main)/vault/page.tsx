@@ -7,7 +7,7 @@ import { VaultUnlock } from "@/components/vault/vault-unlock";
 import { ShieldCheck, LockOpen } from "lucide-react";
 
 export default function VaultPage() {
-    const { user, profile, signOut } = useAuth();
+    const { user, signOut } = useAuth();
 
     // Track unlock state reactively
     const [isUnlocked, setIsUnlocked] = useState(passphraseManager.isUnlocked());
