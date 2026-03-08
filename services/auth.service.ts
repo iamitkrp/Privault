@@ -67,7 +67,10 @@ export class AuthService {
             }
 
             // Check if profile exists. If not, create it using the metadata salt.
-            await this.ensureProfileExists(data.user);
+            const profileResult = await this.ensureProfileExists(data.user);
+            if (!profileResult.success) {
+                return { success: false, error: new Error('Account setup failed. Please contact support.') };
+            }
 
             return { success: true, data: { id: data.user.id } };
         } catch (e) {
@@ -121,9 +124,9 @@ export class AuthService {
 
     /**
      * Helper to ensure a user's `profiles` row exists.
-     * Supabase doesn't automatically create tables unless a trigger does so.
+     * Returns success/error so callers can act on failures.
      */
-    async ensureProfileExists(user: any): Promise<void> {
+    async ensureProfileExists(user: any): Promise<{ success: boolean; error?: Error }> {
         try {
             // 1. Check if it already exists
             const { data: existingProfile } = await this.supabase
@@ -132,22 +135,22 @@ export class AuthService {
                 .eq('user_id', user.id)
                 .maybeSingle();
 
-            if (existingProfile) return; // All good
+            if (existingProfile) return { success: true }; // All good
 
             // 2. We need to create it. Re-extract the salt from user metadata.
-            const salt = user.user_metadata?.crypto_salt;
+            let salt = user.user_metadata?.crypto_salt;
 
             if (!salt) {
-                console.error('User has no crypto_salt in metadata!');
-                // Could auto-generate one here as a fallback, but that implies the 
-                // original password hash used during signup will be out of sync.
-                // For a from-scratch environment, we just create a new one.
-                return;
+                // Fallback: generate a fresh salt so the user isn't left without a profile.
+                // Note: this means any data encrypted with the original (missing) salt
+                // will be unrecoverable, but it prevents a broken account state.
+                console.warn('User has no crypto_salt in metadata — generating fallback salt.');
+                salt = generateSalt();
             }
 
             // 3. Insert the profile
             // @ts-expect-error - Manual mock Database types are overly restrictive. Real DB types will fix this.
-            await this.supabase.from('profiles').insert({
+            const { error: insertError } = await this.supabase.from('profiles').insert({
                 user_id: user.id,
                 email: user.email!,
                 salt: salt,
@@ -156,8 +159,17 @@ export class AuthService {
                     requireOtp: false
                 }
             });
+
+            if (insertError) {
+                console.error('Profile insertion failed:', insertError);
+                return { success: false, error: new Error('Failed to create user profile.') };
+            }
+
+            return { success: true };
         } catch (e) {
             console.error('Failed to ensure profile exists:', e);
+            return { success: false, error: new Error('Failed to create user profile.') };
         }
     }
 }
+

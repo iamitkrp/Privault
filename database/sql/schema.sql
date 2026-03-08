@@ -261,9 +261,47 @@ CREATE TRIGGER trg_vault_credentials_updated_at BEFORE UPDATE ON vault_credentia
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ==========================================
+-- RPC: ATOMIC CREDENTIAL RE-ENCRYPTION
+-- ==========================================
+-- Used by rotateMasterPassword to update all credential rows atomically.
+-- If any single row update fails, the entire transaction rolls back,
+-- preventing partial-key corruption of the vault.
+
+CREATE OR REPLACE FUNCTION rotate_vault_credentials(
+    p_user_id UUID,
+    p_updates JSONB   -- array of {id, encrypted_data, iv}
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY INVOKER   -- caller's RLS policies remain enforced
+AS $$
+DECLARE
+    rec JSONB;
+    row_count INTEGER;
+BEGIN
+    FOR rec IN SELECT * FROM jsonb_array_elements(p_updates)
+    LOOP
+        UPDATE vault_credentials
+        SET encrypted_data = rec->>'encrypted_data',
+            iv = rec->>'iv'
+        WHERE id = (rec->>'id')::UUID
+          AND user_id = p_user_id;
+
+        GET DIAGNOSTICS row_count = ROW_COUNT;
+
+        IF row_count = 0 THEN
+            RAISE EXCEPTION 'Credential % not found or not owned by user %',
+                rec->>'id', p_user_id;
+        END IF;
+    END LOOP;
+END;
+$$;
+
+-- ==========================================
 -- VERIFICATION
 -- ==========================================
 -- Run these queries individually to verify setup:
 -- 1. Check tables: \dt
 -- 2. Check RLS policies: select * from pg_policies;
 -- 3. Check triggers: select trigger_name, event_manipulation, action_statement from information_schema.triggers;
+-- 4. Check functions: select routine_name from information_schema.routines where routine_schema = 'public';

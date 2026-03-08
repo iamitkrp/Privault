@@ -318,18 +318,19 @@ export class VaultService {
             const verResult = await encryptData(CRYPTO_CONFIG.verificationString, newKey);
             const newVerificationData = JSON.stringify(verResult);
 
-            // ── Step 6: Batch update DB ──
-            // Update each credential row
-            for (const u of updates) {
-                const { error: updateErr } = await this.supabase
-                    .from('vault_credentials')
-                    // @ts-expect-error
-                    .update({ encrypted_data: u.encrypted_data, iv: u.iv })
-                    .eq('id', u.id);
+            // ── Step 6: Atomically update all credentials via RPC ──
+            // The rotate_vault_credentials function runs within a single PostgreSQL
+            // transaction — if any row update fails, the entire batch rolls back,
+            // preventing partial-key corruption of the vault.
+            // @ts-expect-error - Database types don't include custom RPC functions
+            const { error: rpcErr } = await this.supabase.rpc('rotate_vault_credentials', {
+                p_user_id: userId,
+                p_updates: updates,
+            });
 
-                if (updateErr) {
-                    return { success: false, error: new Error(`Failed to re-encrypt credential ${u.id}`) };
-                }
+            if (rpcErr) {
+                console.error('Atomic credential rotation failed:', rpcErr);
+                return { success: false, error: new Error('Re-encryption failed. No credentials were modified.') };
             }
 
             // Update profile verification data AND upgrade kdf_iterations
