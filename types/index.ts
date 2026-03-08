@@ -104,6 +104,8 @@ export interface UserProfile {
     email: string;
     salt: string | null;
     vault_verification_data: string | null;
+    /** Per-user PBKDF2 iteration count. null = legacy (100K), populated = upgraded. */
+    kdf_iterations: number | null;
     security_settings: SecuritySettings;
     created_at: string;
     updated_at: string;

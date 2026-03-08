@@ -67,7 +67,8 @@ function ChangeMasterPasswordSection() {
                 currentPassword,
                 newPassword,
                 profile.salt,
-                profile.vault_verification_data
+                profile.vault_verification_data,
+                profile.kdf_iterations
             );
 
             if (!result.success) {

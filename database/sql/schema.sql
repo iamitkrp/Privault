@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     email           TEXT NOT NULL,
     salt            TEXT NOT NULL,        -- Base64-encoded, for PBKDF2 key derivation
     vault_verification_data TEXT,         -- Encrypted test data to verify master password
+    kdf_iterations  INTEGER,             -- Per-user PBKDF2 iteration count (NULL = legacy 100K)
     security_settings JSONB DEFAULT '{
         "autoLockTimeout": 900000,
         "requireOtp": false

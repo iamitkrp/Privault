@@ -18,10 +18,15 @@ class PassphraseManager {
 
     /**
      * Unlocks the vault in memory. Derives the AES key and sets up auto-timeout.
+     *
+     * @param password  The user's master password.
+     * @param saltBase64  The Base64-encoded salt from the user's profile.
+     * @param iterations  Optional PBKDF2 iteration count (from profile.kdf_iterations).
+     *                    When omitted, uses CRYPTO_CONFIG.iterations (600K).
      */
-    async unlock(password: string, saltBase64: string): Promise<void> {
+    async unlock(password: string, saltBase64: string, iterations?: number): Promise<void> {
         try {
-            this.cryptoKey = await deriveKeyFromPassword(password, saltBase64);
+            this.cryptoKey = await deriveKeyFromPassword(password, saltBase64, iterations);
             this.locked = false;
             this.resetAutoLockTimer();
             this.notifyListeners();
@@ -98,40 +103,108 @@ class PassphraseManager {
     /**
      * Verifies the master password against the stored test verification string.
      * If `vault_verification_data` is null (first login), it creates it.
+     *
+     * Supports per-user KDF iteration migration:
+     *  - First tries with the user's stored `kdfIterations` (or the current default if null).
+     *  - If decryption fails and the stored iterations differ from legacy, retries at legacy (100K).
+     *  - When the legacy fallback succeeds, returns `needsKdfUpgrade: true` along with
+     *    re-encrypted verification data and the resolved iteration count, so the caller can
+     *    persist the upgrade.
+     *
+     * @param password            The master password to verify.
+     * @param saltBase64          The user's Base64-encoded salt.
+     * @param verificationDataStr The stored encrypted verification blob, or null for first-time setup.
+     * @param kdfIterations       The user's persisted kdf_iterations value (null = legacy user).
      */
     async verifyOrSetupMasterPassword(
         password: string,
         saltBase64: string,
-        verificationDataStr: string | null
-    ): Promise<{ isValid: boolean, newVerificationData?: string }> {
+        verificationDataStr: string | null,
+        kdfIterations: number | null
+    ): Promise<{
+        isValid: boolean;
+        newVerificationData?: string;
+        needsKdfUpgrade?: boolean;
+        /** The iteration count that successfully verified the password */
+        resolvedIterations?: number;
+    }> {
+        // Determine the effective iteration count for this user
+        const effectiveIterations = kdfIterations ?? CRYPTO_CONFIG.legacyIterations;
 
-        // 1. Derive temporary key specifically to test
-        const tempKey = await deriveKeyFromPassword(password, saltBase64);
-
-        // 2. Setup Mode (first time unlocking vault ever)
+        // ── Setup Mode (first time unlocking vault) ──
         if (!verificationDataStr) {
-            // Encrypt our known magic string and return it so the caller can save it to the DB
+            // New users always start at the current (strongest) iteration count
+            const tempKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
             const result = await encryptData(CRYPTO_CONFIG.verificationString, tempKey);
-
-            // We encode iv and encrypted data together for easy DB storage
             const newVerificationData = JSON.stringify(result);
-
-            return { isValid: true, newVerificationData };
+            return {
+                isValid: true,
+                newVerificationData,
+                needsKdfUpgrade: false,
+                resolvedIterations: CRYPTO_CONFIG.iterations,
+            };
         }
 
-        // 3. Verification Mode
+        // ── Verification Mode ──
+        // 1. Try with the effective (stored or legacy) iteration count
         try {
+            const tempKey = await deriveKeyFromPassword(password, saltBase64, effectiveIterations);
             const parsed = JSON.parse(verificationDataStr);
             if (!parsed.iv || !parsed.encryptedData) return { isValid: false };
 
             const decrypted = await decryptData(parsed.encryptedData, parsed.iv, tempKey);
+            if (decrypted !== CRYPTO_CONFIG.verificationString) return { isValid: false };
 
-            const isValid = decrypted === CRYPTO_CONFIG.verificationString;
-            return { isValid };
-        } catch (e) {
-            // JSON parse error or decrypt error = wrong password
-            return { isValid: false };
+            // Verification succeeded at effectiveIterations
+            const needsUpgrade = effectiveIterations < CRYPTO_CONFIG.iterations;
+
+            if (needsUpgrade) {
+                // Re-encrypt verification data at the new iteration count
+                const upgradedKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
+                const upgradedResult = await encryptData(CRYPTO_CONFIG.verificationString, upgradedKey);
+                const upgradedVerificationData = JSON.stringify(upgradedResult);
+                return {
+                    isValid: true,
+                    newVerificationData: upgradedVerificationData,
+                    needsKdfUpgrade: true,
+                    resolvedIterations: effectiveIterations,
+                };
+            }
+
+            return { isValid: true, resolvedIterations: effectiveIterations };
+        } catch {
+            // Decryption failed — could be wrong password or iteration mismatch
         }
+
+        // 2. Fallback: if effectiveIterations != legacyIterations, try legacy
+        //    (covers edge case where kdf_iterations was manually set to a non-legacy value
+        //     but the verification data hasn't been re-encrypted yet)
+        if (effectiveIterations !== CRYPTO_CONFIG.legacyIterations) {
+            try {
+                const legacyKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.legacyIterations);
+                const parsed = JSON.parse(verificationDataStr);
+                if (!parsed.iv || !parsed.encryptedData) return { isValid: false };
+
+                const decrypted = await decryptData(parsed.encryptedData, parsed.iv, legacyKey);
+                if (decrypted !== CRYPTO_CONFIG.verificationString) return { isValid: false };
+
+                // Legacy verification succeeded — re-encrypt at current iterations
+                const upgradedKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
+                const upgradedResult = await encryptData(CRYPTO_CONFIG.verificationString, upgradedKey);
+                const upgradedVerificationData = JSON.stringify(upgradedResult);
+
+                return {
+                    isValid: true,
+                    newVerificationData: upgradedVerificationData,
+                    needsKdfUpgrade: true,
+                    resolvedIterations: CRYPTO_CONFIG.legacyIterations,
+                };
+            } catch {
+                // Also failed — definitely wrong password
+            }
+        }
+
+        return { isValid: false };
     }
 }
 

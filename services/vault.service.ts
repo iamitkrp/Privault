@@ -239,11 +239,11 @@ export class VaultService {
     /**
      * Rotates the master password.
      * 1. Verify old password against the stored verification data.
-     * 2. Decrypt ALL credentials with the old key.
-     * 3. Derive a NEW key from the new password + existing salt.
+     * 2. Decrypt ALL credentials with the old key (at old iterations).
+     * 3. Derive a NEW key from the new password + existing salt (at current best iterations).
      * 4. Re-encrypt ALL credentials with the new key.
      * 5. Generate new vault_verification_data with the new key.
-     * 6. Batch-update Supabase (all credentials + profile verification data).
+     * 6. Batch-update Supabase (all credentials + profile verification data + kdf_iterations).
      * 7. Re-unlock the passphrase manager with the new key.
      */
     async rotateMasterPassword(
@@ -251,26 +251,32 @@ export class VaultService {
         oldPassword: string,
         newPassword: string,
         saltBase64: string,
-        currentVerificationData: string | null
+        currentVerificationData: string | null,
+        kdfIterations: number | null
     ): Promise<Result<{ newVerificationData: string }>> {
         const { deriveKeyFromPassword } = await import('@/lib/crypto/engine');
         const { passphraseManager } = await import('@/lib/crypto/passphrase');
         const { CRYPTO_CONFIG } = await import('@/constants');
+
+        // The effective old iteration count
+        const oldIterations = kdfIterations ?? CRYPTO_CONFIG.legacyIterations;
 
         try {
             // ── Step 1: Verify old password ──
             const { isValid } = await passphraseManager.verifyOrSetupMasterPassword(
                 oldPassword,
                 saltBase64,
-                currentVerificationData
+                currentVerificationData,
+                kdfIterations
             );
             if (!isValid) {
                 return { success: false, error: new Error("Current master password is incorrect.") };
             }
 
             // ── Step 2: Derive both keys ──
-            const oldKey = await deriveKeyFromPassword(oldPassword, saltBase64);
-            const newKey = await deriveKeyFromPassword(newPassword, saltBase64);
+            // Old key at user's stored iterations; new key always at current best
+            const oldKey = await deriveKeyFromPassword(oldPassword, saltBase64, oldIterations);
+            const newKey = await deriveKeyFromPassword(newPassword, saltBase64, CRYPTO_CONFIG.iterations);
 
             // ── Step 3: Fetch all raw encrypted rows ──
             const { data: rows, error: fetchErr } = await this.supabase
@@ -310,20 +316,23 @@ export class VaultService {
                 }
             }
 
-            // Update profile verification data
+            // Update profile verification data AND upgrade kdf_iterations
             const { error: profileErr } = await this.supabase
                 .from('profiles')
                 // @ts-expect-error
-                .update({ vault_verification_data: newVerificationData })
+                .update({
+                    vault_verification_data: newVerificationData,
+                    kdf_iterations: CRYPTO_CONFIG.iterations,
+                })
                 .eq('user_id', userId);
 
             if (profileErr) {
                 return { success: false, error: new Error("Failed to update verification data.") };
             }
 
-            // ── Step 7: Re-unlock passphrase manager with new key ──
+            // ── Step 7: Re-unlock passphrase manager with new key at new iterations ──
             passphraseManager.lock();
-            await passphraseManager.unlock(newPassword, saltBase64);
+            await passphraseManager.unlock(newPassword, saltBase64, CRYPTO_CONFIG.iterations);
 
             return { success: true, data: { newVerificationData } };
 

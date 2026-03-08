@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
+import { CRYPTO_CONFIG } from "@/constants";
 import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { SecurityService } from "@/services/security.service";
@@ -28,12 +29,14 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
         setError(null);
 
         try {
-            // For first time users, this will encrypt the verification string and return it
-            const { isValid, newVerificationData } = await passphraseManager.verifyOrSetupMasterPassword(
-                password,
-                profile.salt,
-                profile.vault_verification_data
-            );
+            // Verify the master password, passing the user's stored KDF iterations
+            const { isValid, newVerificationData, needsKdfUpgrade } =
+                await passphraseManager.verifyOrSetupMasterPassword(
+                    password,
+                    profile.salt,
+                    profile.vault_verification_data,
+                    profile.kdf_iterations
+                );
 
             if (!isValid) {
                 setIsLoading(false);
@@ -41,14 +44,24 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 return;
             }
 
-            // If it's the first time unlocking, persist the magic verification string 
-            // back to the profile before fully unlocking the memory vault
+            const supabase = createClient();
+
+            // Determine what to persist: first-time setup, KDF upgrade, or nothing
             if (newVerificationData) {
-                const supabase = createClient();
+                // Build the update payload
+                const updatePayload: Record<string, unknown> = {
+                    vault_verification_data: newVerificationData,
+                };
+
+                if (needsKdfUpgrade || !profile.vault_verification_data) {
+                    // Upgrade to current iterations OR first-time setup at current iterations
+                    updatePayload.kdf_iterations = CRYPTO_CONFIG.iterations;
+                }
+
                 const { error: dbError } = await supabase
                     .from("profiles")
                     // @ts-expect-error
-                    .update({ vault_verification_data: newVerificationData })
+                    .update(updatePayload)
                     .eq("id", profile.id);
 
                 if (dbError) {
@@ -56,8 +69,16 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 }
             }
 
-            // Officially unlock the vault in memory
-            await passphraseManager.unlock(password, profile.salt);
+            // Unlock the vault in memory.
+            // After a successful upgrade (or first-time setup) the key should be derived at
+            // the new (600K) iterations. For existing users who are already at 600K (or any
+            // stored value), use their stored value.
+            const unlockIterations =
+                (newVerificationData && (needsKdfUpgrade || !profile.vault_verification_data))
+                    ? CRYPTO_CONFIG.iterations
+                    : (profile.kdf_iterations ?? CRYPTO_CONFIG.legacyIterations);
+
+            await passphraseManager.unlock(password, profile.salt, unlockIterations);
 
             // Log vault unlock event
             try {

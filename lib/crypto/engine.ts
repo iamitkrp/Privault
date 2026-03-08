@@ -32,14 +32,18 @@ export function bufferToText(buffer: Uint8Array): string {
  * 
  * @param password The user's plaintext master password.
  * @param saltBase64 The base64 stored salt for this user.
+ * @param iterations Optional PBKDF2 iteration count. When omitted, uses CRYPTO_CONFIG.iterations (600K).
+ *                   Pass the user's persisted kdf_iterations value to honour per-user versioning.
  * @returns CryptoKey for use with AES-GCM
  */
 export async function deriveKeyFromPassword(
     password: string,
-    saltBase64: string
+    saltBase64: string,
+    iterations?: number
 ): Promise<CryptoKey> {
     const passwordBuffer = textToBuffer(password);
     const saltBuffer = base64ToBuffer(saltBase64);
+    const iterCount = iterations ?? CRYPTO_CONFIG.iterations;
 
     // 1. Import the raw password material
     const keyMaterial = await window.crypto.subtle.importKey(
@@ -55,7 +59,7 @@ export async function deriveKeyFromPassword(
         {
             name: "PBKDF2",
             salt: saltBuffer as unknown as BufferSource,
-            iterations: CRYPTO_CONFIG.iterations,
+            iterations: iterCount,
             hash: CRYPTO_CONFIG.hashAlgorithm
         },
         keyMaterial,
