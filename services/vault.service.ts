@@ -318,33 +318,22 @@ export class VaultService {
             const verResult = await encryptData(CRYPTO_CONFIG.verificationString, newKey);
             const newVerificationData = JSON.stringify(verResult);
 
-            // ── Step 6: Atomically update all credentials via RPC ──
+            // ── Step 6: Atomically update all credentials + profile via RPC ──
             // The rotate_vault_credentials function runs within a single PostgreSQL
-            // transaction — if any row update fails, the entire batch rolls back,
-            // preventing partial-key corruption of the vault.
+            // transaction — both credential re-encryption and profile verification
+            // metadata update happen atomically. If any row or profile update fails,
+            // the entire batch rolls back, preventing partial-key corruption.
             // @ts-expect-error - Database types don't include custom RPC functions
             const { error: rpcErr } = await this.supabase.rpc('rotate_vault_credentials', {
                 p_user_id: userId,
                 p_updates: updates,
+                p_new_verification_data: newVerificationData,
+                p_new_kdf_iterations: CRYPTO_CONFIG.iterations,
             });
 
             if (rpcErr) {
-                console.error('Atomic credential rotation failed:', rpcErr);
-                return { success: false, error: new Error('Re-encryption failed. No credentials were modified.') };
-            }
-
-            // Update profile verification data AND upgrade kdf_iterations
-            const { error: profileErr } = await this.supabase
-                .from('profiles')
-                // @ts-expect-error
-                .update({
-                    vault_verification_data: newVerificationData,
-                    kdf_iterations: CRYPTO_CONFIG.iterations,
-                })
-                .eq('user_id', userId);
-
-            if (profileErr) {
-                return { success: false, error: new Error("Failed to update verification data.") };
+                console.error('Atomic password rotation failed:', rpcErr);
+                return { success: false, error: new Error('Password rotation failed. No data was modified.') };
             }
 
             // ── Step 7: Re-unlock passphrase manager with new key at new iterations ──

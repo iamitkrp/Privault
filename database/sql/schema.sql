@@ -261,15 +261,18 @@ CREATE TRIGGER trg_vault_credentials_updated_at BEFORE UPDATE ON vault_credentia
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ==========================================
--- RPC: ATOMIC CREDENTIAL RE-ENCRYPTION
+-- RPC: ATOMIC PASSWORD ROTATION
 -- ==========================================
--- Used by rotateMasterPassword to update all credential rows atomically.
--- If any single row update fails, the entire transaction rolls back,
+-- Used by rotateMasterPassword to update all credential rows AND the
+-- profile verification metadata in a single PostgreSQL transaction.
+-- If any single row/profile update fails, the entire transaction rolls back,
 -- preventing partial-key corruption of the vault.
 
 CREATE OR REPLACE FUNCTION rotate_vault_credentials(
     p_user_id UUID,
-    p_updates JSONB   -- array of {id, encrypted_data, iv}
+    p_updates JSONB,                    -- array of {id, encrypted_data, iv}
+    p_new_verification_data TEXT,       -- re-encrypted vault_verification_data
+    p_new_kdf_iterations INTEGER        -- target KDF iteration count
 )
 RETURNS void
 LANGUAGE plpgsql
@@ -279,6 +282,7 @@ DECLARE
     rec JSONB;
     row_count INTEGER;
 BEGIN
+    -- 1. Update each credential row
     FOR rec IN SELECT * FROM jsonb_array_elements(p_updates)
     LOOP
         UPDATE vault_credentials
@@ -294,6 +298,18 @@ BEGIN
                 rec->>'id', p_user_id;
         END IF;
     END LOOP;
+
+    -- 2. Update profile verification data and KDF iterations
+    UPDATE profiles
+    SET vault_verification_data = p_new_verification_data,
+        kdf_iterations = p_new_kdf_iterations
+    WHERE user_id = p_user_id;
+
+    GET DIAGNOSTICS row_count = ROW_COUNT;
+
+    IF row_count = 0 THEN
+        RAISE EXCEPTION 'Profile not found for user %', p_user_id;
+    END IF;
 END;
 $$;
 
