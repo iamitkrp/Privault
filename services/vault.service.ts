@@ -316,10 +316,10 @@ export class VaultService {
             }
 
             // ── Step 5: Create new verification data with the new key ──
-            // Use a per-user random token instead of the static known-plaintext string
+            // Encrypt a random token but only persist the scheme marker, never the plaintext
             const verificationToken = generateVerificationToken();
             const verResult = await encryptData(verificationToken, newKey);
-            const newVerificationData = JSON.stringify({ ...verResult, token: verificationToken });
+            const newVerificationData = JSON.stringify({ ...verResult, scheme: 'random_token_v2' });
 
             // ── Step 6: Atomically update all credentials + profile via RPC ──
             // The rotate_vault_credentials function runs within a single PostgreSQL

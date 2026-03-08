@@ -103,14 +103,23 @@ class PassphraseManager {
 
     /**
      * Helper: encrypts a random verification token and returns the JSON blob.
-     * The blob shape is { encryptedData, iv, token } where `token` is the
-     * plaintext Base64 token that was encrypted. This per-user random token
-     * eliminates the known-plaintext advantage of the old static string.
+     * The blob shape is { encryptedData, iv, scheme: "random_token_v2" }.
+     * The plaintext token is NEVER persisted — only its encrypted form.
+     * AES-GCM's authenticated decryption ensures integrity: a wrong key
+     * will fail the auth-tag check and throw, acting as the verification gate.
      */
     private async createVerificationBlob(key: CryptoKey): Promise<string> {
         const token = generateVerificationToken();
         const { encryptedData, iv } = await encryptData(token, key);
-        return JSON.stringify({ encryptedData, iv, token });
+        return JSON.stringify({ encryptedData, iv, scheme: 'random_token_v2' });
+    }
+
+    /**
+     * Validates that a decrypted verification token looks like a valid
+     * Base64-encoded 32-byte random token (~44 characters).
+     */
+    private isValidTokenShape(decrypted: string): boolean {
+        return typeof decrypted === 'string' && decrypted.length >= 40 && decrypted.length <= 48;
     }
 
     /**
@@ -118,11 +127,13 @@ class PassphraseManager {
      * If `vault_verification_data` is null (first login), it creates it.
      *
      * Verification data formats:
-     *  - New format: { encryptedData, iv, token } — `token` is a per-user random
-     *    32-byte Base64 string. Verification decrypts and compares against `token`.
-     *  - Legacy format: { encryptedData, iv } (no `token` field) — decrypts and
-     *    compares against CRYPTO_CONFIG.verificationString. On success, automatically
-     *    upgrades to the new random-token format.
+     *  - Current format (v2): { encryptedData, iv, scheme: "random_token_v2" } —
+     *    AES-GCM decryption success = valid password (auth tag validates integrity).
+     *    Decrypted token shape/length is validated as an extra guard.
+     *  - Transitional format: { encryptedData, iv, token } — from a brief window where
+     *    the plaintext token was stored. Auto-upgrades to v2 on success.
+     *  - Legacy format: { encryptedData, iv } — decrypts and compares against
+     *    CRYPTO_CONFIG.verificationString. Auto-upgrades to v2 on success.
      *
      * Supports per-user KDF iteration migration:
      *  - First tries with the user's stored `kdfIterations` (or the current default if null).
@@ -174,25 +185,31 @@ class PassphraseManager {
 
             const decrypted = await decryptData(parsed.encryptedData, parsed.iv, tempKey);
 
-            // Determine expected plaintext based on blob format
-            const expectedPlaintext = parsed.token
-                ? parsed.token                           // New format: per-user random token
-                : CRYPTO_CONFIG.verificationString;      // Legacy format: static string
-
-            if (decrypted !== expectedPlaintext) return { isValid: false };
+            // Determine verification based on blob format
+            if (parsed.scheme === 'random_token_v2') {
+                // Current format: AES-GCM decryption succeeded (auth tag passed).
+                // Validate decrypted token shape as extra guard.
+                if (!this.isValidTokenShape(decrypted)) return { isValid: false };
+            } else if (parsed.token) {
+                // Transitional format: plaintext token was stored — compare and upgrade
+                if (decrypted !== parsed.token) return { isValid: false };
+            } else {
+                // Legacy format: compare against static verification string
+                if (decrypted !== CRYPTO_CONFIG.verificationString) return { isValid: false };
+            }
 
             // Verification succeeded at effectiveIterations
             const needsKdfUpgrade = effectiveIterations < CRYPTO_CONFIG.iterations;
-            const needsTokenUpgrade = !parsed.token; // Legacy blob without random token
+            const needsSchemeUpgrade = parsed.scheme !== 'random_token_v2';
 
-            if (needsKdfUpgrade || needsTokenUpgrade) {
+            if (needsKdfUpgrade || needsSchemeUpgrade) {
                 // Re-encrypt with a fresh random token at the current iteration count
                 const upgradedKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
                 const upgradedVerificationData = await this.createVerificationBlob(upgradedKey);
                 return {
                     isValid: true,
                     newVerificationData: upgradedVerificationData,
-                    needsKdfUpgrade: needsKdfUpgrade || needsTokenUpgrade,
+                    needsKdfUpgrade: needsKdfUpgrade || needsSchemeUpgrade,
                     resolvedIterations: effectiveIterations,
                 };
             }
@@ -213,12 +230,14 @@ class PassphraseManager {
 
                 const decrypted = await decryptData(parsed.encryptedData, parsed.iv, legacyKey);
 
-                // Determine expected plaintext based on blob format
-                const expectedPlaintext = parsed.token
-                    ? parsed.token
-                    : CRYPTO_CONFIG.verificationString;
-
-                if (decrypted !== expectedPlaintext) return { isValid: false };
+                // Determine verification based on blob format
+                if (parsed.scheme === 'random_token_v2') {
+                    if (!this.isValidTokenShape(decrypted)) return { isValid: false };
+                } else if (parsed.token) {
+                    if (decrypted !== parsed.token) return { isValid: false };
+                } else {
+                    if (decrypted !== CRYPTO_CONFIG.verificationString) return { isValid: false };
+                }
 
                 // Legacy verification succeeded — re-encrypt with random token at current iterations
                 const upgradedKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
