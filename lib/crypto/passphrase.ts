@@ -1,5 +1,6 @@
 import { CRYPTO_CONFIG, SESSION_CONFIG } from "@/constants";
 import { deriveKeyFromPassword, encryptData, decryptData } from "./engine";
+import { generateVerificationToken } from "./core";
 
 /**
  * Singleton class to securely hold the master passphrase and derived CryptoKey in memory.
@@ -101,8 +102,27 @@ class PassphraseManager {
     }
 
     /**
-     * Verifies the master password against the stored test verification string.
+     * Helper: encrypts a random verification token and returns the JSON blob.
+     * The blob shape is { encryptedData, iv, token } where `token` is the
+     * plaintext Base64 token that was encrypted. This per-user random token
+     * eliminates the known-plaintext advantage of the old static string.
+     */
+    private async createVerificationBlob(key: CryptoKey): Promise<string> {
+        const token = generateVerificationToken();
+        const { encryptedData, iv } = await encryptData(token, key);
+        return JSON.stringify({ encryptedData, iv, token });
+    }
+
+    /**
+     * Verifies the master password against the stored verification data.
      * If `vault_verification_data` is null (first login), it creates it.
+     *
+     * Verification data formats:
+     *  - New format: { encryptedData, iv, token } — `token` is a per-user random
+     *    32-byte Base64 string. Verification decrypts and compares against `token`.
+     *  - Legacy format: { encryptedData, iv } (no `token` field) — decrypts and
+     *    compares against CRYPTO_CONFIG.verificationString. On success, automatically
+     *    upgrades to the new random-token format.
      *
      * Supports per-user KDF iteration migration:
      *  - First tries with the user's stored `kdfIterations` (or the current default if null).
@@ -134,9 +154,9 @@ class PassphraseManager {
         // ── Setup Mode (first time unlocking vault) ──
         if (!verificationDataStr) {
             // New users always start at the current (strongest) iteration count
+            // and use a per-user random token instead of the static known-plaintext string
             const tempKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
-            const result = await encryptData(CRYPTO_CONFIG.verificationString, tempKey);
-            const newVerificationData = JSON.stringify(result);
+            const newVerificationData = await this.createVerificationBlob(tempKey);
             return {
                 isValid: true,
                 newVerificationData,
@@ -153,20 +173,26 @@ class PassphraseManager {
             if (!parsed.iv || !parsed.encryptedData) return { isValid: false };
 
             const decrypted = await decryptData(parsed.encryptedData, parsed.iv, tempKey);
-            if (decrypted !== CRYPTO_CONFIG.verificationString) return { isValid: false };
+
+            // Determine expected plaintext based on blob format
+            const expectedPlaintext = parsed.token
+                ? parsed.token                           // New format: per-user random token
+                : CRYPTO_CONFIG.verificationString;      // Legacy format: static string
+
+            if (decrypted !== expectedPlaintext) return { isValid: false };
 
             // Verification succeeded at effectiveIterations
-            const needsUpgrade = effectiveIterations < CRYPTO_CONFIG.iterations;
+            const needsKdfUpgrade = effectiveIterations < CRYPTO_CONFIG.iterations;
+            const needsTokenUpgrade = !parsed.token; // Legacy blob without random token
 
-            if (needsUpgrade) {
-                // Re-encrypt verification data at the new iteration count
+            if (needsKdfUpgrade || needsTokenUpgrade) {
+                // Re-encrypt with a fresh random token at the current iteration count
                 const upgradedKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
-                const upgradedResult = await encryptData(CRYPTO_CONFIG.verificationString, upgradedKey);
-                const upgradedVerificationData = JSON.stringify(upgradedResult);
+                const upgradedVerificationData = await this.createVerificationBlob(upgradedKey);
                 return {
                     isValid: true,
                     newVerificationData: upgradedVerificationData,
-                    needsKdfUpgrade: true,
+                    needsKdfUpgrade: needsKdfUpgrade || needsTokenUpgrade,
                     resolvedIterations: effectiveIterations,
                 };
             }
@@ -186,12 +212,17 @@ class PassphraseManager {
                 if (!parsed.iv || !parsed.encryptedData) return { isValid: false };
 
                 const decrypted = await decryptData(parsed.encryptedData, parsed.iv, legacyKey);
-                if (decrypted !== CRYPTO_CONFIG.verificationString) return { isValid: false };
 
-                // Legacy verification succeeded — re-encrypt at current iterations
+                // Determine expected plaintext based on blob format
+                const expectedPlaintext = parsed.token
+                    ? parsed.token
+                    : CRYPTO_CONFIG.verificationString;
+
+                if (decrypted !== expectedPlaintext) return { isValid: false };
+
+                // Legacy verification succeeded — re-encrypt with random token at current iterations
                 const upgradedKey = await deriveKeyFromPassword(password, saltBase64, CRYPTO_CONFIG.iterations);
-                const upgradedResult = await encryptData(CRYPTO_CONFIG.verificationString, upgradedKey);
-                const upgradedVerificationData = JSON.stringify(upgradedResult);
+                const upgradedVerificationData = await this.createVerificationBlob(upgradedKey);
 
                 return {
                     isValid: true,
@@ -224,3 +255,4 @@ if (typeof window !== 'undefined') {
         window.addEventListener(eventType, resetTimer, { passive: true });
     });
 }
+

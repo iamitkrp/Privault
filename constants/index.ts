@@ -32,7 +32,11 @@ export const CRYPTO_CONFIG = {
     /** 32-byte (256-bit) salt */
     saltLength: 32,
 
-    /** Known test string for vault password verification */
+    /**
+     * @deprecated Retained solely for backward compatibility with existing
+     * vault_verification_data blobs that lack a per-user random `token` field.
+     * New setups and upgrades use a cryptographically random 32-byte token instead.
+     */
     verificationString: "PRIVAULT_VAULT_VERIFICATION_v1",
 } as const;
 

@@ -9,6 +9,7 @@ import {
 } from '@/types';
 import { ERROR_MESSAGES } from '@/constants';
 import { encryptData, decryptData } from '@/lib/crypto/engine';
+import { generateVerificationToken } from '@/lib/crypto/core';
 import { passphraseManager } from '@/lib/crypto/passphrase';
 import { AuditService } from './audit.service';
 
@@ -315,8 +316,10 @@ export class VaultService {
             }
 
             // ── Step 5: Create new verification data with the new key ──
-            const verResult = await encryptData(CRYPTO_CONFIG.verificationString, newKey);
-            const newVerificationData = JSON.stringify(verResult);
+            // Use a per-user random token instead of the static known-plaintext string
+            const verificationToken = generateVerificationToken();
+            const verResult = await encryptData(verificationToken, newKey);
+            const newVerificationData = JSON.stringify({ ...verResult, token: verificationToken });
 
             // ── Step 6: Atomically update all credentials + profile via RPC ──
             // The rotate_vault_credentials function runs within a single PostgreSQL
