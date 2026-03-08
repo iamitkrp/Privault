@@ -91,6 +91,16 @@ export class VaultService {
                 data.map(row => this.decryptCredentialRow(row as unknown as EncryptedCredential, key))
             );
 
+            // Audit log: record bulk credential read (non-blocking, only when user is identified)
+            try {
+                const { data: { user } } = await this.supabase.auth.getUser();
+                if (user?.id) {
+                    this.audit.logAction(user.id, 'credential_read', 'vault', undefined, { count: decryptedRows.length });
+                } else {
+                    console.warn('Skipping credential_read audit: no authenticated user session.');
+                }
+            } catch { /* non-blocking */ }
+
             return { success: true, data: decryptedRows };
 
         } catch (e) {
@@ -217,6 +227,12 @@ export class VaultService {
             // Just confirming vault is unlocked before allowing destructive action
             this.getActiveKey();
 
+            // Retrieve authenticated user for audit trail — fail early if unavailable
+            const { data: { user } } = await this.supabase.auth.getUser();
+            if (!user?.id) {
+                return { success: false, error: new Error('Authentication session expired. Please log in again.') };
+            }
+
             const { error } = await this.supabase
                 .from('vault_credentials')
                 .delete()
@@ -227,7 +243,7 @@ export class VaultService {
             }
 
             // Audit log
-            this.audit.logAction('', 'credential_deleted', 'credential', id);
+            this.audit.logAction(user.id, 'credential_deleted', 'credential', id);
 
             return { success: true, data: undefined };
         } catch (e) {

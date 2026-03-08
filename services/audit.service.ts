@@ -3,6 +3,7 @@ import { Database } from '@/types/database';
 
 export type AuditAction =
     | 'credential_created'
+    | 'credential_read'
     | 'credential_updated'
     | 'credential_deleted'
     | 'vault_unlocked'

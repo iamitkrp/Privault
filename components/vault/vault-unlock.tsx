@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
 import { CRYPTO_CONFIG } from "@/constants";
@@ -12,16 +12,71 @@ interface VaultUnlockProps {
     onUnlock: () => void;
 }
 
+/** Backoff only kicks in at this many failed attempts */
+const BACKOFF_THRESHOLD = 5;
+
 export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     const { profile } = useAuth();
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [failedAttempts, setFailedAttempts] = useState(0);
+    const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
+    const [remainingSeconds, setRemainingSeconds] = useState(0);
+    const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Timer-driven lockout countdown: ticks every second and auto-clears when expired
+    useEffect(() => {
+        // Clear any existing timer
+        if (lockoutTimerRef.current) {
+            clearInterval(lockoutTimerRef.current);
+            lockoutTimerRef.current = null;
+        }
+
+        if (lockoutUntil === null) {
+            setRemainingSeconds(0);
+            return;
+        }
+
+        // Immediately compute remaining time
+        const calcRemaining = () => Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000));
+        setRemainingSeconds(calcRemaining());
+
+        lockoutTimerRef.current = setInterval(() => {
+            const remaining = calcRemaining();
+            setRemainingSeconds(remaining);
+
+            if (remaining <= 0) {
+                // Lockout expired — clear state and re-enable controls
+                setLockoutUntil(null);
+                setError(null);
+                if (lockoutTimerRef.current) {
+                    clearInterval(lockoutTimerRef.current);
+                    lockoutTimerRef.current = null;
+                }
+            }
+        }, 1000);
+
+        return () => {
+            if (lockoutTimerRef.current) {
+                clearInterval(lockoutTimerRef.current);
+                lockoutTimerRef.current = null;
+            }
+        };
+    }, [lockoutUntil]);
+
+    const isLockedOut = lockoutUntil !== null && remainingSeconds > 0;
 
     const handleUnlock = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!profile || !profile.salt) {
             setError("Profile or crypto salt is missing. Please contact support.");
+            return;
+        }
+
+        // Lockout guard: block attempts during backoff period
+        if (isLockedOut) {
+            setError(`Too many failed attempts. Please wait ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}.`);
             return;
         }
 
@@ -39,8 +94,40 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 );
 
             if (!isValid) {
+                const newFailedAttempts = failedAttempts + 1;
+                setFailedAttempts(newFailedAttempts);
+
+                // Log failed attempt as suspicious activity (non-blocking)
+                try {
+                    const sb = createClient();
+                    const sec = new SecurityService(sb);
+                    await sec.logEvent(
+                        profile.id,
+                        'suspicious_activity',
+                        newFailedAttempts >= BACKOFF_THRESHOLD ? 'critical' : 'warning',
+                        { failed_attempts: newFailedAttempts }
+                    );
+                } catch { /* non-blocking */ }
+
                 setIsLoading(false);
-                setError("Incorrect master password. Please verify and try again.");
+
+                // Only enforce backoff after reaching the threshold
+                if (newFailedAttempts >= BACKOFF_THRESHOLD) {
+                    // Exponential backoff starting from threshold: 1s, 2s, 4s, 8s, …
+                    const backoffExponent = newFailedAttempts - BACKOFF_THRESHOLD;
+                    const backoffMs = Math.pow(2, backoffExponent) * 1000;
+                    setLockoutUntil(Date.now() + backoffMs);
+
+                    const waitSeconds = Math.ceil(backoffMs / 1000);
+                    setError(
+                        `Too many failed attempts (${newFailedAttempts}). Please wait ${waitSeconds} second${waitSeconds !== 1 ? 's' : ''} before trying again.`
+                    );
+                } else {
+                    // Below threshold: simple error, no delay
+                    setError(
+                        `Incorrect master password. ${BACKOFF_THRESHOLD - newFailedAttempts} attempt${BACKOFF_THRESHOLD - newFailedAttempts !== 1 ? 's' : ''} remaining before lockout.`
+                    );
+                }
                 return;
             }
 
@@ -70,15 +157,16 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
             }
 
             // Unlock the vault in memory.
-            // After a successful upgrade (or first-time setup) the key should be derived at
-            // the new (600K) iterations. For existing users who are already at 600K (or any
-            // stored value), use their stored value.
             const unlockIterations =
                 (newVerificationData && (needsKdfUpgrade || !profile.vault_verification_data))
                     ? CRYPTO_CONFIG.iterations
                     : (profile.kdf_iterations ?? CRYPTO_CONFIG.legacyIterations);
 
             await passphraseManager.unlock(password, profile.salt, unlockIterations);
+
+            // Reset brute-force counters on successful unlock
+            setFailedAttempts(0);
+            setLockoutUntil(null);
 
             // Log vault unlock event
             try {
@@ -123,14 +211,14 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                         spellCheck="false"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        disabled={isLoading}
+                        disabled={isLoading || isLockedOut}
                         className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-colors disabled:opacity-50 text-center text-xl tracking-widest font-mono"
                         placeholder="••••••••••••"
                     />
 
                     <button
                         type="submit"
-                        disabled={isLoading || !password}
+                        disabled={isLoading || !password || isLockedOut}
                         className="w-full bg-brand text-brand-foreground font-semibold rounded-lg px-4 py-3 hover:bg-brand-hover active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
                     >
                         {isLoading ? (
