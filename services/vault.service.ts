@@ -10,9 +10,13 @@ import {
 import { ERROR_MESSAGES } from '@/constants';
 import { encryptData, decryptData } from '@/lib/crypto/engine';
 import { passphraseManager } from '@/lib/crypto/passphrase';
+import { AuditService } from './audit.service';
 
 export class VaultService {
-    constructor(private supabase: SupabaseClient<Database>) { }
+    private audit: AuditService;
+    constructor(private supabase: SupabaseClient<Database>) {
+        this.audit = new AuditService(supabase);
+    }
 
     private getActiveKey(): CryptoKey {
         try {
@@ -138,6 +142,10 @@ export class VaultService {
 
             // 3. Decrypt and return the full credential to update local state without reloading
             const newCredential = await this.decryptCredentialRow(data as unknown as EncryptedCredential, key);
+
+            // Audit log
+            this.audit.logAction(userId, 'credential_created', 'credential', newCredential.id);
+
             return { success: true, data: newCredential };
 
         } catch (e) {
@@ -189,6 +197,10 @@ export class VaultService {
             }
 
             const updatedCred = await this.decryptCredentialRow(data as unknown as EncryptedCredential, key);
+
+            // Audit log
+            this.audit.logAction(updatedCred.decrypted.site_name ? id : id, 'credential_updated', 'credential', id);
+
             return { success: true, data: updatedCred };
 
         } catch (e) {
@@ -214,10 +226,110 @@ export class VaultService {
                 return { success: false, error: new Error(ERROR_MESSAGES.vault.deleteFailed) };
             }
 
+            // Audit log
+            this.audit.logAction('', 'credential_deleted', 'credential', id);
+
             return { success: true, data: undefined };
         } catch (e) {
             console.error('Failed to delete credential:', e);
             return { success: false, error: new Error(ERROR_MESSAGES.vault.deleteFailed) };
+        }
+    }
+
+    /**
+     * Rotates the master password.
+     * 1. Verify old password against the stored verification data.
+     * 2. Decrypt ALL credentials with the old key.
+     * 3. Derive a NEW key from the new password + existing salt.
+     * 4. Re-encrypt ALL credentials with the new key.
+     * 5. Generate new vault_verification_data with the new key.
+     * 6. Batch-update Supabase (all credentials + profile verification data).
+     * 7. Re-unlock the passphrase manager with the new key.
+     */
+    async rotateMasterPassword(
+        userId: string,
+        oldPassword: string,
+        newPassword: string,
+        saltBase64: string,
+        currentVerificationData: string | null
+    ): Promise<Result<{ newVerificationData: string }>> {
+        const { deriveKeyFromPassword } = await import('@/lib/crypto/engine');
+        const { passphraseManager } = await import('@/lib/crypto/passphrase');
+        const { CRYPTO_CONFIG } = await import('@/constants');
+
+        try {
+            // ── Step 1: Verify old password ──
+            const { isValid } = await passphraseManager.verifyOrSetupMasterPassword(
+                oldPassword,
+                saltBase64,
+                currentVerificationData
+            );
+            if (!isValid) {
+                return { success: false, error: new Error("Current master password is incorrect.") };
+            }
+
+            // ── Step 2: Derive both keys ──
+            const oldKey = await deriveKeyFromPassword(oldPassword, saltBase64);
+            const newKey = await deriveKeyFromPassword(newPassword, saltBase64);
+
+            // ── Step 3: Fetch all raw encrypted rows ──
+            const { data: rows, error: fetchErr } = await this.supabase
+                .from('vault_credentials')
+                .select('*')
+                .eq('user_id', userId);
+
+            if (fetchErr) {
+                return { success: false, error: new Error("Failed to fetch credentials for re-encryption.") };
+            }
+
+            // ── Step 4: Decrypt with old key → re-encrypt with new key ──
+            const updates: { id: string; encrypted_data: string; iv: string }[] = [];
+
+            for (const row of (rows || [])) {
+                const r = row as unknown as EncryptedCredential;
+                const plaintext = await decryptData(r.encrypted_data, r.iv, oldKey);
+                const { encryptedData, iv } = await encryptData(plaintext, newKey);
+                updates.push({ id: r.id, encrypted_data: encryptedData, iv });
+            }
+
+            // ── Step 5: Create new verification data with the new key ──
+            const verResult = await encryptData(CRYPTO_CONFIG.verificationString, newKey);
+            const newVerificationData = JSON.stringify(verResult);
+
+            // ── Step 6: Batch update DB ──
+            // Update each credential row
+            for (const u of updates) {
+                const { error: updateErr } = await this.supabase
+                    .from('vault_credentials')
+                    // @ts-expect-error
+                    .update({ encrypted_data: u.encrypted_data, iv: u.iv })
+                    .eq('id', u.id);
+
+                if (updateErr) {
+                    return { success: false, error: new Error(`Failed to re-encrypt credential ${u.id}`) };
+                }
+            }
+
+            // Update profile verification data
+            const { error: profileErr } = await this.supabase
+                .from('profiles')
+                // @ts-expect-error
+                .update({ vault_verification_data: newVerificationData })
+                .eq('user_id', userId);
+
+            if (profileErr) {
+                return { success: false, error: new Error("Failed to update verification data.") };
+            }
+
+            // ── Step 7: Re-unlock passphrase manager with new key ──
+            passphraseManager.lock();
+            await passphraseManager.unlock(newPassword, saltBase64);
+
+            return { success: true, data: { newVerificationData } };
+
+        } catch (e) {
+            console.error("Master password rotation failed:", e);
+            return { success: false, error: new Error("Password change failed. Your old password is still active.") };
         }
     }
 }

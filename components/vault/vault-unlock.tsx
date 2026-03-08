@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
 import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { SecurityService } from "@/services/security.service";
 
 interface VaultUnlockProps {
     onUnlock: () => void;
@@ -57,6 +58,14 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
 
             // Officially unlock the vault in memory
             await passphraseManager.unlock(password, profile.salt);
+
+            // Log vault unlock event
+            try {
+                const sb = createClient();
+                const sec = new SecurityService(sb);
+                await sec.logEvent(profile.id, 'vault_unlocked', 'info');
+            } catch { /* non-blocking */ }
+
             setIsLoading(false);
             onUnlock();
 

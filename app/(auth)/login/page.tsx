@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-context";
+import { createClient } from "@/lib/supabase/client";
+import { SecurityService } from "@/services/security.service";
 
 export default function LoginPage() {
     const { authService } = useAuth();
@@ -17,6 +19,31 @@ export default function LoginPage() {
         setError(null);
 
         const result = await authService.signIn(email, password);
+
+        // Track login attempt for security monitoring
+        try {
+            const supabase = createClient();
+            const security = new SecurityService(supabase);
+
+            if (result.success) {
+                // Get userId from the session
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    await security.trackLoginAttempt(session.user.id, true, email);
+                }
+            } else {
+                // For failed login, we use email as a pseudo-identifier
+                // The security service handles brute-force detection
+                await security.logEvent(
+                    email, // pseudo-ID — the RLS won't match but that's fine for failed attempts
+                    'login_failure',
+                    'warning',
+                    { email, reason: result.error.message }
+                );
+            }
+        } catch {
+            // Security tracking should never block login
+        }
 
         if (!result.success) {
             setError(result.error.message);

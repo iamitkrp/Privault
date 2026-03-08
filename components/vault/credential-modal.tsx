@@ -21,6 +21,11 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
     const [url, setUrl] = useState(existingCredential?.decrypted.url || "");
     const [notes, setNotes] = useState(existingCredential?.decrypted.notes || "");
     const [category, setCategory] = useState(existingCredential?.category || "other");
+    const [expirationDays, setExpirationDays] = useState<string>(
+        existingCredential?.expires_at
+            ? String(Math.round((new Date(existingCredential.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+            : "0"
+    );
 
     // Type selection: "login" or "secure_note"
     // We derive initial state based on the category. If it was explicitly a secure_note, default to that tab.
@@ -62,8 +67,13 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                 notes: notes || undefined
             };
 
+            const expiresAt = expirationDays !== "0"
+                ? new Date(Date.now() + parseInt(expirationDays) * 24 * 60 * 60 * 1000).toISOString()
+                : null;
+
             const metadata = {
-                category: type === "secure_note" ? "secure_note" : category
+                category: type === "secure_note" ? "secure_note" : category,
+                expires_at: expiresAt,
             };
 
             await onSave(decrypted, metadata);
@@ -148,6 +158,25 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                                 </select>
                             </div>
                         </div>
+
+                        {/* Expiration */}
+                        {type === "login" && (
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium text-secondary">Password Expiration</label>
+                                <select
+                                    value={expirationDays}
+                                    onChange={e => setExpirationDays(e.target.value)}
+                                    className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand appearance-none"
+                                >
+                                    <option value="0">Never</option>
+                                    <option value="30">30 days</option>
+                                    <option value="60">60 days</option>
+                                    <option value="90">90 days</option>
+                                    <option value="180">180 days</option>
+                                    <option value="365">1 year</option>
+                                </select>
+                            </div>
+                        )}
 
                         {type === "login" && (
                             <>

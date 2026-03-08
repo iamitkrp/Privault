@@ -28,11 +28,19 @@ export function VaultHealth({ credentials }: VaultHealthProps) {
 
     const reusedPasswords = Object.values(passwordCounts).filter(count => count > 1).length;
 
+    // Weak password detection (no uppercase, no digits, no symbols, or too short)
+    const weakPasswords = credentials.filter(c => {
+        if (c.category === "secure_note") return false;
+        const pw = c.decrypted.password;
+        return pw.length < 10 || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[^A-Za-z0-9]/.test(pw);
+    }).length;
+
     // Determine overall health status
     let healthScore = 100;
     if (expired > 0) healthScore -= 20;
     if (reusedPasswords > 0) healthScore -= 15 * reusedPasswords;
     if (expiringSoon > 0) healthScore -= 5 * expiringSoon;
+    if (weakPasswords > 0) healthScore -= 5 * weakPasswords;
 
     healthScore = Math.max(0, healthScore);
 
@@ -89,9 +97,9 @@ export function VaultHealth({ credentials }: VaultHealthProps) {
                         </p>
                     </div>
                     <div className="bg-background/40 border border-border/50 p-3 rounded-lg">
-                        <p className="text-xs text-secondary mb-1">Expired</p>
-                        <p className={`text-lg font-semibold flex items-center gap-1.5 ${expired > 0 ? 'text-error' : 'text-foreground'}`}>
-                            {expired}
+                        <p className="text-xs text-secondary mb-1">Weak</p>
+                        <p className={`text-lg font-semibold flex items-center gap-1.5 ${weakPasswords > 0 ? 'text-error' : 'text-foreground'}`}>
+                            {weakPasswords}
                         </p>
                     </div>
                 </div>

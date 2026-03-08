@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, MoreVertical, Edit2, Trash2, KeyRound } from "lucide-react";
+import { Copy, Check, MoreVertical, Edit2, Trash2, KeyRound, Clock } from "lucide-react";
 import { VaultCredential } from "@/types";
 
 interface CredentialCardProps {
@@ -113,8 +113,29 @@ export function CredentialCard({ credential, onEdit, onDelete }: CredentialCardP
 
             {/* Bottom Metadata */}
             <div className="mt-4 pt-4 border-t border-border/50 flex justify-between items-center text-xs text-secondary/60">
-                <span>Updated: {new Date(credential.updated_at).toLocaleDateString()}</span>
-                {credential.is_favorite && <span className="text-brand">★</span>}
+                <div className="flex items-center gap-2">
+                    <span>Updated: {new Date(credential.updated_at).toLocaleDateString()}</span>
+                    {credential.expiration_status === "expired" && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-error/10 text-error border border-error/20 flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Expired
+                        </span>
+                    )}
+                    {credential.expiration_status === "expiring_soon" && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#eab308]/10 text-[#eab308] border border-[#eab308]/20 flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Expiring
+                        </span>
+                    )}
+                </div>
+                <div className="flex items-center gap-1.5">
+                    {credential.category !== "secure_note" && (() => {
+                        const pw = credential.decrypted.password;
+                        const strength = pw.length >= 16 && /[A-Z]/.test(pw) && /[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw)
+                            ? "strong" : pw.length >= 10 ? "fair" : "weak";
+                        const colors = { strong: "bg-success", fair: "bg-[#eab308]", weak: "bg-error" };
+                        return <span className={`w-2 h-2 rounded-full ${colors[strength]}`} title={`Password: ${strength}`} />;
+                    })()}
+                    {credential.is_favorite && <span className="text-brand">★</span>}
+                </div>
             </div>
 
         </div>
