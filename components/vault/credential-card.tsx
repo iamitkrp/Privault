@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Copy, Check, MoreVertical, Edit2, Trash2, KeyRound, Clock } from "lucide-react";
 import { VaultCredential } from "@/types";
+import { SESSION_CONFIG } from "@/constants";
 
 interface CredentialCardProps {
     credential: VaultCredential;
@@ -13,12 +14,26 @@ interface CredentialCardProps {
 export function CredentialCard({ credential, onEdit, onDelete }: CredentialCardProps) {
     const [copied, setCopied] = useState<"username" | "password" | null>(null);
     const [showMenu, setShowMenu] = useState(false);
+    const clipboardClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Cleanup pending clipboard-clear timer on unmount
+    useEffect(() => {
+        return () => {
+            if (clipboardClearTimer.current) clearTimeout(clipboardClearTimer.current);
+        };
+    }, []);
 
     const handleCopy = async (type: "username" | "password") => {
         try {
             await navigator.clipboard.writeText(credential.decrypted[type]);
             setCopied(type);
             setTimeout(() => setCopied(null), 2000);
+            // Reset clipboard-clear timer so the latest copy gets the full retention window
+            if (clipboardClearTimer.current) clearTimeout(clipboardClearTimer.current);
+            clipboardClearTimer.current = setTimeout(
+                () => navigator.clipboard.writeText('').catch(() => { }),
+                SESSION_CONFIG.clipboardClearMs
+            );
         } catch (err) {
             console.error("Failed to copy", err);
         }

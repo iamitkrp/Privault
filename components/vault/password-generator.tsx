@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Copy, RefreshCw, Settings2, Check } from "lucide-react";
+import { SESSION_CONFIG } from "@/constants";
 
 interface PasswordGeneratorProps {
     onSelectPattern?: (password: string) => void;
@@ -16,6 +17,14 @@ export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
     const [useSymbols, setUseSymbols] = useState(true);
     const [copied, setCopied] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const clipboardClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Cleanup pending clipboard-clear timer on unmount
+    useEffect(() => {
+        return () => {
+            if (clipboardClearTimer.current) clearTimeout(clipboardClearTimer.current);
+        };
+    }, []);
 
     const generatePassword = () => {
         const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -36,13 +45,30 @@ export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
             setUseNumbers(true);
         }
 
-        const array = new Uint32Array(length);
-        window.crypto.getRandomValues(array);
+        // Rejection sampling to eliminate modulo bias.
+        // The largest multiple of charset.length that fits in 2^32.
+        const ceiling = Math.floor(0x100000000 / charset.length) * charset.length;
 
         let generated = "";
-        for (let i = 0; i < length; i++) {
-            // Use crypto-safe random distribution to pick from charset
-            generated += charset[array[i]! % charset.length];
+        let buffer = new Uint32Array(length * 4);
+        window.crypto.getRandomValues(buffer);
+        let bufIdx = 0;
+
+        while (generated.length < length) {
+            // Refill buffer if exhausted
+            if (bufIdx >= buffer.length) {
+                buffer = new Uint32Array(length * 4);
+                window.crypto.getRandomValues(buffer);
+                bufIdx = 0;
+            }
+
+            const value = buffer[bufIdx]!;
+            bufIdx++;
+
+            // Skip values in the rejection zone (biased remainder)
+            if (value >= ceiling) continue;
+
+            generated += charset[value % charset.length];
         }
 
         setPassword(generated);
@@ -63,6 +89,12 @@ export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
                 await navigator.clipboard.writeText(password);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
+                // Reset clipboard-clear timer so the latest copy gets the full retention window
+                if (clipboardClearTimer.current) clearTimeout(clipboardClearTimer.current);
+                clipboardClearTimer.current = setTimeout(
+                    () => navigator.clipboard.writeText('').catch(() => { }),
+                    SESSION_CONFIG.clipboardClearMs
+                );
             }
         } catch (err) {
             console.error("Failed to copy", err);
