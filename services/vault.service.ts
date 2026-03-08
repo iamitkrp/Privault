@@ -81,7 +81,7 @@ export class VaultService {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error("Fetch DB Error:", error);
+                console.error("Fetch DB Error. Code:", error?.code);
                 return { success: false, error: new Error(ERROR_MESSAGES.vault.loadFailed) };
             }
 
@@ -105,7 +105,7 @@ export class VaultService {
             return { success: true, data: decryptedRows };
 
         } catch (e) {
-            console.error('Failed to get credentials:', e);
+            console.error('Failed to get credentials.');
             return { success: false, error: new Error(ERROR_MESSAGES.vault.loadFailed) };
         }
     }
@@ -147,7 +147,7 @@ export class VaultService {
                 .single();
 
             if (error) {
-                console.error("Insert error:", error);
+                console.error("Insert error. Code:", error?.code);
                 return { success: false, error: new Error(ERROR_MESSAGES.vault.saveFailed) };
             }
 
@@ -160,7 +160,7 @@ export class VaultService {
             return { success: true, data: newCredential };
 
         } catch (e) {
-            console.error('Failed to add credential:', e);
+            console.error('Failed to add credential.');
             return { success: false, error: new Error(ERROR_MESSAGES.vault.saveFailed) };
         }
     }
@@ -203,7 +203,7 @@ export class VaultService {
                 .single();
 
             if (error) {
-                console.error("Update error:", error);
+                console.error("Update error. Code:", error?.code);
                 return { success: false, error: new Error(ERROR_MESSAGES.vault.saveFailed) };
             }
 
@@ -215,7 +215,7 @@ export class VaultService {
             return { success: true, data: updatedCred };
 
         } catch (e) {
-            console.error('Failed to update credential:', e);
+            console.error('Failed to update credential.');
             return { success: false, error: new Error(ERROR_MESSAGES.vault.saveFailed) };
         }
     }
@@ -248,7 +248,7 @@ export class VaultService {
 
             return { success: true, data: undefined };
         } catch (e) {
-            console.error('Failed to delete credential:', e);
+            console.error('Failed to delete credential.');
             return { success: false, error: new Error(ERROR_MESSAGES.vault.deleteFailed) };
         }
     }
@@ -335,7 +335,7 @@ export class VaultService {
             });
 
             if (rpcErr) {
-                console.error('Atomic password rotation failed:', rpcErr);
+                console.error('Atomic password rotation failed. Code:', rpcErr?.code);
                 return { success: false, error: new Error('Password rotation failed. No data was modified.') };
             }
 
@@ -346,7 +346,7 @@ export class VaultService {
             return { success: true, data: { newVerificationData } };
 
         } catch (e) {
-            console.error("Master password rotation failed:", e);
+            console.error("Master password rotation failed.");
             return { success: false, error: new Error("Password change failed. Your old password is still active.") };
         }
     }

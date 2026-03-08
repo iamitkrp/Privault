@@ -135,7 +135,7 @@ export async function decryptData(
         return bufferToText(new Uint8Array(decryptedBuffer));
     } catch (error) {
         // If decryption fails, it usually means the key or IV is wrong, or the data is tampered with (GCM authentication failed)
-        console.error("Decryption failed:", error);
+        console.error("Decryption failed: invalid key or corrupted data.");
         throw new Error("Failed to decrypt data. Invalid key or corrupted data.");
     }
 }

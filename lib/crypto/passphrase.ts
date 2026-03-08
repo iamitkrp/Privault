@@ -32,7 +32,7 @@ class PassphraseManager {
             this.resetAutoLockTimer();
             this.notifyListeners();
         } catch (e) {
-            console.error("Passphrase manager unlock failed", e);
+            console.error("Passphrase manager unlock failed.");
             throw new Error("Failed to derive encryption keys.");
         }
     }

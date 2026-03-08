@@ -43,7 +43,7 @@ export class AuthService {
 
             return { success: true, data: { id: data.user.id } };
         } catch (e) {
-            console.error('Unexpected signup error:', e);
+            console.error('Unexpected signup error.');
             return { success: false, error: new Error(ERROR_MESSAGES.generic.unexpected) };
         }
     }
@@ -74,7 +74,7 @@ export class AuthService {
 
             return { success: true, data: { id: data.user.id } };
         } catch (e) {
-            console.error('Unexpected login error:', e);
+            console.error('Unexpected login error.');
             return { success: false, error: new Error(ERROR_MESSAGES.generic.unexpected) };
         }
     }
@@ -88,7 +88,7 @@ export class AuthService {
             if (error) throw error;
             return { success: true, data: undefined };
         } catch (e) {
-            console.error('Signout error:', e);
+            console.error('Signout error.');
             return { success: false, error: new Error(ERROR_MESSAGES.generic.unexpected) };
         }
     }
@@ -117,7 +117,7 @@ export class AuthService {
                 data: data as unknown as UserProfile
             };
         } catch (e) {
-            console.error('Get profile error:', e);
+            console.error('Get profile error.');
             return { success: false, error: new Error(ERROR_MESSAGES.generic.unexpected) };
         }
     }
@@ -144,7 +144,7 @@ export class AuthService {
                 // Fallback: generate a fresh salt so the user isn't left without a profile.
                 // Note: this means any data encrypted with the original (missing) salt
                 // will be unrecoverable, but it prevents a broken account state.
-                console.warn('User has no crypto_salt in metadata — generating fallback salt.');
+
                 salt = generateSalt();
             }
 
@@ -161,13 +161,13 @@ export class AuthService {
             });
 
             if (insertError) {
-                console.error('Profile insertion failed:', insertError);
+                console.error('Profile insertion failed. Code:', insertError?.code);
                 return { success: false, error: new Error('Failed to create user profile.') };
             }
 
             return { success: true };
         } catch (e) {
-            console.error('Failed to ensure profile exists:', e);
+            console.error('Failed to ensure profile exists.');
             return { success: false, error: new Error('Failed to create user profile.') };
         }
     }
