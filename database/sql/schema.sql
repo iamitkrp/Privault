@@ -78,17 +78,34 @@ CREATE TABLE IF NOT EXISTS password_history (
 
 -- 4. vault_otp_verifications
 -- OTP codes for email-based two-factor verification.
+-- NOTE: otp_code stores a SHA-256 hex digest (64 chars), NOT the plaintext 6-digit code.
 CREATE TABLE IF NOT EXISTS vault_otp_verifications (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id     UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    otp_code    TEXT NOT NULL,         -- 6-digit numeric code
+    otp_code    TEXT NOT NULL,         -- SHA-256 hex digest of the 6-digit OTP code
     purpose     TEXT NOT NULL,         -- vault_access, vault_password_change
     expires_at  TIMESTAMPTZ NOT NULL,  -- 10-minute expiration
     is_used     BOOLEAN DEFAULT false,
     created_at  TIMESTAMPTZ DEFAULT now() NOT NULL,
     
-    CONSTRAINT otp_code_format CHECK (length(otp_code) = 6 AND otp_code ~ '^[0-9]+$')
+    CONSTRAINT otp_code_format CHECK (length(otp_code) = 64 AND otp_code ~ '^[0-9a-f]{64}$')
 );
+
+-- Migration for existing deployments: enforce SHA-256 hex-only otp_code.
+-- This block is idempotent and safe to run on both fresh and upgraded databases.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'otp_code_format'
+          AND table_name = 'vault_otp_verifications'
+    ) THEN
+        ALTER TABLE vault_otp_verifications DROP CONSTRAINT otp_code_format;
+    END IF;
+    ALTER TABLE vault_otp_verifications
+        ADD CONSTRAINT otp_code_format CHECK (length(otp_code) = 64 AND otp_code ~ '^[0-9a-f]{64}$');
+END
+$$;
 
 -- 5. audit_log
 -- Security audit trail for all significant actions.

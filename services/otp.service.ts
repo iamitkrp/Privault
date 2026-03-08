@@ -2,16 +2,17 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
 import { Result } from '@/types';
 import { VALIDATION } from '@/constants';
+import { createHash } from 'crypto';
 
 /**
  * OTP Service — generates, stores, and verifies 6-digit email-based OTP codes.
  *
  * Architecture:
  * - OTP generation happens client-side (crypto.getRandomValues).
- * - The code is stored in `vault_otp_verifications` table.
+ * - The code is hashed (SHA-256) before storage in `vault_otp_verifications`.
  * - Email delivery uses Supabase's `auth.resetPasswordForEmail` as a proxy,
  *   or in production, a dedicated Edge Function / email provider.
- * - For now, the code is stored and verified against the DB without email.
+ * - For now, the code is stored (hashed) and verified against the DB without email.
  *   The UI will show the code in a toast for dev/testing.
  */
 export class OTPService {
@@ -28,8 +29,18 @@ export class OTPService {
     }
 
     /**
+     * Produces a SHA-256 hex digest of the OTP code.
+     * OTPs are ephemeral (10-minute expiry) and rate-limited, so no salt is needed —
+     * the purpose is only to avoid storing plaintext codes at rest.
+     */
+    private hashOtpCode(code: string): string {
+        return createHash('sha256').update(code).digest('hex');
+    }
+
+    /**
      * Creates and stores a new OTP for the given user and purpose.
-     * Returns the code so the caller can display/send it.
+     * Returns the plaintext code so the caller can display/send it.
+     * The DB only ever sees the SHA-256 hash.
      */
     async createOTP(
         userId: string,
@@ -46,6 +57,7 @@ export class OTPService {
                 .eq('is_used', false);
 
             const code = this.generateCode();
+            const hashedCode = this.hashOtpCode(code);
             const expiresAt = new Date(Date.now() + VALIDATION.otp.expiryMs).toISOString();
 
             const { error } = await this.supabase
@@ -53,7 +65,7 @@ export class OTPService {
                 // @ts-expect-error
                 .insert({
                     user_id: userId,
-                    otp_code: code,
+                    otp_code: hashedCode,
                     purpose,
                     expires_at: expiresAt,
                     is_used: false,
@@ -73,6 +85,7 @@ export class OTPService {
 
     /**
      * Verifies an OTP code for a user and purpose.
+     * Hashes the provided code before querying the DB.
      * Marks the code as used upon successful verification.
      */
     async verifyOTP(
@@ -81,11 +94,13 @@ export class OTPService {
         purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete'
     ): Promise<Result<{ verified: boolean }>> {
         try {
+            const hashedCode = this.hashOtpCode(code);
+
             const { data, error } = await this.supabase
                 .from('vault_otp_verifications')
                 .select('*')
                 .eq('user_id', userId)
-                .eq('otp_code', code)
+                .eq('otp_code', hashedCode)
                 .eq('purpose', purpose)
                 .eq('is_used', false)
                 .gte('expires_at', new Date().toISOString())
@@ -115,3 +130,4 @@ export class OTPService {
         }
     }
 }
+
