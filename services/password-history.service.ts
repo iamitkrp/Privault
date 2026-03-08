@@ -14,12 +14,19 @@ export class PasswordHistoryService {
 
     /**
      * Saves the old password to history when a credential's password is changed.
-     * Encrypts the old password and stores a hash for reuse detection.
+     * Encrypts the old password and stores a salted HMAC-SHA256 hash for reuse detection.
+     *
+     * @param userId  The authenticated user's ID.
+     * @param credentialId  The credential whose password is being rotated.
+     * @param oldPassword  The previous plaintext password to archive.
+     * @param saltBase64  The user's Base64-encoded salt (used to key the HMAC hash).
+     * @param changeReason  Why the password was changed (default: 'manual').
      */
     async savePasswordHistory(
         userId: string,
         credentialId: string,
         oldPassword: string,
+        saltBase64: string,
         changeReason: string = 'manual'
     ): Promise<Result<void>> {
         try {
@@ -28,8 +35,8 @@ export class PasswordHistoryService {
             // Encrypt the old password
             const { encryptedData, iv } = await encryptData(oldPassword, key);
 
-            // Hash the old password for reuse detection
-            const passwordHash = await hashPasswordForStorage(oldPassword);
+            // Hash the old password (salted HMAC-SHA256) for reuse detection
+            const passwordHash = await hashPasswordForStorage(oldPassword, saltBase64);
 
             const { error } = await this.supabase
                 .from('password_history')

@@ -20,8 +20,8 @@ export const CRYPTO_CONFIG = {
     /** 128-bit authentication tag */
     tagLength: 128,
 
-    /** PBKDF2 iteration count — makes brute force 100K× slower */
-    iterations: 100_000,
+    /** PBKDF2 iteration count — OWASP 2023 recommendation for PBKDF2-SHA256 */
+    iterations: 600_000,
 
     /** SHA-256 for PBKDF2 key derivation */
     hashAlgorithm: "SHA-256" as const,

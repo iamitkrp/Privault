@@ -137,12 +137,35 @@ export async function decryptData(
 }
 
 /**
- * Helper to securely hash a password (e.g. for testing against old passwords in history).
- * We don't use this for the primary key derivation, only for validation comparisons 
- * (like comparing password_hash in password_history without decrypting).
+ * Produces a salted HMAC-SHA256 hash of a password for reuse-detection in password history.
+ * Uses the user's existing salt as the HMAC key, preventing rainbow-table attacks.
+ *
+ * This is NOT used for primary key derivation — only for safe equality comparisons
+ * (e.g. checking password_hash in password_history without decrypting).
+ *
+ * @param password  The plaintext password to hash.
+ * @param saltBase64  The user's Base64-encoded salt (same salt used for PBKDF2 key derivation).
+ * @returns Base64-encoded HMAC-SHA256 digest.
  */
-export async function hashPasswordForStorage(password: string): Promise<string> {
-    const buffer = textToBuffer(password);
-    const hashBuffer = await window.crypto.subtle.digest(CRYPTO_CONFIG.hashAlgorithm, buffer as unknown as BufferSource);
-    return bufferToBase64(new Uint8Array(hashBuffer));
+export async function hashPasswordForStorage(password: string, saltBase64: string): Promise<string> {
+    const passwordBuffer = textToBuffer(password);
+    const saltBuffer = base64ToBuffer(saltBase64);
+
+    // Import the salt as an HMAC key
+    const hmacKey = await window.crypto.subtle.importKey(
+        "raw",
+        saltBuffer as unknown as BufferSource,
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+    );
+
+    // Sign the password bytes with the HMAC key
+    const hmacBuffer = await window.crypto.subtle.sign(
+        "HMAC",
+        hmacKey,
+        passwordBuffer as unknown as BufferSource
+    );
+
+    return bufferToBase64(new Uint8Array(hmacBuffer));
 }

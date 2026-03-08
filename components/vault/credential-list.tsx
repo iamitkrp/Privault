@@ -34,7 +34,6 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
 
             if (result.success) {
                 setCredentials(result.data);
-                if (onCredentialsLoad) onCredentialsLoad(result.data);
             } else {
                 setError(result.error.message || "Failed to sync vault");
             }
@@ -45,6 +44,11 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
+    // Sync credentials to parent via effect (avoids setState-during-render)
+    useEffect(() => {
+        if (onCredentialsLoad) onCredentialsLoad(credentials);
+    }, [credentials, onCredentialsLoad]);
+
     const handleSave = async (decrypted: DecryptedCredential, metadata: any) => {
         if (!user) return;
 
@@ -53,21 +57,15 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
             const result = await vaultService.updateCredential(editingCred.id, decrypted, metadata);
             if (!result.success) throw result.error;
 
-            setCredentials(prev => {
-                const newCreds = prev.map(c => c.id === editingCred.id ? result.data! : c);
-                if (onCredentialsLoad) onCredentialsLoad(newCreds);
-                return newCreds;
-            });
+            setCredentials(prev =>
+                prev.map(c => c.id === editingCred.id ? result.data! : c)
+            );
         } else {
             // Add
             const result = await vaultService.addCredential(user.id, decrypted, metadata);
             if (!result.success) throw result.error;
 
-            setCredentials(prev => {
-                const newCreds = [result.data!, ...prev];
-                if (onCredentialsLoad) onCredentialsLoad(newCreds);
-                return newCreds;
-            });
+            setCredentials(prev => [result.data!, ...prev]);
         }
     };
 
@@ -76,11 +74,7 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
 
         const result = await vaultService.deleteCredential(id);
         if (result.success) {
-            setCredentials(prev => {
-                const newCreds = prev.filter(c => c.id !== id);
-                if (onCredentialsLoad) onCredentialsLoad(newCreds);
-                return newCreds;
-            });
+            setCredentials(prev => prev.filter(c => c.id !== id));
         } else {
             alert("Failed to delete credential");
         }

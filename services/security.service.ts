@@ -20,10 +20,13 @@ export type EventSeverity = 'info' | 'warning' | 'critical';
  * `security_events` table for monitoring and suspicious activity detection.
  */
 export class SecurityService {
+    private static disabled = false;
+
     constructor(private supabase: SupabaseClient<Database>) { }
 
     /**
      * Logs a security event. Silently fails to never block auth flow.
+     * Auto-disables itself if the table is inaccessible (403/404).
      */
     async logEvent(
         userId: string,
@@ -31,8 +34,10 @@ export class SecurityService {
         severity: EventSeverity = 'info',
         details: Record<string, unknown> = {}
     ): Promise<void> {
+        if (SecurityService.disabled) return;
+
         try {
-            await this.supabase
+            const { error } = await this.supabase
                 .from('security_events')
                 // @ts-expect-error
                 .insert({
@@ -43,8 +48,13 @@ export class SecurityService {
                     ip_address: null,
                     user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
                 });
-        } catch (e) {
-            console.warn('Security event log failed:', e);
+
+            // If table doesn't exist or RLS blocks, disable for session
+            if (error && (error.code === '42P01' || error.message?.includes('403') || error.code === 'PGRST204')) {
+                SecurityService.disabled = true;
+            }
+        } catch {
+            SecurityService.disabled = true;
         }
     }
 
