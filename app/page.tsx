@@ -354,32 +354,42 @@ export default function LandingPage() {
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 px-1 bg-[#222] border border-[#222]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-[#111] border border-[#111]">
             {features.map((f, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative p-8 bg-[#050505] hover:bg-[#0a0a0a] transition-colors duration-300 overflow-hidden"
+                transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative p-10 bg-[#050505] hover:bg-[#080808] transition-all duration-500 overflow-hidden"
               >
-                <div className={`w-10 h-10 flex items-center justify-center mb-6 text-gray-500 group-hover:text-white transition-colors duration-300`}>
-                  <f.icon className="w-6 h-6" strokeWidth={1.5} />
+                {/* Subtle background gradient on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+
+                {/* Glowing corner accent */}
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/[0.02] blur-xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-white/[0.05] transition-colors"></div>
+
+                <div className={`w-12 h-12 flex items-center justify-center mb-8 text-gray-600 group-hover:text-white transition-all duration-500 group-hover:scale-110`}>
+                  <f.icon className="w-7 h-7" strokeWidth={1} />
                 </div>
 
-                <h3 className="mono text-lg font-bold text-white mb-4 tracking-widest uppercase">
+                <h3 className="mono text-lg font-bold text-white mb-4 tracking-[0.2em] uppercase">
                   {f.title}
                 </h3>
 
-                <p className="mono text-gray-500 text-xs leading-relaxed uppercase pr-4">
+                <p className="mono text-gray-500 text-[10px] sm:text-xs leading-relaxed uppercase tracking-wider pr-4 group-hover:text-gray-400 transition-colors">
                   {f.desc}
                 </p>
 
-                {/* Tech detail corner */}
-                <div className="absolute top-4 right-4 text-[8px] mono text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                  SYS_MOD_{i + 1}
+                {/* Tech metadata details */}
+                <div className="absolute bottom-4 right-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
+                  <div className="mono text-[7px] text-gray-700">STATUS: VERIFIED</div>
+                  <div className="mono text-[7px] text-gray-700 font-bold px-1.5 py-0.5 border border-gray-800">MOD_{i + 1}</div>
                 </div>
+
+                {/* Decorative corner square */}
+                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-800 group-hover:border-[#ff4500] transition-colors"></div>
               </motion.div>
             ))}
           </div>
@@ -387,9 +397,21 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative z-20 pt-32 pb-40 px-6 overflow-hidden border-t border-[#111]">
+      <section className="relative z-20 pt-48 pb-60 px-6 overflow-hidden border-t border-[#111]">
         {/* Core Glow Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[600px] bg-[#ff4500]/5 blur-[120px] rounded-full z-0 pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[800px] bg-[#ff4500]/5 blur-[160px] rounded-full z-0 pointer-events-none"></div>
+
+        {/* Large Decorative Background Hexagon */}
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] z-0 pointer-events-none"
+        >
+          <Hexagon className="w-[800px] h-[800px] text-white" strokeWidth={0.5} />
+        </motion.div>
+
+        {/* Dynamic Scanline Overlay limited to this section */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(to_bottom,transparent_50%,#fff_50%)] bg-[length:100%_4px] animate-scanline"></div>
 
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -449,6 +471,10 @@ export default function LandingPage() {
               <path d="M 0 0 L 20 0 L 20 100 L 0 100" fill="none" stroke="currentColor" strokeWidth="2" />
               <rect x="16" y="45" width="4" height="10" fill="currentColor" />
             </svg>
+
+            {/* Tech IDs in corners */}
+            <div className="absolute -top-4 -left-4 mono text-[10px] text-gray-800 tracking-tighter">PRV_V2.4_INIT</div>
+            <div className="absolute -bottom-4 -right-4 mono text-[10px] text-gray-800 tracking-tighter">SRVR_ACK_READY</div>
           </div>
 
           <p className="mono text-[10px] md:text-sm text-gray-400 mb-14 max-w-2xl text-center uppercase tracking-[0.2em] leading-relaxed">
