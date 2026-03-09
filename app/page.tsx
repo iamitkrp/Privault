@@ -3,20 +3,70 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Link from "next/link";
-import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, ArrowRight, Download, Hexagon, Terminal, Activity, Database, GitBranch } from "lucide-react";
+import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, ArrowRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
 
-// Floating Info Box Component
-const FloatingInfo = ({ title, value, label, position, delay = 0 }: { title: string, value: string, label: string, position: string, delay?: number }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.8 }}
-    className={`absolute ${position} border border-[#333] bg-black/80 backdrop-blur-md p-3 w-40 z-20`}
-  >
-    <div className="mono text-[9px] text-gray-500 uppercase tracking-widest mb-1 border-b border-[#333] pb-1">{title}</div>
-    <div className="mono text-sm text-[#ff4500] font-bold mb-1">{value}</div>
-    <div className="mono text-[8px] text-gray-400 uppercase">{label}</div>
-  </motion.div>
+// SVG Component for a single layer/cross-section of the padlock
+const LockLayer = ({
+  className, fillClass, strokeClass, patternId, patternFill, displayKeyhole = true
+}: {
+  className: string, fillClass: string, strokeClass: string, patternId?: string, patternFill?: string, displayKeyhole?: boolean
+}) => (
+  <svg viewBox="0 0 200 300" className={`absolute inset-0 w-full h-full ${className}`} style={{ transformStyle: 'preserve-3d' }}>
+    <defs>
+      {patternId && (
+        <pattern id={patternId} x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.5" className={patternFill || "fill-white/50"} />
+        </pattern>
+      )}
+      <filter id="glow-strong">
+        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+        <feMerge>
+          <feMergeNode in="coloredBlur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+
+    {/* Shackle */}
+    <path
+      d="M 50 140 V 70 C 50 20, 150 20, 150 70 V 140"
+      fill="none"
+      stroke={patternId ? `url(#${patternId})` : "currentColor"}
+      strokeWidth="24"
+      strokeLinecap="round"
+      className={strokeClass}
+    />
+
+    {/* Main Body */}
+    <rect
+      x="20" y="140" width="160" height="130" rx="16" ry="16"
+      className={`${fillClass} ${strokeClass}`}
+      fill={patternId ? `url(#${patternId})` : undefined}
+      strokeWidth="2"
+    />
+
+    {/* Keyhole (cut out or bright glow depending on layer) */}
+    {displayKeyhole && (
+      <g transform="translate(100, 205)" filter={patternId ? "url(#glow-strong)" : ""}>
+        <circle cx="0" cy="-10" r="12" className={patternId ? "fill-white" : "fill-black"} />
+        <path d="M -8 -5 L -12 20 L 12 20 L 8 -5 Z" className={patternId ? "fill-white" : "fill-black"} />
+      </g>
+    )}
+  </svg>
+);
+
+// Floating Label for Padlock Layers
+const PadlockLabel = ({ text, position, lineProps }: { text: string, position: string, lineProps: { w: number, h: number, x1: number, y1: number, x2: number, y2: number } }) => (
+  <div className={`absolute ${position} flex items-center gap-2 z-40 group`}>
+    <svg width={lineProps.w} height={lineProps.h} className="absolute inset-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">
+      <line x1={lineProps.x1} y1={lineProps.y1} x2={lineProps.x2} y2={lineProps.y2} stroke="#fff" strokeWidth="1" strokeDasharray="2 2" />
+      <circle cx={lineProps.x1} cy={lineProps.y1} r="3" fill="#fff" />
+      <circle cx={lineProps.x2} cy={lineProps.y2} r="2" fill="#fff" />
+    </svg>
+    <div className="border border-[#444] bg-black/90 backdrop-blur-md px-4 py-2 mono text-[10px] sm:text-xs text-gray-300 uppercase tracking-widest hover:text-white hover:border-white/60 transition-colors cursor-default whitespace-nowrap whitespace-pre">
+      {text}
+    </div>
+  </div>
 );
 
 const features = [
@@ -107,12 +157,12 @@ export default function LandingPage() {
       </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-[100vh] flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 pt-24 pb-20 z-10 w-full max-w-[1600px] mx-auto overflow-hidden">
+      <section className="relative min-h-[calc(100vh-100px)] flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 pt-10 pb-20 z-10 w-full max-w-[1600px] mx-auto overflow-hidden">
 
         {/* Left Content */}
         <motion.div
           style={{ y: heroY, opacity: heroOpacity }}
-          className="w-full lg:w-1/2 flex flex-col items-start z-30 pt-10 lg:pt-0"
+          className="w-full lg:w-[45%] flex flex-col items-start z-30 pt-10 lg:pt-0"
         >
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -166,131 +216,101 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
 
-        {/* Right Content - Intricate Padlock & Nodes */}
-        <div className="w-full lg:w-1/2 h-[600px] lg:h-[800px] relative mt-16 lg:mt-0 flex items-center justify-center lg:justify-end pr-0 lg:pr-10 z-20 hidden md:flex">
+        {/* Right Content - True 3D Holographic Padlock */}
+        <div className="w-full lg:w-[55%] h-[500px] lg:h-[600px] relative mt-10 lg:mt-0 flex items-center justify-end z-20 hidden md:flex pl-0 lg:pl-10">
 
-          <FloatingInfo
-            title="ENTROPY LEVELS"
-            value="MAX / 256-BIT"
-            label="PBKDF2 ITERATIONS: 100K"
-            position="top-20 left-10 lg:left-0"
-            delay={0.8}
-          />
-          <FloatingInfo
-            title="VAULT STATUS"
-            value="LOCKED"
-            label="AWAITING MASTER KEY"
-            position="top-1/3 left-0 lg:-left-20"
-            delay={1}
-          />
-          <FloatingInfo
-            title="SERVER SYNC"
-            value="CIPHERTEXT ONLY"
-            label="ZERO KNOWLEDGE VERIFIED"
-            position="bottom-1/4 left-10 lg:left-10"
-            delay={1.2}
-          />
-
-          {/* The Padlock Visualization */}
+          {/* Main 3D Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 1.5, ease: "easeOut" }}
-            className="relative w-[300px] h-[450px] lg:w-[400px] lg:h-[550px]"
+            className="relative w-full h-[500px] flex items-center justify-end"
+            style={{ perspective: '1200px' }}
           >
-            {/* Outline Glow */}
-            <div className="absolute inset-x-8 top-0 bottom-32 bg-[#ff4500]/5 blur-[80px] rounded-full z-0"></div>
+            {/* Background ambient glow */}
+            <div className="absolute top-1/2 right-20 -translate-y-1/2 w-96 h-96 bg-white/5 blur-[120px] rounded-full z-0 pointer-events-none"></div>
 
-            {/* Inner Lock Shackle SVG */}
-            <svg viewBox="0 0 200 150" className="absolute top-0 left-1/2 -translate-x-1/2 w-[65%] h-auto z-10 drop-shadow-2xl">
-              <path d="M 50 150 V 80 C 50 30, 150 30, 150 80 V 150" fill="none" stroke="#222" strokeWidth="25" strokeLinecap="square" />
-              <path d="M 50 150 V 80 C 50 30, 150 30, 150 80 V 150" fill="none" stroke="url(#metal)" strokeWidth="23" strokeLinecap="square" />
-              <path d="M 55 150 V 80 C 55 35, 145 35, 145 80 V 150" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="square" />
-
-              <defs>
-                <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#111" />
-                  <stop offset="20%" stopColor="#333" />
-                  <stop offset="50%" stopColor="#666" />
-                  <stop offset="80%" stopColor="#222" />
-                  <stop offset="100%" stopColor="#111" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            {/* Lock Body */}
-            <div className="absolute bottom-10 left-0 right-0 h-[65%] bg-gradient-to-br from-[#1a1a1a] via-[#111] to-[#050505] border border-[#333] shadow-2xl z-20 flex items-center justify-center overflow-hidden">
-              {/* Grime/Texture */}
-              <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay"></div>
-              {/* Horizontal Detail Lines */}
-              <div className="absolute inset-x-0 top-4 h-px bg-[#333]"></div>
-              <div className="absolute inset-x-0 bottom-4 h-px bg-[#333]"></div>
-              <div className="absolute inset-y-0 left-4 w-px bg-[#333]"></div>
-              <div className="absolute inset-y-0 right-4 w-px bg-[#333]"></div>
-
-              {/* Center Lock Mechanism Circle */}
-              <div className="relative w-40 h-40 rounded-full border border-[#444] bg-[#0a0a0a] shadow-inner flex items-center justify-center">
-                {/* Gear teeth */}
-                <div className="absolute inset-2 border-[4px] border-dashed border-[#333] rounded-full animate-[spin_60s_linear_infinite]"></div>
-                <div className="absolute inset-6 border border-[#222] rounded-full"></div>
-                {/* Keyhole */}
-                <div className="w-8 h-8 rounded-full bg-[#ff4500] shadow-[0_0_20px_rgba(255,69,0,0.5)] flex flex-col items-center justify-center z-10 animate-pulse">
-                  <div className="w-2 h-2 bg-black rounded-full"></div>
-                  <div className="w-1.5 h-3 bg-black -mt-0.5"></div>
-                </div>
-              </div>
-
-              {/* Tech details */}
-              <div className="absolute bottom-8 left-8 mono text-[10px] text-gray-500">
-                <div className="mb-1">AES-GCM</div>
-                <div>NONCE: OK</div>
-              </div>
-              <div className="absolute top-8 right-8 flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-[#ff4500] shadow-[0_0_5px_rgba(255,69,0,0.8)]"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700"></div>
-              </div>
+            {/* Static UI Overlay (Labels mapped to the 3D projection) */}
+            <div className="absolute inset-0 z-50 pointer-events-none">
+              <PadlockLabel
+                text="ENTROPY & BRUTE DETECT"
+                position="top-[20%] left-[45%]"
+                lineProps={{ w: 100, h: 100, x1: 50, y1: 50, x2: 100, y2: 100 }}
+              />
+              <PadlockLabel
+                text="LIVE VAULT ENCRYPTION"
+                position="top-[38%] left-[25%]"
+                lineProps={{ w: 150, h: 50, x1: 50, y1: 25, x2: 150, y2: 40 }}
+              />
+              <PadlockLabel
+                text="ZERO-KNOWLEDGE AUTH"
+                position="top-[55%] left-[40%]"
+                lineProps={{ w: 120, h: 20, x1: 50, y1: 10, x2: 120, y2: 10 }}
+              />
+              <PadlockLabel
+                text="MASTER KEY INTELLIGENCE"
+                position="bottom-[20%] left-[30%]"
+                lineProps={{ w: 120, h: 60, x1: 60, y1: 30, x2: 120, y2: 10 }}
+              />
+              <PadlockLabel
+                text="VAULT SECURITY"
+                position="bottom-[5%] left-[50%]"
+                lineProps={{ w: 150, h: 80, x1: 75, y1: 40, x2: 120, y2: -20 }}
+              />
             </div>
 
-            {/* Terminal Window Overlay (Node Graph) */}
+            {/* 3D Stacked Layers */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.5, duration: 0.8 }}
-              className="absolute -bottom-5 -right-10 lg:-right-20 w-64 h-48 bg-black/90 border border-[#333] backdrop-blur-xl z-30 flex flex-col"
+              className="relative w-[280px] h-[450px] lg:w-[350px] lg:h-[550px] right-0"
+              style={{ transformStyle: 'preserve-3d' }}
+              animate={{ rotateY: [-20, -35, -20], rotateX: [5, 12, 5] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
             >
-              <div className="flex items-center justify-between px-3 py-2 border-b border-[#333] bg-[#0a0a0a]">
-                <div className="flex items-center gap-2">
-                  <Terminal className="w-3 h-3 text-gray-500" />
-                  <span className="mono text-[9px] text-gray-400">NETWORK.LOG</span>
-                </div>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-sm bg-gray-700 hover:bg-[#ff4500] transition-colors cursor-pointer"></div>
-                </div>
-              </div>
 
-              <div className="p-3 relative flex-1 overflow-hidden">
-                {/* Fake Node Network Graph */}
-                <svg className="w-full h-full opacity-60">
-                  <line x1="20%" y1="30%" x2="50%" y2="50%" stroke="#444" strokeWidth="1" />
-                  <line x1="50%" y1="50%" x2="80%" y2="40%" stroke="#444" strokeWidth="1" />
-                  <line x1="50%" y1="50%" x2="60%" y2="80%" stroke="#ff4500" strokeWidth="1.5" strokeDasharray="4 2" className="animate-[dash_2s_linear_infinite]" />
-                  <line x1="20%" y1="70%" x2="50%" y2="50%" stroke="#444" strokeWidth="1" />
-                  <line x1="80%" y1="40%" x2="70%" y2="80%" stroke="#444" strokeWidth="1" />
+              {/* Layer 1 (Back) - Faded skeletal outline */}
+              <LockLayer
+                className="opacity-10 translate-z-[-400px] -translate-x-[200px]"
+                fillClass="fill-transparent"
+                strokeClass="stroke-white/20"
+                displayKeyhole={false}
+              />
 
-                  <circle cx="20%" cy="30%" r="3" fill="#666" />
-                  <circle cx="50%" cy="50%" r="4" fill="#fff" className="animate-pulse" />
-                  <circle cx="80%" cy="40%" r="3" fill="#666" />
-                  <circle cx="20%" cy="70%" r="3" fill="#666" />
-                  <circle cx="60%" cy="80%" r="4" fill="#ff4500" className="animate-node-blink" />
-                  <circle cx="70%" cy="80%" r="3" fill="#666" />
-                </svg>
+              {/* Layer 2 - Dotted wireframe */}
+              <LockLayer
+                className="opacity-30 translate-z-[-300px] -translate-x-[150px]"
+                fillClass="fill-black/40"
+                strokeClass="stroke-white/40 stroke-[1px] dasharray-2"
+                displayKeyhole={false}
+              />
 
-                <div className="absolute bottom-2 left-3 mono text-[8px] text-gray-500">
-                  SYNC_NODES: 2,048<br />
-                  REDUNDANCY: ACTIVE
-                </div>
-              </div>
+              {/* Layer 3 - Core structural grid */}
+              <LockLayer
+                className="opacity-50 translate-z-[-200px] -translate-x-[100px]"
+                fillClass="fill-black/60"
+                strokeClass="stroke-white/60 stroke-[2px]"
+                displayKeyhole={true}
+              />
+
+              {/* Layer 4 - Inner face (dashed/detailed) */}
+              <LockLayer
+                className="opacity-70 translate-z-[-100px] -translate-x-[50px]"
+                fillClass="fill-black/80"
+                strokeClass="stroke-white/80 stroke-[1px] dasharray-4"
+                displayKeyhole={true}
+              />
+
+              {/* Layer 5 (Front) - Dense Data Point Map */}
+              <LockLayer
+                className="translate-z-0 z-10 drop-shadow-[0_0_40px_rgba(255,255,255,0.15)]"
+                fillClass="fill-black/90"
+                strokeClass="stroke-white/30"
+                patternId="front-dots"
+                patternFill="fill-white"
+                displayKeyhole={true}
+              />
+
+              {/* Central Glowing Core (Pierces through the layers) */}
+              <div className="absolute top-[340px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70px] h-[140px] bg-white/90 blur-[25px] rounded-[100%] translate-z-[-150px] pointer-events-none mix-blend-screen pulse-glow"></div>
             </motion.div>
           </motion.div>
 
@@ -367,27 +387,104 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative z-20 py-40 px-6 text-center border-b border-[#222]">
+      <section className="relative z-20 pt-32 pb-40 px-6 overflow-hidden border-t border-[#111]">
+        {/* Core Glow Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[600px] bg-[#ff4500]/5 blur-[120px] rounded-full z-0 pointer-events-none"></div>
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-4xl mx-auto relative"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="max-w-4xl mx-auto relative z-10 flex flex-col items-center"
         >
-          <Hexagon className="w-16 h-16 text-[#ff4500] mx-auto mb-8 opacity-80 shadow-[0_0_15px_rgba(255,69,0,0.5)]" strokeWidth={1} />
+          {/* Animated Tech Icon */}
+          <div className="relative mb-12 group cursor-default">
+            {/* Spinning dashed ring */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="absolute -inset-4 rounded-full border border-[#ff4500]/30 border-dashed"
+            ></motion.div>
 
-          <h2 className="text-4xl md:text-7xl font-bold tracking-tighter text-white mb-6 uppercase">
-            Ready to secure your world?
-          </h2>
+            {/* Inner solid ring */}
+            <div className="w-24 h-24 rounded-full bg-[#050505] border border-[#222] flex flex-col items-center justify-center relative overflow-hidden shadow-[0_0_30px_rgba(255,69,0,0.15)] group-hover:border-[#ff4500]/50 transition-colors duration-500">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#ff4500]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <Hexagon className="w-10 h-10 text-[#ff4500] group-hover:scale-110 transition-transform duration-500" strokeWidth={1} />
+              {/* Pulsing core dot */}
+              <motion.div
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-1.5 h-1.5 bg-white rounded-full absolute mt-2"
+              ></motion.div>
+            </div>
 
-          <p className="mono text-sm text-gray-400 mb-12 max-w-2xl mx-auto uppercase tracking-widest leading-relaxed">
+            {/* Connecting lines top/bottom */}
+            <div className="absolute -top-16 left-1/2 w-px h-12 bg-gradient-to-t from-[#ff4500]/50 to-transparent"></div>
+            <div className="absolute -bottom-16 left-1/2 w-px h-12 bg-gradient-to-b from-[#ff4500]/50 to-transparent"></div>
+
+            {/* Side node dots */}
+            <div className="absolute top-1/2 -left-8 w-1 h-1 bg-[#ff4500] rounded-full"></div>
+            <div className="absolute top-1/2 -right-8 w-1 h-1 bg-[#ff4500] rounded-full"></div>
+            <div className="absolute top-1/2 -left-8 w-8 h-px bg-gradient-to-l from-[#ff4500]/30 to-transparent"></div>
+            <div className="absolute top-1/2 -right-8 w-8 h-px bg-gradient-to-r from-[#ff4500]/30 to-transparent"></div>
+          </div>
+
+          {/* Headline with UI Brackets */}
+          <div className="relative inline-block mb-8 text-center px-12 md:px-20 py-8">
+            <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 uppercase leading-none">
+              Ready to Secure
+              <br />
+              Your World?
+            </h2>
+
+            {/* Left Bracket */}
+            <svg className="absolute top-0 left-0 w-6 h-full text-[#333]" viewBox="0 0 20 100" preserveAspectRatio="none">
+              <path d="M 20 0 L 0 0 L 0 100 L 20 100" fill="none" stroke="currentColor" strokeWidth="2" />
+              <rect x="0" y="45" width="4" height="10" fill="currentColor" />
+            </svg>
+
+            {/* Right Bracket */}
+            <svg className="absolute top-0 right-0 w-6 h-full text-[#333]" viewBox="0 0 20 100" preserveAspectRatio="none">
+              <path d="M 0 0 L 20 0 L 20 100 L 0 100" fill="none" stroke="currentColor" strokeWidth="2" />
+              <rect x="16" y="45" width="4" height="10" fill="currentColor" />
+            </svg>
+          </div>
+
+          <p className="mono text-[10px] md:text-sm text-gray-400 mb-14 max-w-2xl text-center uppercase tracking-[0.2em] leading-relaxed">
             Take back control of your digital identity. Zero-knowledge, zero tracking, infinite peace of mind.
           </p>
 
-          <Link href="/signup" className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-[#ff4500] text-black font-bold uppercase tracking-widest hover:bg-white transition-all duration-300 text-sm">
-            Deploy Vault Instance <ArrowRight className="w-4 h-4" />
+          {/* Enhanced Cyberpunk Button */}
+          <Link href="/signup" className="group relative inline-flex items-center justify-center">
+            {/* Outer Glow */}
+            <div className="absolute inset-0 bg-[#ff4500] blur-[25px] opacity-20 group-hover:opacity-60 transition-opacity duration-500 rounded-sm"></div>
+
+            {/* Button Surface */}
+            <div className="relative px-12 md:px-16 py-5 bg-black border border-[#444] hover:border-[#ff4500] transition-colors duration-300 flex items-center gap-4 overflow-hidden rounded-sm text-white hover:text-[#ff4500]">
+              {/* Hover highlighting sweep */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ff4500]/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
+
+              <span className="font-bold uppercase tracking-[0.2em] text-sm relative z-10">Deploy Vault Instance</span>
+              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-2 transition-transform duration-300" />
+
+              {/* Tech Details (Corner squares) */}
+              <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-gray-600 transition-colors group-hover:bg-[#ff4500]"></div>
+              <div className="absolute bottom-1 right-1 w-1.5 h-1.5 bg-[#ff4500]"></div>
+            </div>
           </Link>
+
+          {/* System Status Line under button */}
+          <div className="mt-12 flex items-center gap-4 opacity-60">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-[pulse_2s_ease-in-out_infinite]"></div>
+              <span className="mono text-[9px] text-gray-500 uppercase tracking-widest hidden md:inline">Global Network: Standing By for Deployment</span>
+              <span className="mono text-[9px] text-gray-500 uppercase tracking-widest md:hidden">Network: Ready</span>
+            </div>
+            <svg className="w-24 md:w-40 h-px hidden sm:block opacity-30"><line x1="0" y1="0" x2="100%" y2="0" stroke="currentColor" strokeDasharray="2 2" /></svg>
+            <div className="mono text-[9px] text-gray-500 tracking-widest hidden sm:block">STATUS: ACK</div>
+          </div>
+
         </motion.div>
       </section>
 
