@@ -105,7 +105,7 @@ export class VaultService {
             return { success: true, data: decryptedRows };
 
         } catch (e) {
-            console.error('Failed to get credentials.');
+            console.error('Failed to get credentials.', e);
             return { success: false, error: new Error(ERROR_MESSAGES.vault.loadFailed) };
         }
     }

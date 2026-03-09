@@ -7,6 +7,7 @@ import { CRYPTO_CONFIG } from "@/constants";
 import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { SecurityService } from "@/services/security.service";
+import { VaultService } from "@/services/vault.service";
 
 interface VaultUnlockProps {
     onUnlock: () => void;
@@ -16,7 +17,7 @@ interface VaultUnlockProps {
 const BACKOFF_THRESHOLD = 5;
 
 export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
-    const { profile } = useAuth();
+    const { profile, user } = useAuth();
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +75,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
 
     const handleUnlock = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!profile || !profile.salt) {
+        if (!profile || !profile.salt || !user) {
             setError("Profile or crypto salt is missing. Please contact support.");
             return;
         }
@@ -90,7 +91,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
 
         try {
             // Verify the master password, passing the user's stored KDF iterations
-            const { isValid, newVerificationData, needsKdfUpgrade } =
+            const { isValid, newVerificationData } =
                 await passphraseManager.verifyOrSetupMasterPassword(
                     password,
                     profile.salt,
@@ -107,7 +108,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                     const sb = createClient();
                     const sec = new SecurityService(sb);
                     await sec.logEvent(
-                        profile.id,
+                        user.id,
                         'suspicious_activity',
                         newFailedAttempts >= BACKOFF_THRESHOLD ? 'critical' : 'warning',
                         { failed_attempts: newFailedAttempts }
@@ -139,35 +140,91 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
             const supabase = createClient();
 
             // Determine what to persist: first-time setup, KDF upgrade, or nothing
-            if (newVerificationData) {
-                // Build the update payload
-                const updatePayload: Record<string, unknown> = {
-                    vault_verification_data: newVerificationData,
-                };
-
-                if (needsKdfUpgrade || !profile.vault_verification_data) {
-                    // Upgrade to current iterations OR first-time setup at current iterations
-                    updatePayload.kdf_iterations = CRYPTO_CONFIG.iterations;
-                }
-
+            if (!profile.vault_verification_data && newVerificationData) {
+                // First-time setup - safely save new verification token and iterations
                 const { error: dbError } = await supabase
                     .from("profiles")
                     // @ts-expect-error Dynamic payload for kdf upgrade
-                    .update(updatePayload)
+                    .update({
+                        vault_verification_data: newVerificationData,
+                        kdf_iterations: CRYPTO_CONFIG.iterations,
+                    })
                     .eq("id", profile.id);
 
                 if (dbError) {
                     throw new Error("Failed to save vault verification setup.");
                 }
+
+                await passphraseManager.unlock(password, profile.salt, CRYPTO_CONFIG.iterations);
+
+            } else if (newVerificationData) {
+                // Old iterations triggered an upgrade. Do an atomic rotation so existing items 
+                // re-encrypt correctly; do NOT arbitrarily bump the profile iterations alone!
+                const vaultService = new VaultService(supabase);
+                const rotateResult = await vaultService.rotateMasterPassword(
+                    user.id,
+                    password,
+                    password,
+                    profile.salt,
+                    profile.vault_verification_data,
+                    profile.kdf_iterations
+                );
+
+                if (!rotateResult.success) {
+                    throw rotateResult.error;
+                }
+            } else {
+                // First, unlock the vault in memory with whatever the profile dictated.
+                await passphraseManager.unlock(password, profile.salt, profile.kdf_iterations ?? CRYPTO_CONFIG.legacyIterations);
+
+                // ==========================================
+                // SELF-HEALING KDF DESYNC MECHANISM
+                // Detect if previous bug upgraded verification data to 600K but abandoned items at 100K.
+                // ==========================================
+                const vService = new VaultService(supabase);
+                const testCheck = await vService.getCredentials();
+
+                if (!testCheck.success && profile.kdf_iterations === CRYPTO_CONFIG.iterations) {
+                    // The newly derived 600K key failed to decrypt the database rows!
+                    // Attempt to heal: Derive a 100K key, test rows, and manually force atomic rotate.
+                    const { deriveKeyFromPassword, encryptData, decryptData } = await import('@/lib/crypto/engine');
+                    const oldKey = await deriveKeyFromPassword(password, profile.salt, CRYPTO_CONFIG.legacyIterations);
+                    const newKey = await deriveKeyFromPassword(password, profile.salt, CRYPTO_CONFIG.iterations);
+
+                    const { data: rows } = await supabase.from('vault_credentials').select('*').eq('user_id', user.id);
+
+                    try {
+                        const updates = [];
+                        // Explicitly test-decrypt with 100K key. If this fails, then it's genuinely corrupted.
+                        for (const row of (rows || [])) {
+                            const r = row as unknown as { id: string; encrypted_data: string; iv: string; };
+                            const plaintext = await decryptData(r.encrypted_data, r.iv, oldKey);
+                            const { encryptedData, iv } = await encryptData(plaintext, newKey);
+                            updates.push({ id: r.id, encrypted_data: encryptedData, iv });
+                        }
+
+                        if (updates.length > 0) {
+                            const { generateVerificationToken } = await import('@/lib/crypto/core');
+                            const vToken = generateVerificationToken();
+                            const vResult = await encryptData(vToken, newKey);
+                            const newVerificationDataStr = JSON.stringify({ ...vResult, scheme: 'random_token_v2' });
+
+                            // @ts-expect-error - Database types don't include custom RPC functions
+                            await supabase.rpc('rotate_vault_credentials', {
+                                p_user_id: user.id,
+                                p_updates: updates,
+                                p_new_verification_data: newVerificationDataStr,
+                                p_new_kdf_iterations: CRYPTO_CONFIG.iterations,
+                            });
+                            console.log("Database successfully self-healed from KDF desync.");
+                        }
+                    } catch (corruptionErr) {
+                        console.error("Self-healing failed: Data is irrecoverably out of sync.", corruptionErr);
+                        // Passphrase manager will remain unlocked at 600K, which will inherently show the Decryption Failed UI.
+                    }
+                }
+                // ==========================================
             }
-
-            // Unlock the vault in memory.
-            const unlockIterations =
-                (newVerificationData && (needsKdfUpgrade || !profile.vault_verification_data))
-                    ? CRYPTO_CONFIG.iterations
-                    : (profile.kdf_iterations ?? CRYPTO_CONFIG.legacyIterations);
-
-            await passphraseManager.unlock(password, profile.salt, unlockIterations);
 
             // Clear password from state immediately after deriving keys
             setPassword("");
@@ -180,7 +237,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
             try {
                 const sb = createClient();
                 const sec = new SecurityService(sb);
-                await sec.logEvent(profile.id, 'vault_unlocked', 'info');
+                await sec.logEvent(user.id, 'vault_unlocked', 'info');
             } catch { /* non-blocking */ }
 
             setIsLoading(false);
