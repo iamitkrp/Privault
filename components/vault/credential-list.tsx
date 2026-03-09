@@ -28,8 +28,13 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
 
     useEffect(() => {
         const loadVault = async () => {
-            if (!user) return;
-            setIsLoading(true);
+            if (!user?.id) return;
+
+            // Only show hard loading spinner if we don't have credentials yet
+            if (credentials.length === 0) {
+                setIsLoading(true);
+            }
+
             const result = await vaultService.getCredentials();
 
             if (result.success) {
@@ -42,7 +47,7 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
 
         loadVault();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user?.id]);
 
     // Sync credentials to parent via effect (avoids setState-during-render)
     useEffect(() => {
@@ -151,12 +156,15 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
                 </div>
             )}
 
-            <CredentialModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSave}
-                existingCredential={editingCred}
-            />
+            {isModalOpen && (
+                <CredentialModal
+                    key={editingCred ? editingCred.id : 'new-cred'}
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleSave}
+                    existingCredential={editingCred}
+                />
+            )}
 
         </div>
     );

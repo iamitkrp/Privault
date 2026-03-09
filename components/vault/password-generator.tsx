@@ -5,7 +5,7 @@ import { Copy, RefreshCw, Settings2, Check } from "lucide-react";
 import { SESSION_CONFIG } from "@/constants";
 
 interface PasswordGeneratorProps {
-    onSelectPattern?: (password: string) => void;
+    onSelectPattern?: (password: string, userInitiated: boolean) => void;
 }
 
 export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
@@ -18,6 +18,7 @@ export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
     const [copied, setCopied] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const clipboardClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isFirstMount = useRef(true);
 
     // Cleanup pending clipboard-clear timer on unmount
     useEffect(() => {
@@ -26,7 +27,7 @@ export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
         };
     }, []);
 
-    const generatePassword = () => {
+    const generatePassword = (userInitiated: boolean = false) => {
         const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const lower = "abcdefghijklmnopqrstuvwxyz";
         const numbers = "0123456789";
@@ -73,13 +74,14 @@ export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
 
         setPassword(generated);
         if (onSelectPattern) {
-            onSelectPattern(generated);
+            onSelectPattern(generated, userInitiated);
         }
     };
 
     // Generate on mount or setting change
     useEffect(() => {
-        generatePassword();
+        generatePassword(!isFirstMount.current);
+        isFirstMount.current = false;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [length, useUpper, useLower, useNumbers, useSymbols]);
 
@@ -121,7 +123,7 @@ export function PasswordGenerator({ onSelectPattern }: PasswordGeneratorProps) {
                 <div className="absolute right-2 flex gap-1 items-center bg-background rounded-md px-1">
                     <button
                         type="button"
-                        onClick={generatePassword}
+                        onClick={() => generatePassword(true)}
                         className="p-2 text-secondary hover:text-brand transition-colors rounded-md focus:outline-none"
                         title="Regenerate"
                     >

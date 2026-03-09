@@ -226,11 +226,16 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                                 {showGenerator && (
                                     <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                         <PasswordGenerator
-                                            onSelectPattern={(generated) => {
-                                                // Auto-updates the password field when generator runs, 
-                                                // only if empty or explicitly commanded.
-                                                // But here we'll just safely update it so it mirrors.
-                                                setPassword(generated);
+                                            onSelectPattern={(generated, userInitiated) => {
+                                                setPassword((prev) => {
+                                                    // Only auto-update the password field if explicitly triggered by the user (button/slider)
+                                                    // OR if the field is currently completely empty on mount.
+                                                    if (userInitiated || !prev) {
+                                                        return generated;
+                                                    }
+                                                    // Otherwise, preserve the existing password (e.g. they opened generator while editing)
+                                                    return prev;
+                                                });
                                             }}
                                         />
                                     </div>
@@ -280,9 +285,9 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                         {isSaving ? (
                             <>
                                 <span className="w-4 h-4 border-2 border-brand-foreground/30 border-t-brand-foreground rounded-full animate-spin block" />
-                                Encrypting...
+                                {isEditing ? "Updating..." : "Encrypting..."}
                             </>
-                        ) : "Save securely"}
+                        ) : (isEditing ? "Update securely" : "Save securely")}
                     </button>
                 </div>
             </div >
