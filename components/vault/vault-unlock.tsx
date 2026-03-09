@@ -65,6 +65,11 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
         };
     }, [lockoutUntil]);
 
+    // Clear password from state on unmount
+    useEffect(() => {
+        return () => { setPassword(""); };
+    }, []);
+
     const isLockedOut = lockoutUntil !== null && remainingSeconds > 0;
 
     const handleUnlock = async (e: React.FormEvent) => {
@@ -163,6 +168,9 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                     : (profile.kdf_iterations ?? CRYPTO_CONFIG.legacyIterations);
 
             await passphraseManager.unlock(password, profile.salt, unlockIterations);
+
+            // Clear password from state immediately after deriving keys
+            setPassword("");
 
             // Reset brute-force counters on successful unlock
             setFailedAttempts(0);

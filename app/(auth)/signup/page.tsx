@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
@@ -16,6 +16,14 @@ export default function SignupPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    // Clear passwords from state on unmount
+    useEffect(() => {
+        return () => {
+            setPassword("");
+            setConfirmPassword("");
+        };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,6 +49,8 @@ export default function SignupPage() {
         if (!result.success) {
             setError(result.error.message);
         } else {
+            setPassword("");
+            setConfirmPassword("");
             setSuccess(true);
             // Wait a moment then redirect to email verification notice
             setTimeout(() => {

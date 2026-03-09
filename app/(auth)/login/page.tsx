@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-context";
 import { createClient } from "@/lib/supabase/client";
@@ -13,12 +13,22 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Clear password from state on unmount
+    useEffect(() => {
+        return () => { setPassword(""); };
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
 
         const result = await authService.signIn(email, password);
+
+        // Clear password from state as soon as sign-in completes
+        if (result.success) {
+            setPassword("");
+        }
 
         // Track login attempt for security monitoring
         try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { VaultService } from "@/services/vault.service";
@@ -44,6 +44,15 @@ function ChangeMasterPasswordSection() {
     const [showNew, setShowNew] = useState(false);
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [message, setMessage] = useState("");
+
+    // Clear passwords from state on unmount
+    useEffect(() => {
+        return () => {
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+        };
+    }, []);
 
     const isFormValid =
         currentPassword.length >= 1 &&
