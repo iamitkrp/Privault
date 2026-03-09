@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { VaultService } from "@/services/vault.service";
-import { Settings, KeyRound, Shield, LogOut, Eye, EyeOff, Check, AlertTriangle, Loader2, Download, Upload, FileText } from "lucide-react";
-import { exportToJSON, exportToCSV } from "@/services/export.service";
+import { Settings, KeyRound, Shield, LogOut, Eye, EyeOff, Check, AlertTriangle, Loader2, Download, Upload, FileText, Lock, X } from "lucide-react";
+import { exportToJSON, exportToCSV, exportToEncryptedJSON } from "@/services/export.service";
 import { parseJSON, parseCSV, ImportResult } from "@/services/import.service";
 
 export default function SettingsPage() {
@@ -231,8 +231,21 @@ function ChangeMasterPasswordSection() {
    ────────────────────────────────────────────────────────── */
 function ExportDataSection() {
     const [exportStatus, setExportStatus] = useState("");
+    const [exportStatusType, setExportStatusType] = useState<"idle" | "success" | "error">("idle");
+    const [warningDismissed, setWarningDismissed] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [pendingFormat, setPendingFormat] = useState<"json" | "csv" | "encrypted-json" | null>(null);
+    const [exportPassphrase, setExportPassphrase] = useState("");
+    const [confirmExportPassphrase, setConfirmExportPassphrase] = useState("");
+    const [showPassphrase, setShowPassphrase] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
-    const handleExport = async (format: "json" | "csv") => {
+    const handleExport = async () => {
+        if (!pendingFormat) return;
+        setIsExporting(true);
+        setExportStatus("");
+        setExportStatusType("idle");
+
         try {
             const supabase = createClient();
             const vaultService = new VaultService(supabase);
@@ -240,54 +253,186 @@ function ExportDataSection() {
 
             if (!result.success || !result.data) {
                 setExportStatus("Failed to fetch credentials for export.");
+                setExportStatusType("error");
+                setIsExporting(false);
                 return;
             }
 
-            if (format === "json") exportToJSON(result.data);
-            else exportToCSV(result.data);
+            if (pendingFormat === "encrypted-json") {
+                await exportToEncryptedJSON(result.data, exportPassphrase);
+            } else if (pendingFormat === "json") {
+                exportToJSON(result.data);
+            } else {
+                exportToCSV(result.data);
+            }
 
-            setExportStatus(`Exported ${result.data.length} credentials as ${format.toUpperCase()}.`);
-            setTimeout(() => setExportStatus(""), 3000);
+            setExportStatus(`Exported ${result.data.length} credentials successfully.`);
+            setExportStatusType("success");
+            setTimeout(() => {
+                setExportStatus("");
+                setExportStatusType("idle");
+            }, 3000);
+
+            // Cleanup
+            setShowConfirmDialog(false);
+            setPendingFormat(null);
+            setExportPassphrase("");
+            setConfirmExportPassphrase("");
         } catch (e) {
             setExportStatus("Export failed.");
+            setExportStatusType("error");
             console.error(e);
+        } finally {
+            setIsExporting(false);
         }
     };
 
+    const cancelExport = () => {
+        setShowConfirmDialog(false);
+        setPendingFormat(null);
+        setExportPassphrase("");
+        setConfirmExportPassphrase("");
+    };
+
     return (
-        <section className="glass rounded-xl border border-border/50 overflow-hidden">
+        <section className="glass rounded-xl border border-border/50 overflow-hidden relative">
             <div className="p-6 border-b border-border/30 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center">
                     <Download className="w-5 h-5 text-brand" />
                 </div>
                 <div>
                     <h2 className="text-lg font-semibold text-foreground">Export Data</h2>
-                    <p className="text-sm text-secondary">Download your vault data as JSON or CSV.</p>
+                    <p className="text-sm text-secondary">Download your vault data to your device.</p>
                 </div>
             </div>
             <div className="p-6 space-y-4">
-                <div className="flex gap-3">
+                {!warningDismissed && (
+                    <div className="flex items-start justify-between gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg text-warning text-sm">
+                        <div className="flex gap-3">
+                            <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-semibold mb-1">Security Warning</p>
+                                <p className="text-warning/90">
+                                    Plaintext exports contain your UNENCRYPTED passwords in a readable file. Anyone with access to this file can read all your passwords. Use &quot;Export Encrypted JSON&quot; to protect the file with a passphrase.
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={() => setWarningDismissed(true)} className="text-warning hover:text-warning/80 transition-colors p-1" title="Dismiss">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
-                        onClick={() => handleExport("json")}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-background/30 border border-border/50 hover:bg-white/5 text-foreground transition-colors text-sm font-medium"
+                        onClick={() => { setPendingFormat("json"); setShowConfirmDialog(true); }}
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-background/30 border border-border/50 hover:bg-white/5 text-foreground transition-colors text-sm font-medium"
                     >
-                        <FileText className="w-4 h-4 text-brand" />
-                        Export JSON
+                        <FileText className="w-4 h-4 text-secondary" />
+                        Export JSON (Plaintext)
                     </button>
                     <button
-                        onClick={() => handleExport("csv")}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-background/30 border border-border/50 hover:bg-white/5 text-foreground transition-colors text-sm font-medium"
+                        onClick={() => { setPendingFormat("csv"); setShowConfirmDialog(true); }}
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-background/30 border border-border/50 hover:bg-white/5 text-foreground transition-colors text-sm font-medium"
                     >
-                        <FileText className="w-4 h-4 text-brand" />
-                        Export CSV
+                        <FileText className="w-4 h-4 text-secondary" />
+                        Export CSV (Plaintext)
+                    </button>
+                    <button
+                        onClick={() => { setPendingFormat("encrypted-json"); setShowConfirmDialog(true); }}
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-brand text-brand-foreground hover:bg-brand-hover transition-colors text-sm font-medium shadow-glow"
+                    >
+                        <Lock className="w-4 h-4" />
+                        Export Encrypted JSON
                     </button>
                 </div>
-                {exportStatus && (
-                    <p className="text-sm text-success flex items-center gap-1.5">
-                        <Check className="w-4 h-4" /> {exportStatus}
+
+                {exportStatusType !== "idle" && (
+                    <p className={`text-sm flex items-center gap-1.5 ${exportStatusType === 'error' ? 'text-error' : 'text-success'}`}>
+                        {exportStatusType === 'error' ? <AlertTriangle className="w-4 h-4" /> : <Check className="w-4 h-4" />} {exportStatus}
                     </p>
                 )}
-                <p className="text-xs text-secondary">Exports are decrypted and downloaded locally. They never leave your browser.</p>
+
+                {/* Confirmation Dialog Overlay */}
+                {showConfirmDialog && (
+                    <div className="mt-4 p-5 rounded-lg border border-border/50 bg-background/50 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                        {pendingFormat === "encrypted-json" ? (
+                            <>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-1">
+                                        <Lock className="w-4 h-4 text-brand" /> Encrypted Export
+                                    </h3>
+                                    <p className="text-xs text-secondary">
+                                        Choose a strong passphrase to encrypt your exported file. You will need this to import or decrypt the file later.
+                                    </p>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="relative">
+                                        <input
+                                            type={showPassphrase ? "text" : "password"}
+                                            value={exportPassphrase}
+                                            onChange={e => setExportPassphrase(e.target.value)}
+                                            placeholder="Export Passphrase (min 8 chars)"
+                                            className="w-full bg-background/80 border border-border rounded-lg px-3 pr-10 py-2.5 text-foreground focus:ring-1 focus:ring-brand focus:border-brand text-sm font-mono"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassphrase(!showPassphrase)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-foreground transition-colors"
+                                        >
+                                            {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="password"
+                                        value={confirmExportPassphrase}
+                                        onChange={e => setConfirmExportPassphrase(e.target.value)}
+                                        placeholder="Confirm Passphrase"
+                                        className={`w-full bg-background/80 border rounded-lg px-3 py-2.5 text-foreground focus:ring-1 focus:ring-brand focus:border-brand text-sm font-mono ${confirmExportPassphrase && confirmExportPassphrase !== exportPassphrase ? "border-error" : "border-border"}`}
+                                    />
+                                    {confirmExportPassphrase && confirmExportPassphrase !== exportPassphrase && (
+                                        <p className="text-xs text-error">Passphrases do not match.</p>
+                                    )}
+                                </div>
+                                <div className="flex justify-end gap-3 pt-2">
+                                    <button onClick={cancelExport} className="px-4 py-2 rounded-lg text-sm font-medium bg-white/5 border border-border text-foreground hover:bg-white/10 transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleExport}
+                                        disabled={isExporting || exportPassphrase.length < 8 || exportPassphrase !== confirmExportPassphrase}
+                                        className="px-4 py-2 rounded-lg text-sm font-medium bg-brand text-brand-foreground hover:bg-brand-hover transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2"
+                                    >
+                                        {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Download Encrypted"}
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-warning flex items-center gap-2 mb-1">
+                                        <AlertTriangle className="w-4 h-4" /> Plaintext Export Confirmation
+                                    </h3>
+                                    <p className="text-sm text-foreground">
+                                        This file will contain your passwords in <strong className="text-warning">plain text</strong>. Are you sure?
+                                    </p>
+                                </div>
+                                <div className="flex justify-end gap-3 pt-2">
+                                    <button onClick={cancelExport} className="px-4 py-2 rounded-lg text-sm font-medium bg-white/5 border border-border text-foreground hover:bg-white/10 transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleExport}
+                                        disabled={isExporting}
+                                        className="px-4 py-2 rounded-lg text-sm font-medium bg-warning text-warning-foreground hover:bg-warning/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Download Anyway"}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
         </section>
     );
