@@ -55,15 +55,14 @@ const LockLayer = ({
   </svg>
 );
 
-// Floating Label for Padlock Layers
 const PadlockLabel = ({ text, position, lineProps }: { text: string, position: string, lineProps: { w: number, h: number, x1: number, y1: number, x2: number, y2: number } }) => (
   <div className={`absolute ${position} flex items-center gap-2 z-40 group`}>
     <svg width={lineProps.w} height={lineProps.h} className="absolute inset-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">
-      <line x1={lineProps.x1} y1={lineProps.y1} x2={lineProps.x2} y2={lineProps.y2} stroke="#fff" strokeWidth="1" strokeDasharray="2 2" />
-      <circle cx={lineProps.x1} cy={lineProps.y1} r="3" fill="#fff" />
-      <circle cx={lineProps.x2} cy={lineProps.y2} r="2" fill="#fff" />
+      <line x1={lineProps.x1} y1={lineProps.y1} x2={lineProps.x2} y2={lineProps.y2} stroke="#ff4500" strokeWidth="1" strokeDasharray="2 2" />
+      <circle cx={lineProps.x1} cy={lineProps.y1} r="3" fill="#00f0ff" />
+      <circle cx={lineProps.x2} cy={lineProps.y2} r="2" fill="#ff4500" />
     </svg>
-    <div className="border border-[#444] bg-black/90 backdrop-blur-md px-4 py-2 mono text-[10px] sm:text-xs text-gray-300 uppercase tracking-widest hover:text-white hover:border-white/60 transition-colors cursor-default whitespace-nowrap whitespace-pre">
+    <div className="border border-[#ff4500]/30 bg-black/90 backdrop-blur-md px-4 py-2 mono text-[10px] sm:text-xs text-[#00f0ff] uppercase tracking-widest hover:text-white hover:border-[#ff4500] hover:shadow-[0_0_15px_rgba(255,69,0,0.3)] transition-all cursor-default whitespace-nowrap whitespace-pre">
       {text}
     </div>
   </div>
@@ -267,50 +266,53 @@ export default function LandingPage() {
               transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
             >
 
-              {/* Layer 1 (Back) - Faded skeletal outline */}
+              {/* Layer 1 (Back) - Deep structural grid */}
               <LockLayer
-                className="opacity-10 translate-z-[-400px] -translate-x-[200px]"
-                fillClass="fill-transparent"
-                strokeClass="stroke-white/20"
-                displayKeyhole={false}
-              />
-
-              {/* Layer 2 - Dotted wireframe */}
-              <LockLayer
-                className="opacity-30 translate-z-[-300px] -translate-x-[150px]"
+                className="opacity-20 translate-z-[-400px] -translate-x-[200px]"
                 fillClass="fill-black/40"
-                strokeClass="stroke-white/40 stroke-[1px] dasharray-2"
+                strokeClass="stroke-[#ff4500]/40 stroke-[2px]"
                 displayKeyhole={false}
               />
 
-              {/* Layer 3 - Core structural grid */}
+              {/* Layer 2 - Data flow wireframe */}
               <LockLayer
-                className="opacity-50 translate-z-[-200px] -translate-x-[100px]"
+                className="opacity-40 translate-z-[-300px] -translate-x-[150px]"
                 fillClass="fill-black/60"
-                strokeClass="stroke-white/60 stroke-[2px]"
-                displayKeyhole={true}
+                strokeClass="stroke-[#00f0ff]/50 stroke-[1px] dasharray-2"
+                displayKeyhole={false}
               />
 
-              {/* Layer 4 - Inner face (dashed/detailed) */}
+              {/* Layer 3 - Core intelligence grid */}
               <LockLayer
-                className="opacity-70 translate-z-[-100px] -translate-x-[50px]"
+                className="opacity-60 translate-z-[-200px] -translate-x-[100px] drop-shadow-[0_0_15px_rgba(255,69,0,0.3)]"
                 fillClass="fill-black/80"
-                strokeClass="stroke-white/80 stroke-[1px] dasharray-4"
+                strokeClass="stroke-[#ff4500]/70 stroke-[2px]"
                 displayKeyhole={true}
               />
 
-              {/* Layer 5 (Front) - Dense Data Point Map */}
+              {/* Layer 4 - Inner shielding face */}
               <LockLayer
-                className="translate-z-0 z-10 drop-shadow-[0_0_40px_rgba(255,255,255,0.15)]"
+                className="opacity-80 translate-z-[-100px] -translate-x-[50px] drop-shadow-[0_0_15px_rgba(0,240,255,0.3)]"
                 fillClass="fill-black/90"
-                strokeClass="stroke-white/30"
+                strokeClass="stroke-[#00f0ff]/80 stroke-[1px] dasharray-4"
+                displayKeyhole={true}
+              />
+
+              {/* Layer 5 (Front) - Master Interface */}
+              <LockLayer
+                className="translate-z-0 z-10 drop-shadow-[0_0_30px_rgba(255,69,0,0.6)]"
+                fillClass="fill-black"
+                strokeClass="stroke-[#ff4500] stroke-[2px]"
                 patternId="front-dots"
-                patternFill="fill-white"
+                patternFill="fill-[#ff4500]/50"
                 displayKeyhole={true}
               />
 
               {/* Central Glowing Core (Pierces through the layers) */}
-              <div className="absolute top-[340px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70px] h-[140px] bg-white/90 blur-[25px] rounded-[100%] translate-z-[-150px] pointer-events-none mix-blend-screen pulse-glow"></div>
+              <div className="absolute top-[340px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80px] h-[160px] bg-gradient-to-t from-[#ff4500] to-[#00f0ff] blur-[30px] rounded-[100%] translate-z-[-150px] pointer-events-none mix-blend-screen animate-pulse"></div>
+
+              {/* Secondary Core Aura */}
+              <div className="absolute top-[340px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140px] h-[220px] bg-[#00f0ff]/20 blur-[50px] rounded-[100%] translate-z-[-50px] pointer-events-none mix-blend-screen pulse-glow"></div>
             </motion.div>
           </motion.div>
 
