@@ -13,7 +13,7 @@ export default function VerifyEmailPage() {
             </h1>
 
             <p className="text-secondary mb-6 leading-relaxed">
-                We've sent a magic link to your email address. Please click the link to verify your account and securely access your vault.
+                We&apos;ve sent a magic link to your email address. Please click the link to verify your account and securely access your vault.
             </p>
 
             <div className="bg-brand/5 border border-brand/20 rounded-lg p-4 text-xs text-brand/80 mb-8 text-left">

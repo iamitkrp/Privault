@@ -8,7 +8,7 @@ import { PasswordGenerator } from "./password-generator";
 interface CredentialModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (decrypted: DecryptedCredential, metadata: any) => Promise<void>;
+    onSave: (decrypted: DecryptedCredential, metadata: Record<string, unknown>) => Promise<void>;
     existingCredential?: VaultCredential;
 }
 
@@ -21,7 +21,7 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
     const [url, setUrl] = useState(existingCredential?.decrypted.url || "");
     const [notes, setNotes] = useState(existingCredential?.decrypted.notes || "");
     const [category, setCategory] = useState(existingCredential?.category || "other");
-    const [expirationDays, setExpirationDays] = useState<string>(
+    const [expirationDays, setExpirationDays] = useState<string>(() =>
         existingCredential?.expires_at
             ? String(Math.round((new Date(existingCredential.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
             : "0"
@@ -78,8 +78,8 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
 
             await onSave(decrypted, metadata);
             onClose();
-        } catch (err: any) {
-            setError(err.message || "Failed to save credential");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to save credential");
             setIsSaving(false);
         }
     };
@@ -147,7 +147,7 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                             <div className="space-y-1.5 col-span-2 md:col-span-1">
                                 <label className="text-sm font-medium text-secondary">Category</label>
                                 <select
-                                    value={category} onChange={e => setCategory(e.target.value as any)}
+                                    value={category} onChange={e => setCategory(e.target.value as VaultCredential['category'])}
                                     className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand appearance-none"
                                 >
                                     <option value="other">General / Other</option>

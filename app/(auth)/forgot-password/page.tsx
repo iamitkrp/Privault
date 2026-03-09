@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
                     Check Your Email
                 </h1>
                 <p className="text-secondary mb-8">
-                    If an account exists for that email, we've sent a secure password reset link.
+                    If an account exists for that email, we&apos;ve sent a secure password reset link.
                 </p>
                 <Link
                     href="/login"
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
                     Reset Password
                 </h1>
                 <p className="text-secondary text-sm px-4">
-                    Enter your email address and we'll send you a link to reset your master password
+                    Enter your email address and we&apos;ll send you a link to reset your master password
                 </p>
             </div>
 

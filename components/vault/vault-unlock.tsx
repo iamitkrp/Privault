@@ -152,7 +152,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
 
                 const { error: dbError } = await supabase
                     .from("profiles")
-                    // @ts-expect-error
+                    // @ts-expect-error Dynamic payload for kdf upgrade
                     .update(updatePayload)
                     .eq("id", profile.id);
 

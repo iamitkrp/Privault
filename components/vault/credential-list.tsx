@@ -49,7 +49,7 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
         if (onCredentialsLoad) onCredentialsLoad(credentials);
     }, [credentials, onCredentialsLoad]);
 
-    const handleSave = async (decrypted: DecryptedCredential, metadata: any) => {
+    const handleSave = async (decrypted: DecryptedCredential, metadata: Record<string, unknown>) => {
         if (!user) return;
 
         if (editingCred) {

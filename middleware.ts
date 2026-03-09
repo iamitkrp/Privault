@@ -13,12 +13,21 @@ export function middleware(request: NextRequest) {
     // Derive Supabase origin for connect-src
     const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 
+    const isDev = process.env.NODE_ENV === 'development';
+
     // Build nonce-based CSP — 'strict-dynamic' allows Next.js-injected scripts
     // that carry the nonce to load additional trusted scripts.
+    // In development mode, Next.js requires 'unsafe-inline' styles for its overlay and 
+    // 'unsafe-eval' for FastRefresh mapping. Modern browsers ignore 'unsafe-inline' if a nonce is present,
+    // so we must explicitly omit the nonce in Dev mode for those attributes to work.
     const cspDirectives = [
         `default-src 'self'`,
-        `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-        `style-src 'self' 'nonce-${nonce}'`,
+        isDev
+            ? `script-src 'self' 'unsafe-eval' 'unsafe-inline'`
+            : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+        isDev
+            ? `style-src 'self' 'unsafe-inline'`
+            : `style-src 'self' 'nonce-${nonce}'`,
         `img-src 'self' data: blob:`,
         `font-src 'self'`,
         `connect-src 'self' ${supabaseOrigin}`.trim(),
