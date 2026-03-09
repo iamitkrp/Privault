@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-context";
-import { createClient } from "@/lib/supabase/client";
 import { SecurityService } from "@/services/security.service";
 
 export default function LoginPage() {
-    const { authService } = useAuth();
+    const { authService, supabaseClient } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -32,7 +31,7 @@ export default function LoginPage() {
 
         // Track login attempt for security monitoring
         try {
-            const supabase = createClient();
+            const supabase = supabaseClient;
             const security = new SecurityService(supabase);
 
             if (result.success) {

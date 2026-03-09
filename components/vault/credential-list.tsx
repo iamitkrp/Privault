@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
-import { createClient } from "@/lib/supabase/client";
 import { VaultService } from "@/services/vault.service";
 import { VaultCredential, DecryptedCredential } from "@/types";
 import { Plus, Search, ServerCrash, KeyRound } from "lucide-react";
@@ -13,7 +12,7 @@ interface CredentialListProps {
 }
 
 export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
-    const { user } = useAuth();
+    const { user, supabaseClient } = useAuth();
 
     const [credentials, setCredentials] = useState<VaultCredential[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +23,7 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCred, setEditingCred] = useState<VaultCredential | undefined>(undefined);
 
-    const vaultService = new VaultService(createClient());
+    const vaultService = new VaultService(supabaseClient);
 
     useEffect(() => {
         const loadVault = async () => {

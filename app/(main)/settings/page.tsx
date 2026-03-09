@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
-import { createClient } from "@/lib/supabase/client";
 import { VaultService } from "@/services/vault.service";
 import { Settings, KeyRound, Shield, LogOut, Eye, EyeOff, Check, AlertTriangle, Loader2, Download, Upload, FileText, Lock, X } from "lucide-react";
 import { exportToJSON, exportToCSV, exportToEncryptedJSON } from "@/services/export.service";
@@ -35,7 +34,7 @@ export default function SettingsPage() {
    Change Master Password Section
    ────────────────────────────────────────────────────────── */
 function ChangeMasterPasswordSection() {
-    const { user, profile } = useAuth();
+    const { user, profile, supabaseClient } = useAuth();
 
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -68,8 +67,7 @@ function ChangeMasterPasswordSection() {
         setMessage("");
 
         try {
-            const supabase = createClient();
-            const vaultService = new VaultService(supabase);
+            const vaultService = new VaultService(supabaseClient);
 
             const result = await vaultService.rotateMasterPassword(
                 user.id,
@@ -230,6 +228,7 @@ function ChangeMasterPasswordSection() {
    Export Data Section
    ────────────────────────────────────────────────────────── */
 function ExportDataSection() {
+    const { supabaseClient } = useAuth();
     const [exportStatus, setExportStatus] = useState("");
     const [exportStatusType, setExportStatusType] = useState<"idle" | "success" | "error">("idle");
     const [warningDismissed, setWarningDismissed] = useState(false);
@@ -247,8 +246,7 @@ function ExportDataSection() {
         setExportStatusType("idle");
 
         try {
-            const supabase = createClient();
-            const vaultService = new VaultService(supabase);
+            const vaultService = new VaultService(supabaseClient);
             const result = await vaultService.getCredentials();
 
             if (!result.success || !result.data) {
@@ -442,7 +440,7 @@ function ExportDataSection() {
    Import Data Section
    ────────────────────────────────────────────────────────── */
 function ImportDataSection() {
-    const { user } = useAuth();
+    const { user, supabaseClient } = useAuth();
     const [importResult, setImportResult] = useState<ImportResult | null>(null);
     const [importing, setImporting] = useState(false);
     const [importDone, setImportDone] = useState("");
@@ -466,8 +464,7 @@ function ImportDataSection() {
         setImporting(true);
 
         try {
-            const supabase = createClient();
-            const vaultService = new VaultService(supabase);
+            const vaultService = new VaultService(supabaseClient);
 
             let imported = 0;
             for (const cred of importResult.credentials) {
@@ -541,7 +538,7 @@ function ImportDataSection() {
    Danger Zone (Account Deletion / Logout)
    ────────────────────────────────────────────────────────── */
 function DangerZoneSection() {
-    const { user } = useAuth();
+    const { user, supabaseClient } = useAuth();
     const [confirmText, setConfirmText] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -552,8 +549,7 @@ function DangerZoneSection() {
         try {
             // Note: Account deletion requires a Supabase Edge function or service-role call.
             // For now, we sign out and show a message indicating they need to contact support.
-            const supabase = createClient();
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = "/login";
         } catch (e) {
             console.error("Account deletion error:", e);
@@ -562,8 +558,7 @@ function DangerZoneSection() {
     };
 
     const handleLogout = async () => {
-        const supabase = createClient();
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         window.location.href = "/login";
     };
 

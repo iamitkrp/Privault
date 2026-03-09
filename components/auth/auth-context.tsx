@@ -12,6 +12,7 @@ interface AuthContextType {
     isLoading: boolean;
     signOut: () => Promise<void>;
     authService: AuthService;
+    supabaseClient: ReturnType<typeof createClient>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -121,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, profile, isLoading, signOut, authService }}>
+        <AuthContext.Provider value={{ user, profile, isLoading, signOut, authService, supabaseClient }}>
             {children}
         </AuthContext.Provider>
     );

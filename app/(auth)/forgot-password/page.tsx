@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/components/auth/auth-context";
 import { ERROR_MESSAGES } from "@/constants";
 
 export default function ForgotPasswordPage() {
+    const { supabaseClient } = useAuth();
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -16,7 +17,7 @@ export default function ForgotPasswordPage() {
         setIsLoading(true);
         setError(null);
 
-        const supabase = createClient();
+        const supabase = supabaseClient;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?type=recovery`,
         });

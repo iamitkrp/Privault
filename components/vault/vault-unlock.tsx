@@ -5,7 +5,6 @@ import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
 import { CRYPTO_CONFIG } from "@/constants";
 import { Lock } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { SecurityService } from "@/services/security.service";
 import { VaultService } from "@/services/vault.service";
 
@@ -17,7 +16,7 @@ interface VaultUnlockProps {
 const BACKOFF_THRESHOLD = 5;
 
 export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
-    const { profile, user } = useAuth();
+    const { profile, user, supabaseClient } = useAuth();
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -90,6 +89,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
         setError(null);
 
         try {
+            console.log("[VaultUnlock] Starting verifyOrSetupMasterPassword...");
             // Verify the master password, passing the user's stored KDF iterations
             const { isValid, newVerificationData } =
                 await passphraseManager.verifyOrSetupMasterPassword(
@@ -98,6 +98,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                     profile.vault_verification_data,
                     profile.kdf_iterations
                 );
+            console.log("[VaultUnlock] verifyOrSetupMasterPassword finished:", { isValid, hasNewData: !!newVerificationData });
 
             if (!isValid) {
                 const newFailedAttempts = failedAttempts + 1;
@@ -105,8 +106,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
 
                 // Log failed attempt as suspicious activity (non-blocking)
                 try {
-                    const sb = createClient();
-                    const sec = new SecurityService(sb);
+                    const sec = new SecurityService(supabaseClient);
                     await sec.logEvent(
                         user.id,
                         'suspicious_activity',
@@ -137,10 +137,13 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 return;
             }
 
-            const supabase = createClient();
+            console.log("[VaultUnlock] Creating Supabase client...");
+            const supabase = supabaseClient;
 
             // Determine what to persist: first-time setup, KDF upgrade, or nothing
+            console.log("[VaultUnlock] Checking how to persist...");
             if (!profile.vault_verification_data && newVerificationData) {
+                console.log("[VaultUnlock] Branch 1: First-time setup...");
                 // First-time setup - safely save new verification token and iterations
                 const { error: dbError } = await supabase
                     .from("profiles")
@@ -158,6 +161,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 await passphraseManager.unlock(password, profile.salt, CRYPTO_CONFIG.iterations);
 
             } else if (newVerificationData) {
+                console.log("[VaultUnlock] Branch 2: Rotation required...");
                 // Old iterations triggered an upgrade. Do an atomic rotation so existing items 
                 // re-encrypt correctly; do NOT arbitrarily bump the profile iterations alone!
                 const vaultService = new VaultService(supabase);
@@ -174,6 +178,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                     throw rotateResult.error;
                 }
             } else {
+                console.log("[VaultUnlock] Branch 3: Standard unlock path...");
                 const targetIterations = profile.kdf_iterations ?? CRYPTO_CONFIG.legacyIterations;
 
                 // ==========================================
@@ -239,10 +244,13 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 }
                 // ==========================================
 
+                console.log("[VaultUnlock] Calling passphraseManager.unlock...");
                 // Finally unlock the vault in memory, AFTER the data is fully ready to be read.
                 await passphraseManager.unlock(password, profile.salt, targetIterations);
+                console.log("[VaultUnlock] passphraseManager.unlock successful.");
             }
 
+            console.log("[VaultUnlock] Finalizing state...");
             // Clear password from state immediately after deriving keys
             setPassword("");
 
@@ -252,16 +260,16 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
 
             // Log vault unlock event
             try {
-                const sb = createClient();
-                const sec = new SecurityService(sb);
+                const sec = new SecurityService(supabaseClient);
                 await sec.logEvent(user.id, 'vault_unlocked', 'info');
             } catch { /* non-blocking */ }
 
+            console.log("[VaultUnlock] Unlock sequence complete. Calling onUnlock...");
             setIsLoading(false);
             onUnlock();
 
         } catch (err) {
-            console.error(err);
+            console.error("[VaultUnlock] Exception caught:", err);
             setIsLoading(false);
             setError("An unexpected error occurred while unlocking the vault.");
         }
