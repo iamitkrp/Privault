@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, ArrowRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
 
-import InteractiveTerminal from "@/components/landing/InteractiveTerminal";
+import EncryptionPipeline from "@/components/landing/EncryptionPipeline";
 
 const features = [
   {
@@ -154,9 +154,9 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
 
-        {/* Right Content - Interactive Terminal Visualization */}
+        {/* Right Content - Encryption Pipeline Visualization */}
         <div className="w-full lg:w-[55%] h-[500px] lg:h-[650px] relative mt-10 lg:mt-0 z-20 hidden md:flex items-center justify-end lg:pr-12">
-          <InteractiveTerminal />
+          <EncryptionPipeline />
         </div>
       </section>
 
