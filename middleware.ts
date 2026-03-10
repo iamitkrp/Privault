@@ -23,19 +23,21 @@ export function middleware(request: NextRequest) {
     const cspDirectives = [
         `default-src 'self'`,
         isDev
-            ? `script-src 'self' 'unsafe-eval' 'unsafe-inline'`
-            : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+            ? `script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:`
+            : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob:`,
         isDev
             ? `style-src 'self' 'unsafe-inline'`
             : `style-src 'self' 'nonce-${nonce}'`,
-        `img-src 'self' data: blob:`,
+        `img-src 'self' data: blob: https://*.spline.design`,
         `font-src 'self'`,
-        `connect-src 'self' ${supabaseOrigin}`.trim(),
-        `frame-src 'none'`,
+        `connect-src 'self' ${supabaseOrigin} https://prod.spline.design https://*.spline.design`.trim(),
+        `worker-src 'self' blob:`,
+        `frame-src https://my.spline.design`,
         `object-src 'none'`,
         `base-uri 'self'`,
         `form-action 'self'`,
     ];
+
 
     const cspHeaderValue = cspDirectives.join('; ');
 

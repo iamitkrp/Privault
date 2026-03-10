@@ -3,6 +3,130 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
+// ─── Math & Generators ────────────────────────────────────────────────────────
+function generatePadlockPoints() {
+    const pts: number[] = [];
+    const step = 0.05; // Density of grid points
+
+    const addPoint = (x: number, y: number, z: number) => pts.push(x, y, z);
+
+    // Body dimensions
+    const bw = 2.4, bh = 1.8, bd = 0.8;
+
+    // Keyhole Shape Mask
+    const isKeyhole = (x: number, y: number) => {
+        const circ = Math.sqrt(x * x + (y - 0.1) * (y - 0.1)) < 0.35;
+        const stem = y < 0.1 && y > -0.6 && Math.abs(x) < (0.18 - (y - 0.1) * 0.1);
+        return circ || stem;
+    };
+
+    // Front / Back faces (Dense Grid)
+    for (let x = -bw / 2; x <= bw / 2; x += step) {
+        for (let y = -bh / 2; y <= bh / 2; y += step) {
+            if (!isKeyhole(x, y)) {
+                addPoint(x, y, bd / 2);
+                addPoint(x, y, -bd / 2);
+            }
+        }
+    }
+
+    // Top / Bottom
+    for (let x = -bw / 2; x <= bw / 2; x += step) {
+        for (let z = -bd / 2; z <= bd / 2; z += step) {
+            addPoint(x, bh / 2, z);
+            addPoint(x, -bh / 2, z);
+        }
+    }
+
+    // Left / Right
+    for (let y = -bh / 2; y <= bh / 2; y += step) {
+        for (let z = -bd / 2; z <= bd / 2; z += step) {
+            addPoint(bw / 2, y, z);
+            addPoint(-bw / 2, y, z);
+        }
+    }
+
+    // Shackle Arc (Top Loop)
+    const sr = 0.7, st = 0.3;
+    for (let theta = 0; theta <= Math.PI; theta += 0.06) {
+        for (let phi = 0; phi <= Math.PI * 2; phi += 0.15) {
+            const vx = (sr + st * Math.cos(phi)) * Math.cos(theta);
+            const vy = (sr + st * Math.cos(phi)) * Math.sin(theta);
+            const vz = st * Math.sin(phi);
+            addPoint(vx, vy + bh / 2 + 0.5, vz);
+        }
+    }
+
+    // Shackle Legs
+    for (let y = 0; y <= 0.5; y += step) {
+        for (let phi = 0; phi <= Math.PI * 2; phi += 0.15) {
+            const z = st * Math.sin(phi);
+            const x = st * Math.cos(phi);
+            addPoint(sr + x, y + bh / 2, z);
+            addPoint(-sr + x, y + bh / 2, z);
+        }
+    }
+
+    // Internal "data core" structure (faint sparse matrix inside the lock)
+    for (let x = -bw / 2 + 0.2; x <= bw / 2 - 0.2; x += step * 3) {
+        for (let y = -bh / 2 + 0.2; y <= bh / 2 - 0.2; y += step * 3) {
+            for (let z = -bd / 2 + 0.2; z <= bd / 2 - 0.2; z += step * 3) {
+                if (Math.random() > 0.5 && !isKeyhole(x, y)) {
+                    addPoint(x, y, z);
+                }
+            }
+        }
+    }
+
+    return new Float32Array(pts);
+}
+
+function generateRingProjPoints() {
+    const pts: number[] = [];
+    const zOffsets = [1.5, 2.5, 3.8, 5.5];
+
+    // Solid dense dials floating backwards
+    zOffsets.forEach((zo, i) => {
+        const rad = 0.5 + i * 0.5; // Rings get larger as they move backwards
+        for (let r = rad - 0.3; r <= rad; r += 0.04) {
+            for (let a = 0; a < Math.PI * 2; a += 0.03) {
+                // Cut gaps for techy separated dial look
+                if ((a % (Math.PI / 4)) < 0.2) continue;
+                // Outer jagged noise (binary code look)
+                if (r >= rad - 0.04 && Math.random() > 0.6) continue;
+
+                pts.push(r * Math.cos(a), r * Math.sin(a) + 0.1, zo);
+            }
+        }
+    });
+
+    // Connecting funnel cone connecting rings to keyhole
+    for (let z = 0.5; z < 5.5; z += 0.1) {
+        const rad = 0.3 + (z * 0.4);
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+            if (Math.random() > 0.3) {
+                pts.push(rad * Math.cos(a), rad * Math.sin(a) + 0.1, z);
+            }
+        }
+    }
+    return new Float32Array(pts);
+}
+
+function createGlowDot() {
+    const c = document.createElement("canvas");
+    c.width = 64; c.height = 64;
+    const ctx = c.getContext("2d")!;
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, "rgba(255, 255, 255, 1.0)");
+    grad.addColorStop(0.2, "rgba(200, 240, 255, 0.8)");
+    grad.addColorStop(0.5, "rgba(0, 150, 255, 0.2)");
+    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function HeroLockCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -11,278 +135,79 @@ export default function HeroLockCanvas() {
         if (!container) return;
 
         const scene = new THREE.Scene();
-        const cw = container.clientWidth, ch = container.clientHeight;
-        const camera = new THREE.PerspectiveCamera(40, cw / ch, 0.1, 100);
-        camera.position.set(0, 0, 3.2);
-        camera.lookAt(0, 0, 0);
+        // Base dark void (as per reference)
+        scene.background = new THREE.Color(0x040608);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const cw = container.clientWidth, ch = container.clientHeight;
+        const camera = new THREE.PerspectiveCamera(38, cw / ch, 0.1, 100);
+        camera.position.set(0, 0, 8.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         renderer.setSize(cw, ch);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setClearColor(0x000000, 0);
         container.appendChild(renderer.domElement);
 
+        const tex = createGlowDot();
+
+        // ── Main Padlock Mesh ─────────────────────────────────────
+        const lockGeo = new THREE.BufferGeometry();
+        lockGeo.setAttribute("position", new THREE.BufferAttribute(generatePadlockPoints(), 3));
+        const lockMat = new THREE.PointsMaterial({
+            size: 0.045,
+            map: tex,
+            transparent: true,
+            opacity: 0.9,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            color: 0xeeffff
+        });
+        const lockPoints = new THREE.Points(lockGeo, lockMat);
+
+        // ── Data Rings Mesh ────────────────────────────────
+        const ringsGeo = new THREE.BufferGeometry();
+        ringsGeo.setAttribute("position", new THREE.BufferAttribute(generateRingProjPoints(), 3));
+        const ringsMat = new THREE.PointsMaterial({
+            size: 0.04,
+            map: tex,
+            transparent: true,
+            opacity: 0.7,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            color: 0x88ccff
+        });
+        const ringsPoints = new THREE.Points(ringsGeo, ringsMat);
+
+        // ── Blinding Keyhole Core Glow ──────────────────────
+        const coreSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: tex,
+            color: 0xffffff,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        }));
+        coreSprite.scale.set(1.8, 1.8, 1);
+        coreSprite.position.set(0, -0.1, 0.4);
+
         const group = new THREE.Group();
-        group.rotation.x = 0.15; // slight tilt
+        group.add(lockPoints);
+        group.add(ringsPoints);
+        group.add(coreSprite);
+
+        // Orient exactly like the reference screenshot
+        // Padlock sits on right side, faces left slightly, projecting rings left-backward
+        group.rotation.x = -0.05;
+        group.rotation.y = -0.7;
+        group.position.set(2, 0, 0);
+
         scene.add(group);
 
-        const loader = new THREE.TextureLoader();
+        // ── Grid Background ────────────────────────────────
+        const gridHelper = new THREE.GridHelper(20, 40, 0x112233, 0x0a111a);
+        gridHelper.rotation.x = Math.PI / 2;
+        gridHelper.position.z = -3;
+        scene.add(gridHelper);
 
-        // ===== EARTH GLOBE =====
-        const earthGeo = new THREE.SphereGeometry(1, 64, 64);
-
-        // Dark earth texture
-        const earthMat = new THREE.MeshStandardMaterial({
-            color: 0x112244,
-            roughness: 0.8,
-            metalness: 0.2,
-            transparent: true,
-            opacity: 0.95,
-        });
-
-        loader.load(
-            "https://unpkg.com/three-globe@2.31.0/example/img/earth-night.jpg",
-            (texture) => {
-                earthMat.map = texture;
-                earthMat.color.set(0xffffff);
-                earthMat.needsUpdate = true;
-            },
-            undefined,
-            () => {
-                // Fallback
-                earthMat.color.set(0x0a1628);
-            }
-        );
-
-        const earthMesh = new THREE.Mesh(earthGeo, earthMat);
-        group.add(earthMesh);
-
-        // ===== ATMOSPHERE GLOW =====
-        const atmosGeo = new THREE.SphereGeometry(1.03, 64, 64);
-        const atmosMat = new THREE.ShaderMaterial({
-            transparent: true,
-            side: THREE.FrontSide,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            uniforms: {},
-            vertexShader: `
-        varying vec3 vNormal;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-            fragmentShader: `
-        varying vec3 vNormal;
-        void main() {
-          float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-          gl_FragColor = vec4(0.3, 0.6, 1.0, intensity * 0.8);
-        }
-      `,
-        });
-        group.add(new THREE.Mesh(atmosGeo, atmosMat));
-
-        // Back-side outer glow
-        const outerGlowMat = new THREE.ShaderMaterial({
-            transparent: true,
-            side: THREE.BackSide,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            uniforms: {},
-            vertexShader: `
-        varying vec3 vNormal;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-            fragmentShader: `
-        varying vec3 vNormal;
-        void main() {
-          float intensity = pow(0.5 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-          gl_FragColor = vec4(0.2, 0.5, 1.0, intensity * 0.5);
-        }
-      `,
-        });
-        group.add(new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), outerGlowMat));
-
-        // ===== WIREFRAME OVERLAY =====
-        const wireGeo = new THREE.SphereGeometry(1.005, 36, 18);
-        const wireMat = new THREE.MeshBasicMaterial({
-            color: 0x4488ff, wireframe: true, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending,
-        });
-        group.add(new THREE.Mesh(wireGeo, wireMat));
-
-        // ===== CONNECTION POINTS & ARCS (Encrypted Data Traffic) =====
-        const cities = [
-            { name: "NY", lat: 40.7, lng: -74.0 },
-            { name: "London", lat: 51.5, lng: -0.1 },
-            { name: "Tokyo", lat: 35.7, lng: 139.7 },
-            { name: "Sydney", lat: -33.9, lng: 151.2 },
-            { name: "SF", lat: 37.8, lng: -122.4 },
-            { name: "Singapore", lat: 1.3, lng: 103.8 },
-            { name: "Berlin", lat: 52.5, lng: 13.4 },
-            { name: "Paris", lat: 48.9, lng: 2.4 },
-            { name: "Delhi", lat: 28.6, lng: 77.2 },
-            { name: "São Paulo", lat: -23.5, lng: -46.6 },
-            { name: "Moscow", lat: 55.8, lng: 37.6 },
-            { name: "Dubai", lat: 25.2, lng: 55.2 },
-            { name: "Cape Town", lat: -33.9, lng: 18.4 },
-        ];
-
-        const getVectorFromLatLng = (lat: number, lng: number, radius = 1) => {
-            const phi = (90 - lat) * (Math.PI / 180);
-            const theta = (lng + 180) * (Math.PI / 180);
-            return new THREE.Vector3(
-                -radius * Math.sin(phi) * Math.cos(theta),
-                radius * Math.cos(phi),
-                radius * Math.sin(phi) * Math.sin(theta)
-            );
-        };
-
-        const pointGroup = new THREE.Group();
-        earthMesh.add(pointGroup); // attach to earth so they rotate with it
-
-        const dotGeometry = new THREE.SphereGeometry(0.012, 8, 8);
-        const dotMaterial = new THREE.MeshBasicMaterial({ color: 0xaaccff });
-
-        // Node Sprites Map
-        const nodeSprites: THREE.Sprite[] = [];
-        const cityVectors: THREE.Vector3[] = [];
-
-        // Create a generic glow texture for nodes
-        const nodeGlowCanvas = document.createElement("canvas");
-        nodeGlowCanvas.width = 32; nodeGlowCanvas.height = 32;
-        const ngCtx = nodeGlowCanvas.getContext("2d")!;
-        const ngGrad = ngCtx.createRadialGradient(16, 16, 0, 16, 16, 16);
-        ngGrad.addColorStop(0, "rgba(150,200,255,1)");
-        ngGrad.addColorStop(0.4, "rgba(80,140,255,0.4)");
-        ngGrad.addColorStop(1, "rgba(40,90,255,0)");
-        ngCtx.fillStyle = ngGrad; ngCtx.fillRect(0, 0, 32, 32);
-        const nodeTex = new THREE.CanvasTexture(nodeGlowCanvas);
-        const spriteMat = new THREE.SpriteMaterial({ map: nodeTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-
-        for (const city of cities) {
-            const pos = getVectorFromLatLng(city.lat, city.lng, 1.002);
-            cityVectors.push(pos);
-
-            // Core dot
-            const dot = new THREE.Mesh(dotGeometry, dotMaterial);
-            dot.position.copy(pos);
-            pointGroup.add(dot);
-
-            // Glow sprite
-            const sprite = new THREE.Sprite(spriteMat.clone());
-            sprite.scale.set(0.12, 0.12, 1);
-            sprite.position.copy(pos);
-            pointGroup.add(sprite);
-            nodeSprites.push(sprite);
-        }
-
-        // --- ARCS for Network Traffic ---
-        const arcGroup = new THREE.Group();
-        earthMesh.add(arcGroup);
-
-        // Create random arcs between cities
-        const arcCount = 15;
-        const arcs: { mesh: THREE.Line; progress: number; speed: number; material: THREE.LineDashedMaterial }[] = [];
-
-        for (let i = 0; i < arcCount; i++) {
-            const i1 = Math.floor(Math.random() * cities.length);
-            let i2 = Math.floor(Math.random() * cities.length);
-            while (i2 === i1) i2 = Math.floor(Math.random() * cities.length);
-
-            const v1 = cityVectors[i1]!;
-            const v2 = cityVectors[i2]!;
-
-            const dist = v1.distanceTo(v2);
-            // Create a quadratic bezier curve for the arc, popping out from the sphere
-            const midPoint = v1.clone().lerp(v2, 0.5);
-            midPoint.normalize().multiplyScalar(1 + dist * 0.3); // Pop out relative to distance
-
-            const curve = new THREE.QuadraticBezierCurve3(v1, midPoint, v2);
-            const points = curve.getPoints(30);
-            const geo = new THREE.BufferGeometry().setFromPoints(points);
-
-            const mat = new THREE.LineDashedMaterial({
-                color: 0x66ccff,
-                linewidth: 1,
-                transparent: true,
-                opacity: 0.8,
-                dashSize: dist * 0.15,
-                gapSize: 10, // Basically hiding the rest of the line
-                blending: THREE.AdditiveBlending,
-                depthWrite: false
-            });
-
-            const line = new THREE.Line(geo, mat);
-            line.computeLineDistances();
-            arcGroup.add(line);
-
-            arcs.push({
-                mesh: line,
-                progress: Math.random() * 10,
-                speed: 0.05 + Math.random() * 0.05,
-                material: mat
-            });
-        }
-
-        // ===== DATA PARTICLES ORBITING ALONG RINGS =====
-        const ringGroup = new THREE.Group();
-        group.add(ringGroup);
-
-        const createRing = (radius: number, tiltX: number, tiltZ: number, particles: number) => {
-            const g = new THREE.Group();
-
-            // Dashed subtle ring
-            const curve = new THREE.EllipseCurve(0, 0, radius, radius, 0, Math.PI * 2, false, 0);
-            const pts = curve.getPoints(100);
-            const geo = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p.x, 0, p.y)));
-            const mat = new THREE.LineDashedMaterial({
-                color: 0x4488ff, transparent: true, opacity: 0.08, dashSize: 0.1, gapSize: 0.05,
-            });
-            const line = new THREE.Line(geo, mat);
-            line.computeLineDistances();
-            g.add(line);
-
-            // Data nodes on the ring
-            const pGroup = new THREE.Group();
-            for (let i = 0; i < particles; i++) {
-                const nodeMat = new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-                const node = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.05, 4), nodeMat);
-                const a = (i / particles) * Math.PI * 2;
-                node.position.set(Math.cos(a) * radius, 0, Math.sin(a) * radius);
-                node.rotation.x = Math.PI / 2;
-                node.rotation.z = -a;
-                pGroup.add(node);
-            }
-            g.add(pGroup);
-
-            g.rotation.x = tiltX;
-            g.rotation.z = tiltZ;
-            ringGroup.add(g);
-            return { group: g, nodes: pGroup };
-        };
-
-        const rings = [
-            createRing(1.5, 1.2, 0.2, 5),
-            createRing(1.7, 0.4, -0.6, 8),
-            createRing(1.9, -0.5, 0.4, 6),
-        ];
-
-        // ===== LIGHTING =====
-        const dirLight = new THREE.DirectionalLight(0x66aaff, 1.2);
-        dirLight.position.set(-5, 3, 4);
-        scene.add(dirLight);
-
-        const dirLight2 = new THREE.DirectionalLight(0xffaa66, 0.3); // Warm rim light
-        dirLight2.position.set(5, -2, -3);
-        scene.add(dirLight2);
-
-        const ambLight = new THREE.AmbientLight(0x0a1628, 2.0);
-        scene.add(ambLight);
-
-        // ===== ANIMATION =====
+        // ── Animation ─────────────────────────────────────
         let raf = 0;
         const clock = new THREE.Clock();
 
@@ -290,36 +215,17 @@ export default function HeroLockCanvas() {
             raf = requestAnimationFrame(animate);
             const t = clock.getElapsedTime();
 
-            // Earth rotation
-            earthMesh.rotation.y = t * 0.05;
-            wireGeo.rotateY(0.0003); // Wireframe slowly drags relative to earth
+            // Very subtle idle floating and sway
+            group.rotation.y = -0.7 + Math.sin(t * 0.2) * 0.05;
+            group.position.y = Math.sin(t * 0.4) * 0.1;
 
-            // Node pulsing (attached to earth, so they spin with it)
-            for (let i = 0; i < nodeSprites.length; i++) {
-                const sp = nodeSprites[i]!;
-                sp.material.opacity = 0.4 + Math.sin(t * 3 + i) * 0.6;
-                sp.scale.setScalar(0.1 + Math.sin(t * 2 + i) * 0.04);
-            }
+            // Rings rotating over time like dials
+            ringsPoints.rotation.z = t * 0.1;
+            ringsPoints.material.opacity = 0.6 + Math.sin(t * 5) * 0.15;
 
-            // Animating Arcs (Data Transfer)
-            for (const arc of arcs) {
-                arc.progress -= arc.speed * 0.1;
-                if (arc.progress < -arc.mesh.geometry.attributes.lineDistance!.array[arc.mesh.geometry.attributes.lineDistance!.count - 1]!) {
-                    arc.progress = 0; // Reset length
-                    // Change random target logic could go here if we dynamically updated the geometry
-                }
-                arc.material.dashOffset = arc.progress;
-            }
-
-            // Animating Rings
-            for (let i = 0; i < rings.length; i++) {
-                const r = rings[i]!;
-                r.nodes.rotation.y = -t * (0.1 + i * 0.05); // Spin nodes around ring
-            }
-
-            // Gentle Group float/tilt
-            group.rotation.y = Math.sin(t * 0.1) * 0.1;
-            group.rotation.x = 0.15 + Math.sin(t * 0.08) * 0.05;
+            // Core pulsing
+            coreSprite.material.opacity = 0.8 + Math.sin(t * 8) * 0.2;
+            coreSprite.scale.setScalar(1.6 + Math.sin(t * 4) * 0.2);
 
             renderer.render(scene, camera);
         };
@@ -341,5 +247,47 @@ export default function HeroLockCanvas() {
         };
     }, []);
 
-    return <div ref={containerRef} className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none", zIndex: 0 }} />;
+    return (
+        <div className="absolute inset-0 w-full h-full bg-[#020406] overflow-hidden" style={{ zIndex: 0 }}>
+            {/* 3D Canvas */}
+            <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+
+            {/* Connecting lines SVG matches UI placement */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-[#304050] stroke-[1px] fill-none opacity-80" preserveAspectRatio="none">
+                {/* Line from top left shackle to BUNDLE & SIGNAL */}
+                <path d="M 55% 30% L 35% 30% L 35% 25% L 26% 25%" />
+                {/* Line from middle rings to SMART MONEY FLOW */}
+                <path d="M 45% 45% L 30% 45% L 30% 38% L 20% 38%" />
+                {/* Line from bottom rings to WALLET INTELLIGENCE */}
+                <path d="M 38% 65% L 25% 65% L 25% 82% L 20% 82%" />
+            </svg>
+
+            {/* Floating HUD Annotations (Left Side) */}
+            <div className="absolute top-1/4 left-[8%] flex flex-col items-end gap-20 text-[10px] uppercase font-mono tracking-[0.2em] text-[#a0c0d0]">
+                {/* Bundle Detection */}
+                <div className="flex items-center gap-4 translate-y-[-100%]">
+                    <div className="border border-[#304050] bg-[#04080c]/90 px-4 py-2 flex flex-col items-center">
+                        <span className="mb-1">Bundle & Signal</span>
+                        <span>Detection</span>
+                    </div>
+                </div>
+
+                {/* Smart Money Flow */}
+                <div className="flex items-center gap-4 translate-x-[-20%]">
+                    <div className="border border-[#304050] bg-[#04080c]/90 px-4 py-2">
+                        Smart Money Flow
+                    </div>
+                </div>
+            </div>
+
+            {/* Wallet Intelligence */}
+            <div className="absolute bottom-[16%] left-[10%] text-[10px] uppercase font-mono tracking-[0.2em] text-[#a0c0d0]">
+                <div className="border border-[#304050] bg-[#04080c]/90 px-4 py-2">
+                    Wallet Intelligence
+                </div>
+            </div>
+
+
+        </div>
+    );
 }
