@@ -6,14 +6,27 @@ import * as THREE from "three";
 // ─── Math & Generators ────────────────────────────────────────────────────────
 
 function generatePadlockPoints() {
-    // Separate arrays for 0s and 1s to allow different textures
     const pts0: number[] = [];
     const pts1: number[] = [];
-    const step = 0.035; // Wider step to allow space for legible digits
+
+    // Arrays for custom shader attributes
+    const randoms0: number[] = [];
+    const randoms1: number[] = [];
+
+    const step = 0.035;
 
     const addPoint = (x: number, y: number, z: number) => {
-        if (Math.random() > 0.5) pts1.push(x, y, z);
-        else pts0.push(x, y, z);
+        const isOne = Math.random() > 0.5;
+        // Store a random float (0-1) per particle to offset animations
+        const rnd = Math.random();
+
+        if (isOne) {
+            pts1.push(x, y, z);
+            randoms1.push(rnd);
+        } else {
+            pts0.push(x, y, z);
+            randoms0.push(rnd);
+        }
     };
 
     const bw = 2.2, bh = 2.0, bd = 0.9;
@@ -24,7 +37,7 @@ function generatePadlockPoints() {
         return circ || stem;
     };
 
-    // Front / Back faces
+    // Body
     for (let x = -bw / 2; x <= bw / 2; x += step) {
         for (let y = -bh / 2; y <= bh / 2; y += step) {
             if (!isKeyhole(x, y)) {
@@ -33,8 +46,6 @@ function generatePadlockPoints() {
             }
         }
     }
-
-    // Top / Bottom / Sides
     for (let x = -bw / 2; x <= bw / 2; x += step) {
         for (let z = -bd / 2; z <= bd / 2; z += step) {
             addPoint(x, bh / 2, z);
@@ -48,15 +59,13 @@ function generatePadlockPoints() {
         }
     }
 
-    // Inner Keyhole Tunnel
+    // Keyhole Tunnel
     for (let z = -bd / 2; z <= bd / 2; z += step * 1.5) {
         for (let a = 0; a < Math.PI * 2; a += 0.06) {
             const r = 0.3;
             const x = r * Math.cos(a);
             const y = r * Math.sin(a) + 0.2;
-            if (y > 0.0) {
-                addPoint(x, y, z);
-            }
+            if (y > 0.0) addPoint(x, y, z);
         }
         for (let y = -0.6; y <= 0.2; y += step * 1.5) {
             const w = 0.12 + (y + 0.6) * 0.05;
@@ -87,38 +96,33 @@ function generatePadlockPoints() {
         }
     }
 
-    // Front-face "scanlines"
-    for (let y = -bh / 2; y <= bh / 2; y += step * 1.5) {
-        for (let x = -bw / 2; x <= bw / 2; x += step * 1.5) {
-            if (!isKeyhole(x, y)) {
-                if (Math.sin(x * 20) > 0.8 && Math.random() > 0.5) addPoint(x, y, bd / 2 + 0.015);
-                if (Math.sin(y * 25) > 0.9 && Math.random() > 0.5) addPoint(x, y, bd / 2 + 0.015);
-            }
-        }
-    }
-
     return {
         pts0: new Float32Array(pts0),
-        pts1: new Float32Array(pts1)
+        pts1: new Float32Array(pts1),
+        rand0: new Float32Array(randoms0),
+        rand1: new Float32Array(randoms1)
     };
 }
 
-// Crisp Text Texture Generator
 function createDigitTexture(char: string) {
     const c = document.createElement("canvas");
-    c.width = 32; c.height = 32;
+    c.width = 64; c.height = 64;
     const ctx = c.getContext("2d")!;
-    ctx.clearRect(0, 0, 32, 32);
+    ctx.clearRect(0, 0, 64, 64);
+
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "rgba(100, 200, 255, 1.0)";
+
     ctx.fillStyle = "#ffffff";
-    // Monospace crisp tech font
-    ctx.font = "bold 28px 'Courier New', monospace";
+    ctx.font = "900 48px 'Courier New', monospace";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(char, 16, 16);
+    ctx.fillText(char, 32, 32);
+    ctx.fillText(char, 32, 32);
+
     return new THREE.CanvasTexture(c);
 }
 
-// Broad soft halo 
 function createKeyholeHalo() {
     const c = document.createElement("canvas");
     c.width = 256; c.height = 256;
@@ -133,6 +137,70 @@ function createKeyholeHalo() {
     return new THREE.CanvasTexture(c);
 }
 
+// Custom Shader for animated binary data points
+// Creates falling data streaks (Matrix-style) and pulsating glows
+const dataShaderMaterial = (tex: THREE.Texture, colorHex: number) => new THREE.ShaderMaterial({
+    uniforms: {
+        time: { value: 0 },
+        tex: { value: tex },
+        baseColor: { value: new THREE.Color(colorHex) }
+    },
+    vertexShader: `
+        uniform float time;
+        attribute float aRandom;
+        
+        varying float vAlpha;
+        varying vec3 vPos;
+        
+        void main() {
+            vPos = position;
+            
+            // Pulsing size based on time and random offset
+            float pulse = sin(time * 2.0 + aRandom * 10.0) * 0.5 + 0.5;
+            gl_PointSize = 12.0 + (pulse * 6.0);
+            
+            // Matrix falling rain effect
+            // Modulo math creates downward sweeping bands of brightness
+            float fall = fract((position.y * 0.5) - (time * 0.4) + aRandom);
+            
+            // Base opacity + flash on the falling band edge
+            vAlpha = 0.2 + (pow(1.0 - fall, 3.0) * 0.8);
+            
+            // Occasional full-flicker glitch
+            if (fract(time * 0.1 + aRandom) < 0.05) {
+                vAlpha = 0.0;
+            }
+            if (fract(time * 0.4 + aRandom) < 0.05) {
+                gl_PointSize *= 1.5;
+                vAlpha = 1.0;
+            }
+            
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            
+            // Size attenuation (points get smaller further away)
+            gl_PointSize *= ( 20.0 / -mvPosition.z );
+            
+            gl_Position = projectionMatrix * mvPosition;
+        }
+    `,
+    fragmentShader: `
+        uniform sampler2D tex;
+        uniform vec3 baseColor;
+        varying float vAlpha;
+        
+        void main() {
+            vec4 texColor = texture2D(tex, gl_PointCoord);
+            if (texColor.a < 0.1) discard;
+            
+            // Mix the white texture with the base cyan glow, scaling by animated alpha
+            gl_FragColor = vec4(baseColor * texColor.rgb, texColor.a * vAlpha);
+        }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+});
+
 export default function HeroLockCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -141,14 +209,13 @@ export default function HeroLockCanvas() {
         if (!container) return;
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020304);
+        scene.background = new THREE.Color(0x010203);
 
         const cw = container.clientWidth, ch = container.clientHeight;
         const camera = new THREE.PerspectiveCamera(30, cw / ch, 0.1, 100);
         camera.position.set(0, 0, 15);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-        // Maximize resolution for crisp text
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(cw, ch);
         container.appendChild(renderer.domElement);
@@ -157,39 +224,30 @@ export default function HeroLockCanvas() {
         const tex1 = createDigitTexture("1");
         const haloTex = createKeyholeHalo();
 
-        const { pts0, pts1 } = generatePadlockPoints();
+        const { pts0, pts1, rand0, rand1 } = generatePadlockPoints();
 
-        // Material settings optimized for text sprites
-        const matParams = {
-            size: 0.055, // Larger size to read characters
-            transparent: true,
-            opacity: 0.85,
-            depthWrite: true,
-            blending: THREE.AdditiveBlending,
-            color: 0xffffff,
-            alphaTest: 0.1 // Discard empty pixels to prevent z-fighting boxes
-        };
-
+        // ── Main Padlock Binary Points using Shader ──
         const geo0 = new THREE.BufferGeometry();
         geo0.setAttribute("position", new THREE.BufferAttribute(pts0, 3));
-        const mat0 = new THREE.PointsMaterial({ ...matParams, map: tex0 });
+        geo0.setAttribute("aRandom", new THREE.BufferAttribute(rand0, 1));
+        const mat0 = dataShaderMaterial(tex0, 0xeeffff);
         const points0 = new THREE.Points(geo0, mat0);
 
         const geo1 = new THREE.BufferGeometry();
         geo1.setAttribute("position", new THREE.BufferAttribute(pts1, 3));
-        const mat1 = new THREE.PointsMaterial({ ...matParams, map: tex1 });
+        geo1.setAttribute("aRandom", new THREE.BufferAttribute(rand1, 1));
+        const mat1 = dataShaderMaterial(tex1, 0xeeffff);
         const points1 = new THREE.Points(geo1, mat1);
 
-        // ── Main Padlock Group ──
         const lockGroup = new THREE.Group();
         lockGroup.add(points0);
         lockGroup.add(points1);
 
-        // ── Inside-Keyhole Intense Burst ──
+        // ── Keyhole Glow ──
         const coreBright = new THREE.Sprite(new THREE.SpriteMaterial({
             map: haloTex, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
         }));
-        coreBright.scale.set(1.8, 1.8, 1);
+        coreBright.scale.set(2.0, 2.0, 1);
         coreBright.position.set(0, -0.1, 0.0);
         lockGroup.add(coreBright);
 
@@ -198,25 +256,41 @@ export default function HeroLockCanvas() {
 
         scene.add(lockGroup);
 
-        // ── Backgound Flare ──
+        // ── Background Flare ──
         const coreStreak = new THREE.Sprite(new THREE.SpriteMaterial({
             map: haloTex, color: 0x88bbff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
         }));
-        coreStreak.scale.set(18.0, 0.4, 1);
+        coreStreak.scale.set(18.0, 0.6, 1);
         coreStreak.position.set(2, -0.4, -0.5);
         scene.add(coreStreak);
 
-        // ── Background Echo Rings ──
-        // Keep simple circular faint grid behind the lock
-        const ringGeo = new THREE.RingGeometry(2, 6, 64, 5, 0, Math.PI * 2);
-        const ringMat = new THREE.MeshBasicMaterial({
-            color: 0x446688, wireframe: true, transparent: true, opacity: 0.08, side: THREE.DoubleSide
+        // ── Background Radar Rings ──
+        const ringGeo = new THREE.RingGeometry(2.5, 7.5, 64, 4, 0, Math.PI * 2);
+        // Custom ring shader for a sweeping radar/sonar effect
+        const ringMat = new THREE.ShaderMaterial({
+            uniforms: { time: { value: 0 } },
+            vertexShader: `varying vec3 vPos; void main() { vPos=position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
+                uniform float time;
+                varying vec3 vPos;
+                void main() {
+                    float dist = length(vPos);
+                    // Concentric ripples moving outwards
+                    float ripple = sin(dist * 5.0 - time * 2.0);
+                    // Radar sweep angle
+                    float angle = atan(vPos.y, vPos.x);
+                    float sweep = fract(angle / (3.14159 * 2.0) - time * 0.1);
+                    float intensity = max(0.0, ripple * sweep) * 0.15;
+                    gl_FragColor = vec4(0.2, 0.5, 0.9, intensity);
+                }
+            `,
+            transparent: true, depthWrite: false, wireframe: true, blending: THREE.AdditiveBlending
         });
         const meshRing = new THREE.Mesh(ringGeo, ringMat);
         meshRing.position.set(2, 0, -5);
         scene.add(meshRing);
 
-        // ── Animation ──
+        // ── Animation Loop ──
         let raf = 0;
         const clock = new THREE.Clock();
 
@@ -224,13 +298,20 @@ export default function HeroLockCanvas() {
             raf = requestAnimationFrame(animate);
             const t = clock.getElapsedTime();
 
-            lockGroup.position.y = -0.3 + Math.sin(t * 0.4) * 0.05;
+            // Update custom shaders
+            mat0.uniforms.time.value = t;
+            mat1.uniforms.time.value = t;
+            ringMat.uniforms.time.value = t;
+
+            // Float physics
+            lockGroup.position.y = -0.3 + Math.sin(t * 0.5) * 0.08;
+            lockGroup.rotation.y = -Math.PI / 4.5 + Math.sin(t * 0.2) * 0.05;
             coreStreak.position.y = lockGroup.position.y - 0.1;
 
-            meshRing.rotation.z = t * 0.05;
-
-            coreBright.material.opacity = 0.8 + Math.sin(t * 8) * 0.2;
-            coreStreak.material.opacity = 0.5 + Math.sin(t * 4) * 0.2;
+            // Flash lock core
+            coreBright.material.opacity = 0.8 + Math.sin(t * 12) * 0.2;
+            coreStreak.material.opacity = 0.6 + Math.sin(t * 6) * 0.2;
+            coreStreak.scale.x = 18.0 + Math.sin(t * 3) * 2.0;
 
             renderer.render(scene, camera);
         };
@@ -253,15 +334,15 @@ export default function HeroLockCanvas() {
     }, []);
 
     return (
-        <div className="absolute inset-0 w-full h-full bg-[#020304] overflow-hidden" style={{ zIndex: 0 }}>
+        <div className="absolute inset-0 w-full h-full bg-[#010203] overflow-hidden" style={{ zIndex: 0 }}>
             <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
             <div className="absolute inset-0 pointer-events-none" style={{
-                backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
+                backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
                 backgroundSize: '40px 40px'
             }} />
 
-            {/* HUD Callouts with connecting exact-width horizontal lines */}
+            {/* HUD Callouts */}
             <div className="absolute top-[25%] left-[20%] -translate-y-1/2 -translate-x-full">
                 <div className="absolute top-1/2 left-[105%] w-[8vw] h-[1px] bg-[#1a2530]" />
                 <div className="absolute top-1/2 left-[calc(105%+8vw)] w-[4px] h-[4px] bg-[#405060] rounded-full -translate-y-1/2" />
