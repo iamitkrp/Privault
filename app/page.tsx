@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Link from "next/link";
 
-import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, ArrowRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
+import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
 
 import EncryptionPipeline from "@/components/landing/EncryptionPipeline";
 
@@ -239,60 +239,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative z-20 pt-48 pb-60 px-6 overflow-hidden border-t border-[#111]">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="max-w-4xl mx-auto relative z-10 flex flex-col items-center"
-        >
-          {/* Headline */}
-          <div className="relative inline-block mb-8 text-center px-12 md:px-20 py-8">
-            <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 uppercase leading-none">
-              Ready to Secure
-              <br />
-              Your World?
-            </h2>
-          </div>
 
-          <p className="mono text-[10px] md:text-sm text-gray-400 mb-14 max-w-2xl text-center uppercase tracking-[0.2em] leading-relaxed">
-            Take back control of your digital identity. Zero-knowledge, zero tracking, infinite peace of mind.
-          </p>
-
-          {/* Enhanced Cyberpunk Button */}
-          <Link href="/signup" className="group relative inline-flex items-center justify-center">
-            {/* Outer Glow */}
-            <div className="absolute inset-0 bg-[#ff4500] blur-[25px] opacity-20 group-hover:opacity-60 transition-opacity duration-500 rounded-sm"></div>
-
-            {/* Button Surface */}
-            <div className="relative px-12 md:px-16 py-5 bg-black border border-[#444] hover:border-[#ff4500] transition-colors duration-300 flex items-center gap-4 overflow-hidden rounded-sm text-white hover:text-[#ff4500]">
-              {/* Hover highlighting sweep */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ff4500]/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
-
-              <span className="font-bold uppercase tracking-[0.2em] text-sm relative z-10">Deploy Vault Instance</span>
-              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-2 transition-transform duration-300" />
-
-              {/* Tech Details (Corner squares) */}
-              <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-gray-600 transition-colors group-hover:bg-[#ff4500]"></div>
-              <div className="absolute bottom-1 right-1 w-1.5 h-1.5 bg-[#ff4500]"></div>
-            </div>
-          </Link>
-
-          {/* System Status Line under button */}
-          <div className="mt-12 flex items-center gap-4 opacity-60">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-[pulse_2s_ease-in-out_infinite]"></div>
-              <span className="mono text-[9px] text-gray-500 uppercase tracking-widest hidden md:inline">Global Network: Standing By for Deployment</span>
-              <span className="mono text-[9px] text-gray-500 uppercase tracking-widest md:hidden">Network: Ready</span>
-            </div>
-            <svg className="w-24 md:w-40 h-px hidden sm:block opacity-30"><line x1="0" y1="0" x2="100%" y2="0" stroke="currentColor" strokeDasharray="2 2" /></svg>
-            <div className="mono text-[9px] text-gray-500 tracking-widest hidden sm:block">STATUS: ACK</div>
-          </div>
-
-        </motion.div>
-      </section>
 
       {/* Footer */}
       <footer className="relative z-20 pt-16 pb-20 border-t border-[#111] bg-black text-xs text-gray-600 mono uppercase tracking-widest">
