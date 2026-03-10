@@ -3,10 +3,10 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+
 import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, ArrowRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
 
-const HeroLockCanvas = dynamic(() => import("@/components/landing/HeroLockCanvas"), { ssr: false });
+import InteractiveTerminal from "@/components/landing/InteractiveTerminal";
 
 const features = [
   {
@@ -154,9 +154,9 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
 
-        {/* Right Content - Particle Wireframe Lock Visualization */}
-        <div className="w-full lg:w-[55%] h-[500px] lg:h-[650px] relative mt-10 lg:mt-0 z-20 hidden md:flex">
-          <HeroLockCanvas />
+        {/* Right Content - Interactive Terminal Visualization */}
+        <div className="w-full lg:w-[55%] h-[500px] lg:h-[650px] relative mt-10 lg:mt-0 z-20 hidden md:flex items-center justify-end lg:pr-12">
+          <InteractiveTerminal />
         </div>
       </section>
 
