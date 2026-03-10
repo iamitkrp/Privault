@@ -241,21 +241,6 @@ export default function LandingPage() {
 
       {/* Final CTA */}
       <section className="relative z-20 pt-48 pb-60 px-6 overflow-hidden border-t border-[#111]">
-        {/* Core Glow Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[800px] bg-[#ff4500]/5 blur-[160px] rounded-full z-0 pointer-events-none"></div>
-
-        {/* Large Decorative Background Hexagon */}
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] z-0 pointer-events-none"
-        >
-          <Hexagon className="w-[800px] h-[800px] text-white" strokeWidth={0.5} />
-        </motion.div>
-
-        {/* Dynamic Scanline Overlay limited to this section */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(to_bottom,transparent_50%,#fff_50%)] bg-[length:100%_4px] animate-scanline"></div>
-
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -263,61 +248,13 @@ export default function LandingPage() {
           transition={{ duration: 1, ease: "easeOut" }}
           className="max-w-4xl mx-auto relative z-10 flex flex-col items-center"
         >
-          {/* Animated Tech Icon */}
-          <div className="relative mb-12 group cursor-default">
-            {/* Spinning dashed ring */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="absolute -inset-4 rounded-full border border-[#ff4500]/30 border-dashed"
-            ></motion.div>
-
-            {/* Inner solid ring */}
-            <div className="w-24 h-24 rounded-full bg-[#050505] border border-[#222] flex flex-col items-center justify-center relative overflow-hidden shadow-[0_0_30px_rgba(255,69,0,0.15)] group-hover:border-[#ff4500]/50 transition-colors duration-500">
-              <div className="absolute inset-0 bg-gradient-to-b from-[#ff4500]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <Hexagon className="w-10 h-10 text-[#ff4500] group-hover:scale-110 transition-transform duration-500" strokeWidth={1} />
-              {/* Pulsing core dot */}
-              <motion.div
-                animate={{ opacity: [0.4, 1, 0.4] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-1.5 h-1.5 bg-white rounded-full absolute mt-2"
-              ></motion.div>
-            </div>
-
-            {/* Connecting lines top/bottom */}
-            <div className="absolute -top-16 left-1/2 w-px h-12 bg-gradient-to-t from-[#ff4500]/50 to-transparent"></div>
-            <div className="absolute -bottom-16 left-1/2 w-px h-12 bg-gradient-to-b from-[#ff4500]/50 to-transparent"></div>
-
-            {/* Side node dots */}
-            <div className="absolute top-1/2 -left-8 w-1 h-1 bg-[#ff4500] rounded-full"></div>
-            <div className="absolute top-1/2 -right-8 w-1 h-1 bg-[#ff4500] rounded-full"></div>
-            <div className="absolute top-1/2 -left-8 w-8 h-px bg-gradient-to-l from-[#ff4500]/30 to-transparent"></div>
-            <div className="absolute top-1/2 -right-8 w-8 h-px bg-gradient-to-r from-[#ff4500]/30 to-transparent"></div>
-          </div>
-
-          {/* Headline with UI Brackets */}
+          {/* Headline */}
           <div className="relative inline-block mb-8 text-center px-12 md:px-20 py-8">
             <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 uppercase leading-none">
               Ready to Secure
               <br />
               Your World?
             </h2>
-
-            {/* Left Bracket */}
-            <svg className="absolute top-0 left-0 w-6 h-full text-[#333]" viewBox="0 0 20 100" preserveAspectRatio="none">
-              <path d="M 20 0 L 0 0 L 0 100 L 20 100" fill="none" stroke="currentColor" strokeWidth="2" />
-              <rect x="0" y="45" width="4" height="10" fill="currentColor" />
-            </svg>
-
-            {/* Right Bracket */}
-            <svg className="absolute top-0 right-0 w-6 h-full text-[#333]" viewBox="0 0 20 100" preserveAspectRatio="none">
-              <path d="M 0 0 L 20 0 L 20 100 L 0 100" fill="none" stroke="currentColor" strokeWidth="2" />
-              <rect x="16" y="45" width="4" height="10" fill="currentColor" />
-            </svg>
-
-            {/* Tech IDs in corners */}
-            <div className="absolute -top-4 -left-4 mono text-[10px] text-gray-800 tracking-tighter">PRV_V2.4_INIT</div>
-            <div className="absolute -bottom-4 -right-4 mono text-[10px] text-gray-800 tracking-tighter">SRVR_ACK_READY</div>
           </div>
 
           <p className="mono text-[10px] md:text-sm text-gray-400 mb-14 max-w-2xl text-center uppercase tracking-[0.2em] leading-relaxed">
