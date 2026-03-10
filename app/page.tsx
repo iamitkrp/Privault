@@ -8,7 +8,6 @@ import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, ArrowRight, Downl
 
 const HeroLockCanvas = dynamic(() => import("@/components/landing/HeroLockCanvas"), { ssr: false });
 
-
 const features = [
   {
     icon: Lock,
@@ -67,7 +66,6 @@ export default function LandingPage() {
       {/* Immersive Grid Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-grid-pattern opacity-40">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black"></div>
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.05] mix-blend-overlay"></div>
       </div>
 
       {/* Navigation - Minimalist Technical */}
