@@ -4,41 +4,43 @@ import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
 // ─── Math & Generators ────────────────────────────────────────────────────────
+
 function generatePadlockPoints() {
-    const pts: number[] = [];
-    const step = 0.05; // Density of grid points
+    // Separate arrays for 0s and 1s to allow different textures
+    const pts0: number[] = [];
+    const pts1: number[] = [];
+    const step = 0.035; // Wider step to allow space for legible digits
 
-    const addPoint = (x: number, y: number, z: number) => pts.push(x, y, z);
+    const addPoint = (x: number, y: number, z: number) => {
+        if (Math.random() > 0.5) pts1.push(x, y, z);
+        else pts0.push(x, y, z);
+    };
 
-    // Body dimensions
-    const bw = 2.4, bh = 1.8, bd = 0.8;
+    const bw = 2.2, bh = 2.0, bd = 0.9;
 
-    // Keyhole Shape Mask
     const isKeyhole = (x: number, y: number) => {
-        const circ = Math.sqrt(x * x + (y - 0.1) * (y - 0.1)) < 0.35;
-        const stem = y < 0.1 && y > -0.6 && Math.abs(x) < (0.18 - (y - 0.1) * 0.1);
+        const circ = Math.sqrt(x * x + (y - 0.2) * (y - 0.2)) < 0.3;
+        const stem = y <= 0.2 && y > -0.6 && Math.abs(x) < (0.12 + (y + 0.6) * 0.05);
         return circ || stem;
     };
 
-    // Front / Back faces (Dense Grid)
+    // Front / Back faces
     for (let x = -bw / 2; x <= bw / 2; x += step) {
         for (let y = -bh / 2; y <= bh / 2; y += step) {
             if (!isKeyhole(x, y)) {
                 addPoint(x, y, bd / 2);
-                addPoint(x, y, -bd / 2);
+                if (Math.random() > 0.5) addPoint(x, y, -bd / 2);
             }
         }
     }
 
-    // Top / Bottom
+    // Top / Bottom / Sides
     for (let x = -bw / 2; x <= bw / 2; x += step) {
         for (let z = -bd / 2; z <= bd / 2; z += step) {
             addPoint(x, bh / 2, z);
-            addPoint(x, -bh / 2, z);
+            if (Math.random() > 0.6) addPoint(x, -bh / 2, z);
         }
     }
-
-    // Left / Right
     for (let y = -bh / 2; y <= bh / 2; y += step) {
         for (let z = -bd / 2; z <= bd / 2; z += step) {
             addPoint(bw / 2, y, z);
@@ -46,87 +48,91 @@ function generatePadlockPoints() {
         }
     }
 
-    // Shackle Arc (Top Loop)
-    const sr = 0.7, st = 0.3;
-    for (let theta = 0; theta <= Math.PI; theta += 0.06) {
-        for (let phi = 0; phi <= Math.PI * 2; phi += 0.15) {
-            const vx = (sr + st * Math.cos(phi)) * Math.cos(theta);
-            const vy = (sr + st * Math.cos(phi)) * Math.sin(theta);
-            const vz = st * Math.sin(phi);
-            addPoint(vx, vy + bh / 2 + 0.5, vz);
+    // Inner Keyhole Tunnel
+    for (let z = -bd / 2; z <= bd / 2; z += step * 1.5) {
+        for (let a = 0; a < Math.PI * 2; a += 0.06) {
+            const r = 0.3;
+            const x = r * Math.cos(a);
+            const y = r * Math.sin(a) + 0.2;
+            if (y > 0.0) {
+                addPoint(x, y, z);
+            }
+        }
+        for (let y = -0.6; y <= 0.2; y += step * 1.5) {
+            const w = 0.12 + (y + 0.6) * 0.05;
+            addPoint(w, y, z); addPoint(-w, y, z);
         }
     }
 
-    // Shackle Legs
-    for (let y = 0; y <= 0.5; y += step) {
-        for (let phi = 0; phi <= Math.PI * 2; phi += 0.15) {
-            const z = st * Math.sin(phi);
-            const x = st * Math.cos(phi);
-            addPoint(sr + x, y + bh / 2, z);
-            addPoint(-sr + x, y + bh / 2, z);
+    // Shackle 
+    const sr = 0.65, st = 0.25;
+    for (let theta = 0; theta < Math.PI; theta += 0.05) {
+        for (let phi = 0; phi < Math.PI * 2; phi += 0.15) {
+            if (Math.random() > 0.1) {
+                const vx = (sr + st * Math.cos(phi)) * Math.cos(theta);
+                const vy = (sr + st * Math.cos(phi)) * Math.sin(theta);
+                const vz = st * Math.sin(phi);
+                addPoint(vx, vy + bh / 2 + 0.6, vz);
+            }
         }
     }
-
-    // Internal "data core" structure (faint sparse matrix inside the lock)
-    for (let x = -bw / 2 + 0.2; x <= bw / 2 - 0.2; x += step * 3) {
-        for (let y = -bh / 2 + 0.2; y <= bh / 2 - 0.2; y += step * 3) {
-            for (let z = -bd / 2 + 0.2; z <= bd / 2 - 0.2; z += step * 3) {
-                if (Math.random() > 0.5 && !isKeyhole(x, y)) {
-                    addPoint(x, y, z);
-                }
+    for (let y = 0; y <= 0.6; y += step) {
+        for (let phi = 0; phi <= Math.PI * 2; phi += 0.15) {
+            if (Math.random() > 0.1) {
+                const z = st * Math.sin(phi);
+                const x = st * Math.cos(phi);
+                addPoint(sr + x, y + bh / 2, z);
+                addPoint(-sr + x, y + bh / 2, z);
             }
         }
     }
 
-    return new Float32Array(pts);
+    // Front-face "scanlines"
+    for (let y = -bh / 2; y <= bh / 2; y += step * 1.5) {
+        for (let x = -bw / 2; x <= bw / 2; x += step * 1.5) {
+            if (!isKeyhole(x, y)) {
+                if (Math.sin(x * 20) > 0.8 && Math.random() > 0.5) addPoint(x, y, bd / 2 + 0.015);
+                if (Math.sin(y * 25) > 0.9 && Math.random() > 0.5) addPoint(x, y, bd / 2 + 0.015);
+            }
+        }
+    }
+
+    return {
+        pts0: new Float32Array(pts0),
+        pts1: new Float32Array(pts1)
+    };
 }
 
-function generateRingProjPoints() {
-    const pts: number[] = [];
-    const zOffsets = [1.5, 2.5, 3.8, 5.5];
-
-    // Solid dense dials floating backwards
-    zOffsets.forEach((zo, i) => {
-        const rad = 0.5 + i * 0.5; // Rings get larger as they move backwards
-        for (let r = rad - 0.3; r <= rad; r += 0.04) {
-            for (let a = 0; a < Math.PI * 2; a += 0.03) {
-                // Cut gaps for techy separated dial look
-                if ((a % (Math.PI / 4)) < 0.2) continue;
-                // Outer jagged noise (binary code look)
-                if (r >= rad - 0.04 && Math.random() > 0.6) continue;
-
-                pts.push(r * Math.cos(a), r * Math.sin(a) + 0.1, zo);
-            }
-        }
-    });
-
-    // Connecting funnel cone connecting rings to keyhole
-    for (let z = 0.5; z < 5.5; z += 0.1) {
-        const rad = 0.3 + (z * 0.4);
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
-            if (Math.random() > 0.3) {
-                pts.push(rad * Math.cos(a), rad * Math.sin(a) + 0.1, z);
-            }
-        }
-    }
-    return new Float32Array(pts);
-}
-
-function createGlowDot() {
+// Crisp Text Texture Generator
+function createDigitTexture(char: string) {
     const c = document.createElement("canvas");
-    c.width = 64; c.height = 64;
+    c.width = 32; c.height = 32;
     const ctx = c.getContext("2d")!;
-    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grad.addColorStop(0, "rgba(255, 255, 255, 1.0)");
-    grad.addColorStop(0.2, "rgba(200, 240, 255, 0.8)");
-    grad.addColorStop(0.5, "rgba(0, 150, 255, 0.2)");
-    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 64, 64);
+    ctx.clearRect(0, 0, 32, 32);
+    ctx.fillStyle = "#ffffff";
+    // Monospace crisp tech font
+    ctx.font = "bold 28px 'Courier New', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(char, 16, 16);
     return new THREE.CanvasTexture(c);
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// Broad soft halo 
+function createKeyholeHalo() {
+    const c = document.createElement("canvas");
+    c.width = 256; c.height = 256;
+    const ctx = c.getContext("2d")!;
+    const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grad.addColorStop(0, "rgba(255, 255, 255, 1.0)");
+    grad.addColorStop(0.05, "rgba(200, 230, 255, 0.8)");
+    grad.addColorStop(0.3, "rgba(50, 130, 255, 0.15)");
+    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+    return new THREE.CanvasTexture(c);
+}
+
 export default function HeroLockCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -135,79 +141,82 @@ export default function HeroLockCanvas() {
         if (!container) return;
 
         const scene = new THREE.Scene();
-        // Base dark void (as per reference)
-        scene.background = new THREE.Color(0x040608);
+        scene.background = new THREE.Color(0x020304);
 
         const cw = container.clientWidth, ch = container.clientHeight;
-        const camera = new THREE.PerspectiveCamera(38, cw / ch, 0.1, 100);
-        camera.position.set(0, 0, 8.5);
+        const camera = new THREE.PerspectiveCamera(30, cw / ch, 0.1, 100);
+        camera.position.set(0, 0, 15);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        // Maximize resolution for crisp text
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(cw, ch);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
-        const tex = createGlowDot();
+        const tex0 = createDigitTexture("0");
+        const tex1 = createDigitTexture("1");
+        const haloTex = createKeyholeHalo();
 
-        // ── Main Padlock Mesh ─────────────────────────────────────
-        const lockGeo = new THREE.BufferGeometry();
-        lockGeo.setAttribute("position", new THREE.BufferAttribute(generatePadlockPoints(), 3));
-        const lockMat = new THREE.PointsMaterial({
-            size: 0.045,
-            map: tex,
+        const { pts0, pts1 } = generatePadlockPoints();
+
+        // Material settings optimized for text sprites
+        const matParams = {
+            size: 0.055, // Larger size to read characters
             transparent: true,
-            opacity: 0.9,
-            depthWrite: false,
+            opacity: 0.85,
+            depthWrite: true,
             blending: THREE.AdditiveBlending,
-            color: 0xeeffff
-        });
-        const lockPoints = new THREE.Points(lockGeo, lockMat);
-
-        // ── Data Rings Mesh ────────────────────────────────
-        const ringsGeo = new THREE.BufferGeometry();
-        ringsGeo.setAttribute("position", new THREE.BufferAttribute(generateRingProjPoints(), 3));
-        const ringsMat = new THREE.PointsMaterial({
-            size: 0.04,
-            map: tex,
-            transparent: true,
-            opacity: 0.7,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            color: 0x88ccff
-        });
-        const ringsPoints = new THREE.Points(ringsGeo, ringsMat);
-
-        // ── Blinding Keyhole Core Glow ──────────────────────
-        const coreSprite = new THREE.Sprite(new THREE.SpriteMaterial({
-            map: tex,
             color: 0xffffff,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
+            alphaTest: 0.1 // Discard empty pixels to prevent z-fighting boxes
+        };
+
+        const geo0 = new THREE.BufferGeometry();
+        geo0.setAttribute("position", new THREE.BufferAttribute(pts0, 3));
+        const mat0 = new THREE.PointsMaterial({ ...matParams, map: tex0 });
+        const points0 = new THREE.Points(geo0, mat0);
+
+        const geo1 = new THREE.BufferGeometry();
+        geo1.setAttribute("position", new THREE.BufferAttribute(pts1, 3));
+        const mat1 = new THREE.PointsMaterial({ ...matParams, map: tex1 });
+        const points1 = new THREE.Points(geo1, mat1);
+
+        // ── Main Padlock Group ──
+        const lockGroup = new THREE.Group();
+        lockGroup.add(points0);
+        lockGroup.add(points1);
+
+        // ── Inside-Keyhole Intense Burst ──
+        const coreBright = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: haloTex, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
         }));
-        coreSprite.scale.set(1.8, 1.8, 1);
-        coreSprite.position.set(0, -0.1, 0.4);
+        coreBright.scale.set(1.8, 1.8, 1);
+        coreBright.position.set(0, -0.1, 0.0);
+        lockGroup.add(coreBright);
 
-        const group = new THREE.Group();
-        group.add(lockPoints);
-        group.add(ringsPoints);
-        group.add(coreSprite);
+        lockGroup.rotation.y = -Math.PI / 4.5;
+        lockGroup.position.set(2.5, -0.3, 0);
 
-        // Orient exactly like the reference screenshot
-        // Padlock sits on right side, faces left slightly, projecting rings left-backward
-        group.rotation.x = -0.05;
-        group.rotation.y = -0.7;
-        group.position.set(2, 0, 0);
+        scene.add(lockGroup);
 
-        scene.add(group);
+        // ── Backgound Flare ──
+        const coreStreak = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: haloTex, color: 0x88bbff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+        }));
+        coreStreak.scale.set(18.0, 0.4, 1);
+        coreStreak.position.set(2, -0.4, -0.5);
+        scene.add(coreStreak);
 
-        // ── Grid Background ────────────────────────────────
-        const gridHelper = new THREE.GridHelper(20, 40, 0x112233, 0x0a111a);
-        gridHelper.rotation.x = Math.PI / 2;
-        gridHelper.position.z = -3;
-        scene.add(gridHelper);
+        // ── Background Echo Rings ──
+        // Keep simple circular faint grid behind the lock
+        const ringGeo = new THREE.RingGeometry(2, 6, 64, 5, 0, Math.PI * 2);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0x446688, wireframe: true, transparent: true, opacity: 0.08, side: THREE.DoubleSide
+        });
+        const meshRing = new THREE.Mesh(ringGeo, ringMat);
+        meshRing.position.set(2, 0, -5);
+        scene.add(meshRing);
 
-        // ── Animation ─────────────────────────────────────
+        // ── Animation ──
         let raf = 0;
         const clock = new THREE.Clock();
 
@@ -215,17 +224,13 @@ export default function HeroLockCanvas() {
             raf = requestAnimationFrame(animate);
             const t = clock.getElapsedTime();
 
-            // Very subtle idle floating and sway
-            group.rotation.y = -0.7 + Math.sin(t * 0.2) * 0.05;
-            group.position.y = Math.sin(t * 0.4) * 0.1;
+            lockGroup.position.y = -0.3 + Math.sin(t * 0.4) * 0.05;
+            coreStreak.position.y = lockGroup.position.y - 0.1;
 
-            // Rings rotating over time like dials
-            ringsPoints.rotation.z = t * 0.1;
-            ringsPoints.material.opacity = 0.6 + Math.sin(t * 5) * 0.15;
+            meshRing.rotation.z = t * 0.05;
 
-            // Core pulsing
-            coreSprite.material.opacity = 0.8 + Math.sin(t * 8) * 0.2;
-            coreSprite.scale.setScalar(1.6 + Math.sin(t * 4) * 0.2);
+            coreBright.material.opacity = 0.8 + Math.sin(t * 8) * 0.2;
+            coreStreak.material.opacity = 0.5 + Math.sin(t * 4) * 0.2;
 
             renderer.render(scene, camera);
         };
@@ -248,45 +253,51 @@ export default function HeroLockCanvas() {
     }, []);
 
     return (
-        <div className="absolute inset-0 w-full h-full bg-[#020406] overflow-hidden" style={{ zIndex: 0 }}>
-            {/* 3D Canvas */}
+        <div className="absolute inset-0 w-full h-full bg-[#020304] overflow-hidden" style={{ zIndex: 0 }}>
             <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
-            {/* Connecting lines SVG matches UI placement */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-[#304050] stroke-[1px] fill-none opacity-80" preserveAspectRatio="none">
-                {/* Line from top left shackle to BUNDLE & SIGNAL */}
-                <path d="M 55% 30% L 35% 30% L 35% 25% L 26% 25%" />
-                {/* Line from middle rings to SMART MONEY FLOW */}
-                <path d="M 45% 45% L 30% 45% L 30% 38% L 20% 38%" />
-                {/* Line from bottom rings to WALLET INTELLIGENCE */}
-                <path d="M 38% 65% L 25% 65% L 25% 82% L 20% 82%" />
-            </svg>
+            <div className="absolute inset-0 pointer-events-none" style={{
+                backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
+                backgroundSize: '40px 40px'
+            }} />
 
-            {/* Floating HUD Annotations (Left Side) */}
-            <div className="absolute top-1/4 left-[8%] flex flex-col items-end gap-20 text-[10px] uppercase font-mono tracking-[0.2em] text-[#a0c0d0]">
-                {/* Bundle Detection */}
-                <div className="flex items-center gap-4 translate-y-[-100%]">
-                    <div className="border border-[#304050] bg-[#04080c]/90 px-4 py-2 flex flex-col items-center">
-                        <span className="mb-1">Bundle & Signal</span>
-                        <span>Detection</span>
-                    </div>
-                </div>
+            {/* HUD Callouts with connecting exact-width horizontal lines */}
+            <div className="absolute top-[25%] left-[20%] -translate-y-1/2 -translate-x-full">
+                <div className="absolute top-1/2 left-[105%] w-[8vw] h-[1px] bg-[#1a2530]" />
+                <div className="absolute top-1/2 left-[calc(105%+8vw)] w-[4px] h-[4px] bg-[#405060] rounded-full -translate-y-1/2" />
 
-                {/* Smart Money Flow */}
-                <div className="flex items-center gap-4 translate-x-[-20%]">
-                    <div className="border border-[#304050] bg-[#04080c]/90 px-4 py-2">
-                        Smart Money Flow
-                    </div>
+                <div className="border border-[#203040] bg-[#020406]/90 px-6 py-4 text-[11px] uppercase font-mono tracking-[0.2em] text-[#8aaaba] flex flex-col items-center">
+                    <span className="mb-1.5 whitespace-nowrap">Bundle & Signal</span>
+                    <span className="whitespace-nowrap">Detection</span>
                 </div>
             </div>
 
-            {/* Wallet Intelligence */}
-            <div className="absolute bottom-[16%] left-[10%] text-[10px] uppercase font-mono tracking-[0.2em] text-[#a0c0d0]">
-                <div className="border border-[#304050] bg-[#04080c]/90 px-4 py-2">
+            <div className="absolute top-[52%] left-[16%] -translate-y-1/2 -translate-x-full">
+                <div className="absolute top-1/2 left-[105%] w-[12vw] h-[1px] bg-[#1a2530]" />
+                <div className="absolute top-1/2 left-[calc(105%+12vw)] w-[4px] h-[4px] bg-[#405060] rounded-full -translate-y-1/2" />
+
+                <div className="border border-[#203040] bg-[#020406]/90 px-6 py-4 text-[11px] uppercase font-mono tracking-[0.2em] text-[#8aaaba] whitespace-nowrap">
+                    Smart Money Flow
+                </div>
+            </div>
+
+            <div className="absolute top-[82%] left-[22%] -translate-y-1/2 -translate-x-full">
+                <div className="absolute top-1/2 left-[105%] w-[10vw] h-[1px] bg-[#1a2530]" />
+                <div className="absolute top-1/2 left-[calc(105%+10vw)] w-[4px] h-[4px] bg-[#405060] rounded-full -translate-y-1/2" />
+
+                <div className="border border-[#203040] bg-[#020406]/90 px-6 py-4 text-[11px] uppercase font-mono tracking-[0.2em] text-[#8aaaba] whitespace-nowrap">
                     Wallet Intelligence
                 </div>
             </div>
 
+            <div className="absolute right-[22%] top-[58%] text-[9px] font-mono text-[#8a9aa0] leading-[1.8] pointer-events-none drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">
+                <div>//00101100 11010011 0001</div>
+                <div>TX: 0x9f...a12c</div>
+                <div className="flex items-center gap-1">
+                    STATUS: <span className="line-through opacity-70">VERIFYING</span> ACTIVE
+                </div>
+                <div>GRID: ACTIVE</div>
+            </div>
 
         </div>
     );
