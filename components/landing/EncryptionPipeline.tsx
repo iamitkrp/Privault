@@ -5,11 +5,6 @@ import { motion } from "framer-motion";
 export default function EncryptionPipeline() {
     return (
         <div className="w-full h-full relative z-20 flex items-center justify-center p-2 lg:p-6 pointer-events-none">
-            {/* 
-                Reverted back to the highly-requested T-Shape cryptographic flow.
-                Optimized the viewBox perfectly to "960 620" so it scales up massively,
-                eliminating all the leftover black space that made it tiny before.
-            */}
             <svg
                 viewBox="0 0 1000 600"
                 className="w-full h-full drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]"
@@ -48,37 +43,27 @@ export default function EncryptionPipeline() {
 
                 {/* CONNECTION LINES (Edges) */}
                 <g stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="6 6">
-                    {/* Password to KDF */}
                     <path d="M 280 90 L 720 90" />
-                    {/* KDF down to Key (Diagonal S-Curve) */}
                     <path d="M 840 140 C 840 190, 500 190, 500 240" />
-                    {/* Key drops into Engine */}
                     <path d="M 500 340 L 500 440" />
-                    {/* Data into Engine */}
                     <path d="M 280 490 L 380 490" />
-                    {/* Engine to Server */}
                     <path d="M 620 490 L 720 490" />
                 </g>
 
                 {/* DATA DOTS ANIMATIONS */}
                 <g filter="url(#neonGlow)">
-                    {/* Pass to KDF */}
                     <circle r="4" fill="#ff4500">
                         <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
                     </circle>
-                    {/* KDF to Key */}
                     <circle r="3" fill="#00ffcc">
                         <animateMotion dur="2s" begin="1.2s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
                     </circle>
-                    {/* Key to Engine */}
                     <circle r="5" fill="#00ffcc">
-                        <animateMotion dur="1s" repeatCount="indefinite"><mpath href="#flow-key-engine" /></animateMotion>
+                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-key-engine" /></animateMotion>
                     </circle>
-                    {/* Data to Engine */}
                     <circle r="4" fill="#ff4500">
                         <animateMotion dur="1.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
                     </circle>
-                    {/* Engine to Server */}
                     <circle r="5" fill="#a855f7">
                         <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
                     </circle>
@@ -89,56 +74,56 @@ export default function EncryptionPipeline() {
                     <text x="500" y="80">UTF-8 BYTES</text>
                     <text x="670" y="195">32-BYTE DERIVATION</text>
                     <text x="560" y="395">MASTER KEY</text>
-                    <text x="330" y="480">DATA</text>
+                    <text x="330" y="480">DATA BLOCK</text>
                     <text x="670" y="480">CIPHERTEXT + TAG</text>
                 </g>
 
                 {/* --- PIPELINE NODES (BOXES) --- */}
 
-                {/* 1. Master Password (Top Left) */}
+                {/* Master Password */}
                 <g transform="translate(40, 40)">
                     <rect width="240" height="100" rx="6" fill="#080808" stroke="#333" strokeWidth="2" />
                     <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">KEY // 01</text>
+                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
                     <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Master Password</text>
                     <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">ONLY EXISTS IN MEMORY</text>
                 </g>
 
-                {/* 2. PBKDF2 Hashing (Top Right) */}
+                {/* PBKDF2 Hashing */}
                 <g transform="translate(720, 40)">
                     <rect width="240" height="100" rx="6" fill="#080808" stroke="#333" strokeWidth="2" />
                     <rect x="-4" y="25" width="4" height="50" fill="#00ffcc" opacity="0.8" />
-                    <text x="20" y="35" fill="#00ffcc" fontFamily="monospace" fontSize="12" letterSpacing="1">KEY // 02</text>
+                    <text x="20" y="35" fill="#00ffcc" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
                     <text x="20" y="65" fill="#00ffcc" fontFamily="sans-serif" fontSize="20" fontWeight="bold">PBKDF2 Hashing</text>
                     <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
                 </g>
 
-                {/* 3. Cryptographic Key (Middle Left) */}
+                {/* Cryptographic Key */}
                 <g transform="translate(380, 240)">
                     <rect width="240" height="100" rx="6" fill="#080808" stroke="#333" strokeWidth="2" />
                     <line x1="210" y1="0" x2="240" y2="0" stroke="#00ffcc" strokeWidth="4" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">KEY // 03</text>
+                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
                     <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="18" fontWeight="bold">Cryptographic Key</text>
                     <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">AES-256 (32 BYTES)</text>
                 </g>
 
-                {/* 4. Private Vault Data (Far Bottom Left) */}
+                {/* Private Vault Data */}
                 <g transform="translate(40, 440)">
                     <rect width="240" height="100" rx="6" fill="#080808" stroke="#333" strokeWidth="2" />
                     <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">DATA // 01</text>
+                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
                     <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Private Vault Data</text>
                     <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">PASSWORDS & NOTES</text>
                 </g>
 
-                {/* 5. AES-256-GCM Engine (Bottom Middle) */}
+                {/* AES-256-GCM Engine */}
                 <g transform="translate(380, 440)">
                     <motion.rect
                         width="240" height="100" rx="6" fill="#110515" stroke="#a855f7" strokeWidth="2.5"
                         animate={{ strokeOpacity: [1, 0.4, 1], boxShadow: ["0px 0px 5px #a855f7", "0px 0px 15px #a855f7", "0px 0px 5px #a855f7"] }}
                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     />
-                    <text x="25" y="35" fill="#a855f7" fontFamily="monospace" fontSize="12" letterSpacing="1">ENGINE // 02</text>
+                    <text x="25" y="35" fill="#a855f7" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
                     <text x="25" y="65" fill="#a855f7" fontFamily="sans-serif" fontSize="24" fontWeight="bold">AES-256-GCM</text>
                     <text x="25" y="85" fill="#a855f7" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
 
@@ -150,11 +135,11 @@ export default function EncryptionPipeline() {
                     />
                 </g>
 
-                {/* 6. Cloud Server (Bottom Right) */}
+                {/* Cloud Server (Blind) */}
                 <g transform="translate(720, 440)">
                     <rect width="240" height="100" rx="6" fill="#080808" stroke="#333" strokeWidth="2" />
                     <rect x="236" y="25" width="4" height="50" fill="#a855f7" opacity="0.8" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">REMOTE // 03</text>
+                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
                     <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Blind Server</text>
                     <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">CANNOT DECRYPT</text>
                 </g>
