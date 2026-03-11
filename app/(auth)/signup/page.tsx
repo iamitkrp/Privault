@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
 import { VALIDATION } from "@/constants";
+import { Activity, ChevronRight, AlertTriangle } from "lucide-react";
 
 export default function SignupPage() {
     const { authService } = useAuth();
@@ -17,33 +18,25 @@ export default function SignupPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    // Clear passwords from state on unmount
     useEffect(() => {
-        return () => {
-            setPassword("");
-            setConfirmPassword("");
-        };
+        return () => { setPassword(""); setConfirmPassword(""); };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        // Basic client-side validation
         if (password.length < VALIDATION.password.minLength) {
             setError(`Password must be at least ${VALIDATION.password.minLength} characters.`);
             return;
         }
-
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
             return;
         }
 
         setIsLoading(true);
-
         const result = await authService.signUp(email, password);
-
         setIsLoading(false);
 
         if (!result.success) {
@@ -52,117 +45,123 @@ export default function SignupPage() {
             setPassword("");
             setConfirmPassword("");
             setSuccess(true);
-            // Wait a moment then redirect to email verification notice
-            setTimeout(() => {
-                router.push("/verify-email");
-            }, 2000);
+            setTimeout(() => router.push("/verify-email"), 2000);
         }
     };
 
     if (success) {
         return (
-            <div className="glass rounded-xl p-8 shadow-glass animate-in fade-in zoom-in-95 duration-500 text-center">
-                <div className="w-16 h-16 bg-success/20 text-success rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
-                    ✅
+            <div className="border border-[#222] bg-black/80 backdrop-blur-md p-8 animate-in fade-in zoom-in-95 duration-500 text-center">
+                <div className="w-16 h-16 border border-[#333] flex items-center justify-center mx-auto mb-6 text-2xl">
+                    ✓
                 </div>
-                <h1 className="text-2xl font-bold text-foreground mb-4">Vault Created!</h1>
-                <p className="text-secondary mb-6">
-                    Your secure vault has been cryptographically provisioned. You are being redirected...
+                <div className="mono text-[10px] text-[#ff4500] tracking-widest uppercase mb-3">VAULT_INITIALIZED</div>
+                <h1 className="text-2xl font-bold text-white tracking-tighter mb-3">Vault Created</h1>
+                <p className="mono text-xs text-gray-500 uppercase tracking-widest">
+                    Cryptographic provisioning complete. Redirecting...
                 </p>
             </div>
         );
     }
 
     return (
-        <div className="glass rounded-xl p-8 shadow-glass animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">
-                    Create Your Vault
-                </h1>
-                <p className="text-secondary text-sm">
-                    A secure, zero-knowledge password manager
+        <div className="border border-[#222] bg-black/80 backdrop-blur-md p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4500]" />
+
+            <div className="mb-8">
+                <div className="mono text-[10px] text-gray-500 tracking-widest uppercase flex items-center gap-2 mb-5">
+                    <Activity className="w-3 h-3 text-[#ff4500]" />
+                    INITIALIZE_VAULT // ZERO_KNOWLEDGE
+                </div>
+                <h1 className="text-2xl font-bold tracking-tighter text-white mb-1">Create Your Vault</h1>
+                <p className="mono text-xs text-gray-500 uppercase tracking-widest">
+                    Zero-knowledge encrypted storage
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
                 {error && (
-                    <div className="p-3 rounded-md bg-error/10 border border-error/20 text-error text-sm text-center">
-                        {error}
+                    <div className="border border-red-900/60 bg-red-950/30 text-red-400 mono text-xs p-3 uppercase tracking-wide">
+                        <span className="text-red-500 mr-1">!</span> {error}
                     </div>
                 )}
 
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium text-foreground">
-                            Email Address
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            disabled={isLoading}
-                            className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-colors disabled:opacity-50"
-                            placeholder="you@example.com"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label htmlFor="password" className="text-sm font-medium text-foreground flex items-center justify-between">
-                            <span>Master Password</span>
-                            <span className="text-xs text-secondary font-normal">Min {VALIDATION.password.minLength} chars</span>
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            disabled={isLoading}
-                            className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-colors disabled:opacity-50 font-mono tracking-widest"
-                            placeholder="••••••••••••"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
-                            Confirm Master Password
-                        </label>
-                        <input
-                            id="confirmPassword"
-                            type="password"
-                            required
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            disabled={isLoading}
-                            className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-colors disabled:opacity-50 font-mono tracking-widest"
-                            placeholder="••••••••••••"
-                        />
-                    </div>
+                <div className="space-y-1.5">
+                    <label htmlFor="email" className="mono text-[10px] uppercase tracking-widest text-gray-500">
+                        Email Address
+                    </label>
+                    <input
+                        id="email"
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
+                        className="w-full bg-black border border-[#333] px-4 py-3 text-white text-sm mono focus:outline-none focus:border-[#ff4500] transition-colors disabled:opacity-50 placeholder-gray-700"
+                        placeholder="you@example.com"
+                    />
                 </div>
 
-                <div className="bg-brand/5 border border-brand/20 rounded-lg p-4 text-xs text-brand/80">
-                    <strong>Crucial absolute fact:</strong> If you forget your Master Password, your data cannot be recovered. Privault uses zero-knowledge encryption, meaning we never store or transmit your password.
+                <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                        <label htmlFor="password" className="mono text-[10px] uppercase tracking-widest text-gray-500">
+                            Master Password
+                        </label>
+                        <span className="mono text-[10px] text-gray-600 uppercase tracking-widest">Min {VALIDATION.password.minLength} chars</span>
+                    </div>
+                    <input
+                        id="password"
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                        className="w-full bg-black border border-[#333] px-4 py-3 text-white mono tracking-widest focus:outline-none focus:border-[#ff4500] transition-colors disabled:opacity-50"
+                        placeholder="••••••••••••"
+                    />
+                </div>
+
+                <div className="space-y-1.5">
+                    <label htmlFor="confirmPassword" className="mono text-[10px] uppercase tracking-widest text-gray-500">
+                        Confirm Master Password
+                    </label>
+                    <input
+                        id="confirmPassword"
+                        type="password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={isLoading}
+                        className="w-full bg-black border border-[#333] px-4 py-3 text-white mono tracking-widest focus:outline-none focus:border-[#ff4500] transition-colors disabled:opacity-50"
+                        placeholder="••••••••••••"
+                    />
+                </div>
+
+                {/* Warning block */}
+                <div className="border border-[#333] bg-[#0a0a0a] p-4 flex gap-3">
+                    <AlertTriangle className="w-4 h-4 text-[#ff4500] shrink-0 mt-0.5" />
+                    <p className="mono text-[10px] text-gray-500 uppercase tracking-wide leading-relaxed">
+                        <span className="text-white">Critical:</span> If you forget your master password, your data cannot be recovered. We use zero-knowledge encryption — we never store or transmit your password.
+                    </p>
                 </div>
 
                 <button
                     type="submit"
                     disabled={isLoading || !email || !password || !confirmPassword}
-                    className="w-full bg-brand text-brand-foreground font-semibold rounded-lg px-4 py-2.5 hover:bg-brand-hover active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
+                    className="w-full bg-white text-black mono font-bold text-xs uppercase tracking-widest px-4 py-3.5 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 mt-2"
                 >
                     {isLoading ? (
-                        <div className="w-5 h-5 border-2 border-brand-foreground/30 border-t-brand-foreground rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                     ) : (
-                        "Create Secure Vault"
+                        <>Initialize Vault <ChevronRight className="w-4 h-4" /></>
                     )}
                 </button>
             </form>
 
-            <div className="mt-8 text-center text-sm text-secondary">
+            <div className="mt-7 pt-6 border-t border-[#1a1a1a] mono text-[10px] text-gray-600 uppercase tracking-widest text-center">
                 Already have a vault?{" "}
-                <Link href="/login" className="text-brand hover:text-brand-hover font-medium transition-colors">
-                    Sign in here
+                <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+                    Sign in →
                 </Link>
             </div>
         </div>

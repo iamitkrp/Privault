@@ -4,11 +4,12 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 export default function AuthLayout({ children }: { children: ReactNode }) {
     return (
         <ProtectedRoute requireGuest>
-            <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
-                {/* Subtle background glow effect using our Tailwind utility classes */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand/5 rounded-full blur-3xl -z-10" />
+            <div className="min-h-screen flex items-center justify-center bg-black p-4 relative overflow-hidden">
+                {/* Grid background matching landing page */}
+                <div className="fixed inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
+                <div className="fixed inset-0 bg-gradient-to-b from-transparent via-black/60 to-black pointer-events-none" />
 
-                <div className="w-full max-w-md">
+                <div className="w-full max-w-md relative z-10">
                     {children}
                 </div>
             </div>

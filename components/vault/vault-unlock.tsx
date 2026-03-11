@@ -276,21 +276,27 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="glass p-10 rounded-2xl shadow-glass max-w-md w-full text-center">
-                <div className="w-20 h-20 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Lock className="w-10 h-10" />
+        <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in slide-in-from-bottom-4 duration-500 px-4">
+            <div className="border border-[#222] bg-black/80 backdrop-blur-md p-10 max-w-md w-full text-center relative">
+                {/* Corner accents */}
+                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4500]" />
+                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ff4500]" />
+
+                {/* Lock icon */}
+                <div className="w-16 h-16 border border-[#333] flex items-center justify-center mx-auto mb-6 text-gray-600">
+                    <Lock className="w-8 h-8" />
                 </div>
 
-                <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">Vault Locked</h2>
-                <p className="text-secondary text-sm mb-8">
-                    Enter your master password to derive the cryptographic keys and decrypt your vault.
+                <div className="mono text-[10px] text-[#ff4500] tracking-widest uppercase mb-3">VAULT_LOCKED // AES-256</div>
+                <h2 className="text-2xl font-bold tracking-tighter text-white mb-2">Decrypt Vault</h2>
+                <p className="mono text-xs text-gray-500 uppercase tracking-widest mb-8">
+                    Enter master password to derive cryptographic keys
                 </p>
 
-                <form onSubmit={handleUnlock} className="space-y-6">
+                <form onSubmit={handleUnlock} className="space-y-4 text-left">
                     {error && (
-                        <div className="p-3 rounded-md bg-error/10 border border-error/20 text-error text-sm text-center">
-                            {error}
+                        <div className="border border-red-900/60 bg-red-950/30 text-red-400 mono text-xs p-3 uppercase tracking-wide text-center">
+                            <span className="text-red-500 mr-1">!</span> {error}
                         </div>
                     )}
 
@@ -302,27 +308,25 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={isLoading || isLockedOut}
-                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-colors disabled:opacity-50 text-center text-xl tracking-widest font-mono"
+                        className="w-full bg-black border border-[#333] px-4 py-3 text-white mono text-center text-xl tracking-widest focus:outline-none focus:border-[#ff4500] transition-colors disabled:opacity-50"
                         placeholder="••••••••••••"
                     />
 
                     <button
                         type="submit"
                         disabled={isLoading || !password || isLockedOut}
-                        className="w-full bg-brand text-brand-foreground font-semibold rounded-lg px-4 py-3 hover:bg-brand-hover active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
+                        className="w-full bg-white text-black mono font-bold text-xs uppercase tracking-widest px-4 py-3.5 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
                     >
                         {isLoading ? (
-                            <div className="w-5 h-5 flex items-center justify-center">
-                                <span className="w-4 h-4 border-2 border-brand-foreground/30 border-t-brand-foreground rounded-full animate-spin block" />
-                            </div>
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                         ) : (
                             "Decrypt Vault"
                         )}
                     </button>
                 </form>
 
-                <p className="text-xs text-secondary mt-6">
-                    Everything happens securely on your device. The master password never leaves this browser window.
+                <p className="mono text-[10px] text-gray-600 uppercase tracking-widest mt-6 leading-relaxed">
+                    Your master password never leaves this browser window.
                 </p>
             </div>
         </div>
