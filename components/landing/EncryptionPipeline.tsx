@@ -36,7 +36,7 @@ export default function EncryptionPipeline() {
                     {/* Paths for the animated data dots in a Z-Shape */}
                     <path id="flow-pass-kdf" d="M 280 90 L 720 90" />
                     <path id="flow-kdf-key" d="M 840 140 C 840 190, 500 190, 500 240" />
-                    <path id="flow-key-engine" d="M 500 340 L 500 440" />
+                    <path id="flow-key-data" d="M 500 340 C 500 390, 160 390, 160 440" />
                     <path id="flow-data-engine" d="M 280 490 L 380 490" />
                     <path id="flow-engine-server" d="M 620 490 L 720 490" />
                 </defs>
@@ -45,7 +45,7 @@ export default function EncryptionPipeline() {
                 <g stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="6 6">
                     <path d="M 280 90 L 720 90" />
                     <path d="M 840 140 C 840 190, 500 190, 500 240" />
-                    <path d="M 500 340 L 500 440" />
+                    <path d="M 500 340 C 500 390, 160 390, 160 440" />
                     <path d="M 280 490 L 380 490" />
                     <path d="M 620 490 L 720 490" />
                 </g>
@@ -59,7 +59,7 @@ export default function EncryptionPipeline() {
                         <animateMotion dur="2s" begin="1.2s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
                     </circle>
                     <circle r="5" fill="#00ffcc">
-                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-key-engine" /></animateMotion>
+                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-key-data" /></animateMotion>
                     </circle>
                     <circle r="4" fill="#ff4500">
                         <animateMotion dur="1.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
@@ -73,7 +73,7 @@ export default function EncryptionPipeline() {
                 <g fontFamily="monospace" fontSize="11" fill="#aaaaaa" letterSpacing="1" textAnchor="middle">
                     <text x="500" y="80">UTF-8 BYTES</text>
                     <text x="670" y="195">32-BYTE DERIVATION</text>
-                    <text x="560" y="395">MASTER KEY</text>
+                    <text x="330" y="380">MASTER KEY</text>
                     <text x="330" y="480">DATA BLOCK</text>
                     <text x="670" y="480">CIPHERTEXT + TAG</text>
                 </g>
