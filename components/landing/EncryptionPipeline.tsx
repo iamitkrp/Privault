@@ -14,27 +14,27 @@ const TOOLTIPS: Record<NonNullable<StepKey>, { title: string; text: string; x: n
     2: {
         title: "// 02: PBKDF2 Key Derivation",
         text: "Your password itself is too short to be a cryptographic key. It is mathematically hashed 100,000 times using PBKDF2 with a unique cryptographic salt. This computationally expensive process prevents brute-force guessing attacks.",
-        x: 640, y: 155
+        x: 340, y: 155
     },
     3: {
         title: "// 03: Cryptographic Master Key",
         text: "The result of the hashing function is a pure 256-bit (32-byte) cryptographic key. This is the actual mathematical key used by the AES engine to lock and unlock your secure data.",
-        x: 340, y: 355
+        x: 340, y: 395
     },
     4: {
         title: "// 04: Local Vault Data",
         text: "Your plaintext passwords, secure notes, and sensitive data blocks are prepared locally in your browser. This raw data never leaves your device unencrypted.",
-        x: 40, y: 300
+        x: 40, y: 395
     },
     5: {
         title: "// 05: AES-256-GCM Engine",
         text: "The military-grade encryption engine. It feeds your Data Block (Step 04) and the Master Key (Step 03) into the AES-256 cipher to produce impenetrable ciphertext. GCM also generates an authentication tag to prevent tampering.",
-        x: 340, y: 555
+        x: 40, y: 320
     },
     6: {
         title: "// 06: Zero-Knowledge Server",
         text: "Only the fully encrypted ciphertext and authentication tag are sent to the cloud. The server is mathematically 'blind'—it stores the vault but fundamentally cannot decrypt it without your local Master Key.",
-        x: 640, y: 300
+        x: 340, y: 320
     }
 };
 
@@ -42,9 +42,9 @@ export default function EncryptionPipeline() {
     const [hovered, setHovered] = useState<StepKey>(null);
 
     return (
-        <div className="w-full h-full relative z-20 flex items-center justify-center p-2 lg:p-6">
+        <div className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0">
             <svg
-                viewBox="0 0 1000 600"
+                viewBox="0 0 700 700"
                 className="w-full h-full drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] pointer-events-none"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@ export default function EncryptionPipeline() {
                 <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
                     <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
                 </pattern>
-                <rect width="1000" height="600" fill="url(#grid)" />
+                <rect width="700" height="700" fill="url(#grid)" />
 
                 {/* DEFINITIONS for gradients and markers */}
                 <defs>
@@ -71,12 +71,12 @@ export default function EncryptionPipeline() {
                         </feMerge>
                     </filter>
 
-                    {/* Paths for the animated data dots in a Z-Shape */}
-                    <path id="flow-pass-kdf" d="M 280 90 L 720 90" />
-                    <path id="flow-kdf-key" d="M 840 140 C 840 190, 500 190, 500 240" />
-                    <path id="flow-key-data" d="M 500 340 C 500 390, 160 390, 160 440" />
-                    <path id="flow-data-engine" d="M 280 490 L 380 490" />
-                    <path id="flow-engine-server" d="M 620 490 L 720 490" />
+                    {/* Vertical Pipeline Paths */}
+                    <path id="flow-pass-kdf" d="M 280 90 L 420 90" />
+                    <path id="flow-kdf-key" d="M 540 140 C 600 180, 600 240, 540 280" />
+                    <path id="flow-key-data" d="M 420 330 L 280 330" />
+                    <path id="flow-data-engine" d="M 160 380 C 100 420, 100 480, 160 520" />
+                    <path id="flow-engine-server" d="M 280 570 L 420 570" />
 
                     {/* Tooltip Background Blur (Safari support) */}
                     <filter id="tooltipBlur">
@@ -91,20 +91,20 @@ export default function EncryptionPipeline() {
 
                 {/* CONNECTION LINES (Edges) */}
                 <g stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="6 6">
-                    <path d="M 280 90 L 720 90" stroke={hovered === 1 || hovered === 2 ? "#ff4500" : undefined} className="transition-all duration-500" />
-                    <path d="M 840 140 C 840 190, 500 190, 500 240" stroke={hovered === 2 || hovered === 3 ? "#00ffcc" : undefined} className="transition-all duration-500" />
-                    <path d="M 500 340 C 500 390, 160 390, 160 440" stroke={hovered === 3 || hovered === 4 ? "#00ffcc" : undefined} className="transition-all duration-500" />
-                    <path d="M 280 490 L 380 490" stroke={hovered === 4 || hovered === 5 ? "#ff4500" : undefined} className="transition-all duration-500" />
-                    <path d="M 620 490 L 720 490" stroke={hovered === 5 || hovered === 6 ? "#a855f7" : undefined} className="transition-all duration-500" />
+                    <path d="M 280 90 L 420 90" stroke={hovered === 1 || hovered === 2 ? "#ff4500" : undefined} className="transition-all duration-500" />
+                    <path d="M 540 140 C 600 180, 600 240, 540 280" stroke={hovered === 2 || hovered === 3 ? "#00ffcc" : undefined} className="transition-all duration-500" />
+                    <path d="M 420 330 L 280 330" stroke={hovered === 3 || hovered === 4 ? "#00ffcc" : undefined} className="transition-all duration-500" />
+                    <path d="M 160 380 C 100 420, 100 480, 160 520" stroke={hovered === 4 || hovered === 5 ? "#ff4500" : undefined} className="transition-all duration-500" />
+                    <path d="M 280 570 L 420 570" stroke={hovered === 5 || hovered === 6 ? "#a855f7" : undefined} className="transition-all duration-500" />
                 </g>
 
                 {/* DATA DOTS ANIMATIONS */}
                 <g filter="url(#neonGlow)">
                     <circle r="4" fill="#ff4500">
-                        <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
+                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
                     </circle>
                     <circle r="3" fill="#00ffcc">
-                        <animateMotion dur="2s" begin="1.2s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
+                        <animateMotion dur="1.5s" begin="0.5s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
                     </circle>
                     <circle r="5" fill="#00ffcc">
                         <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-key-data" /></animateMotion>
@@ -113,17 +113,17 @@ export default function EncryptionPipeline() {
                         <animateMotion dur="1.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
                     </circle>
                     <circle r="5" fill="#a855f7">
-                        <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
+                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
                     </circle>
                 </g>
 
                 {/* CONNECTION LABELS */}
                 <g fontFamily="monospace" fontSize="11" fill="#aaaaaa" letterSpacing="1" textAnchor="middle">
-                    <text x="500" y="80">UTF-8 BYTES</text>
-                    <text x="670" y="195">32-BYTE DERIVATION</text>
-                    <text x="330" y="380">MASTER KEY</text>
-                    <text x="330" y="480">DATA BLOCK</text>
-                    <text x="670" y="480">CIPHERTEXT + TAG</text>
+                    <text x="350" y="80">UTF-8 BYTES</text>
+                    <text x="610" y="215">32-BYTE DERIVATION</text>
+                    <text x="350" y="320">MASTER KEY</text>
+                    <text x="90" y="455">DATA BLOCK</text>
+                    <text x="350" y="560">CIPHERTEXT + TAG</text>
                 </g>
 
                 {/* --- PIPELINE NODES (BOXES) --- */}
@@ -144,7 +144,7 @@ export default function EncryptionPipeline() {
 
                 {/* PBKDF2 Hashing - STEP 02 */}
                 <g 
-                    transform="translate(720, 40)" 
+                    transform="translate(420, 40)" 
                     className="pointer-events-auto cursor-pointer transition-all duration-300"
                     onMouseEnter={() => setHovered(2)} 
                     onMouseLeave={() => setHovered(null)}
@@ -158,7 +158,7 @@ export default function EncryptionPipeline() {
 
                 {/* Cryptographic Key - STEP 03 */}
                 <g 
-                    transform="translate(380, 240)" 
+                    transform="translate(420, 280)" 
                     className="pointer-events-auto cursor-pointer transition-all duration-300"
                     onMouseEnter={() => setHovered(3)} 
                     onMouseLeave={() => setHovered(null)}
@@ -172,7 +172,7 @@ export default function EncryptionPipeline() {
 
                 {/* Private Vault Data - STEP 04 */}
                 <g 
-                    transform="translate(40, 440)" 
+                    transform="translate(40, 280)" 
                     className="pointer-events-auto cursor-pointer transition-all duration-300"
                     onMouseEnter={() => setHovered(4)} 
                     onMouseLeave={() => setHovered(null)}
@@ -186,7 +186,7 @@ export default function EncryptionPipeline() {
 
                 {/* AES-256-GCM Engine - STEP 05 */}
                 <g 
-                    transform="translate(380, 440)" 
+                    transform="translate(40, 520)" 
                     className="pointer-events-auto cursor-pointer transition-all duration-300"
                     onMouseEnter={() => setHovered(5)} 
                     onMouseLeave={() => setHovered(null)}
@@ -213,7 +213,7 @@ export default function EncryptionPipeline() {
 
                 {/* Cloud Server (Blind) - STEP 06 */}
                 <g 
-                    transform="translate(720, 440)" 
+                    transform="translate(420, 520)" 
                     className="pointer-events-auto cursor-pointer transition-all duration-300"
                     onMouseEnter={() => setHovered(6)} 
                     onMouseLeave={() => setHovered(null)}
@@ -261,9 +261,9 @@ export default function EncryptionPipeline() {
 
                 {/* Decorative corner brackets for SVG container */}
                 <path d="M 0 30 L 0 0 L 30 0" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 1000 30 L 1000 0 L 970 0" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 0 570 L 0 600 L 30 600" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 1000 570 L 1000 600 L 970 600" fill="none" stroke="#666" strokeWidth="2" />
+                <path d="M 700 30 L 700 0 L 670 0" fill="none" stroke="#666" strokeWidth="2" />
+                <path d="M 0 670 L 0 700 L 30 700" fill="none" stroke="#666" strokeWidth="2" />
+                <path d="M 700 670 L 700 700 L 670 700" fill="none" stroke="#666" strokeWidth="2" />
 
             </svg>
 
