@@ -76,8 +76,27 @@ export default function LandingPage() {
         className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-md border-b border-white/10 bg-black/40"
       >
         <div className="flex items-center gap-3 font-semibold text-lg tracking-wide group cursor-pointer">
-          <Hexagon className="w-6 h-6 text-white group-hover:text-gray-300 transition-colors" strokeWidth={1.5} />
-          <span className="mono text-sm tracking-widest text-white">PRIVAULT.</span>
+          <motion.svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-white group-hover:text-amber-500 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,0.8)] transition-all duration-500"
+          >
+            <motion.path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse", repeatDelay: 1 }}
+            />
+          </motion.svg>
+          <span className="mono text-sm tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 relative z-10 transition-colors duration-500 group-hover:from-white group-hover:to-amber-500">
+            PRIVAULT.
+          </span>
         </div>
 
         <div className="hidden md:flex items-center gap-12 mono text-xs text-gray-400">
