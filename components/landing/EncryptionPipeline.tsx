@@ -70,14 +70,7 @@ export default function EncryptionPipeline() {
                             <feMergeNode in="SourceGraphic" />
                         </feMerge>
                     </filter>
-
-                    {/* Vertical Pipeline Paths */}
-                    <path id="flow-pass-kdf" d="M 280 90 L 420 90" />
-                    <path id="flow-kdf-key" d="M 540 140 C 600 180, 600 240, 540 280" />
-                    <path id="flow-key-data" d="M 420 330 L 280 330" />
-                    <path id="flow-data-engine" d="M 160 380 C 100 420, 100 480, 160 520" />
-                    <path id="flow-engine-server" d="M 280 570 L 420 570" />
-
+                    
                     {/* Tooltip Background Blur (Safari support) */}
                     <filter id="tooltipBlur">
                         <feGaussianBlur stdDeviation="15" result="blur" />
@@ -89,140 +82,150 @@ export default function EncryptionPipeline() {
                     </filter>
                 </defs>
 
-                {/* CONNECTION LINES (Edges) */}
-                <g stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="6 6">
-                    <path d="M 280 90 L 420 90" stroke={hovered === 1 || hovered === 2 ? "#ff4500" : undefined} className="transition-all duration-500" />
-                    <path d="M 540 140 C 600 180, 600 240, 540 280" stroke={hovered === 2 || hovered === 3 ? "#00ffcc" : undefined} className="transition-all duration-500" />
-                    <path d="M 420 330 L 280 330" stroke={hovered === 3 || hovered === 4 ? "#00ffcc" : undefined} className="transition-all duration-500" />
-                    <path d="M 160 380 C 100 420, 100 480, 160 520" stroke={hovered === 4 || hovered === 5 ? "#ff4500" : undefined} className="transition-all duration-500" />
-                    <path d="M 280 570 L 420 570" stroke={hovered === 5 || hovered === 6 ? "#a855f7" : undefined} className="transition-all duration-500" />
-                </g>
+                {/* THE ENTIRE VISUAL LAYOUT SHIFTED DOWN 30px FOR PERFECT VERTICAL CENTERING */}
+                <g transform="translate(0, 30)">
+                    {/* Vertical Pipeline Paths */}
+                    <path id="flow-pass-kdf" d="M 280 90 L 420 90" />
+                    <path id="flow-kdf-key" d="M 540 140 C 600 180, 600 240, 540 280" />
+                    <path id="flow-key-data" d="M 420 330 L 280 330" />
+                    <path id="flow-data-engine" d="M 160 380 C 100 420, 100 480, 160 520" />
+                    <path id="flow-engine-server" d="M 280 570 L 420 570" />
 
-                {/* DATA DOTS ANIMATIONS */}
-                <g filter="url(#neonGlow)">
-                    <circle r="4" fill="#ff4500">
-                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
-                    </circle>
-                    <circle r="3" fill="#00ffcc">
-                        <animateMotion dur="1.5s" begin="0.5s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
-                    </circle>
-                    <circle r="5" fill="#00ffcc">
-                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-key-data" /></animateMotion>
-                    </circle>
-                    <circle r="4" fill="#ff4500">
-                        <animateMotion dur="1.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
-                    </circle>
-                    <circle r="5" fill="#a855f7">
-                        <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
-                    </circle>
-                </g>
+                    {/* CONNECTION LINES (Edges) */}
+                    <g stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="6 6">
+                        <path d="M 280 90 L 420 90" stroke={hovered === 1 || hovered === 2 ? "#ff4500" : undefined} className="transition-all duration-500" />
+                        <path d="M 540 140 C 600 180, 600 240, 540 280" stroke={hovered === 2 || hovered === 3 ? "#00ffcc" : undefined} className="transition-all duration-500" />
+                        <path d="M 420 330 L 280 330" stroke={hovered === 3 || hovered === 4 ? "#00ffcc" : undefined} className="transition-all duration-500" />
+                        <path d="M 160 380 C 100 420, 100 480, 160 520" stroke={hovered === 4 || hovered === 5 ? "#ff4500" : undefined} className="transition-all duration-500" />
+                        <path d="M 280 570 L 420 570" stroke={hovered === 5 || hovered === 6 ? "#a855f7" : undefined} className="transition-all duration-500" />
+                    </g>
 
-                {/* CONNECTION LABELS */}
-                <g fontFamily="monospace" fontSize="11" fill="#aaaaaa" letterSpacing="1" textAnchor="middle">
-                    <text x="350" y="80">UTF-8 BYTES</text>
-                    <text x="610" y="215">32-BYTE DERIVATION</text>
-                    <text x="350" y="320">MASTER KEY</text>
-                    <text x="90" y="455">DATA BLOCK</text>
-                    <text x="350" y="560">CIPHERTEXT + TAG</text>
-                </g>
+                    {/* DATA DOTS ANIMATIONS */}
+                    <g filter="url(#neonGlow)">
+                        <circle r="4" fill="#ff4500">
+                            <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
+                        </circle>
+                        <circle r="3" fill="#00ffcc">
+                            <animateMotion dur="1.5s" begin="0.5s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
+                        </circle>
+                        <circle r="5" fill="#00ffcc">
+                            <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-key-data" /></animateMotion>
+                        </circle>
+                        <circle r="4" fill="#ff4500">
+                            <animateMotion dur="1.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
+                        </circle>
+                        <circle r="5" fill="#a855f7">
+                            <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
+                        </circle>
+                    </g>
 
-                {/* --- PIPELINE NODES (BOXES) --- */}
+                    {/* CONNECTION LABELS */}
+                    <g fontFamily="monospace" fontSize="11" fill="#aaaaaa" letterSpacing="1" textAnchor="middle">
+                        <text x="350" y="80">UTF-8 BYTES</text>
+                        <text x="610" y="215">32-BYTE DERIVATION</text>
+                        <text x="350" y="320">MASTER KEY</text>
+                        <text x="90" y="455">DATA BLOCK</text>
+                        <text x="350" y="560">CIPHERTEXT + TAG</text>
+                    </g>
 
-                {/* Master Password - STEP 01 */}
-                <g 
-                    transform="translate(40, 40)" 
-                    className="pointer-events-auto cursor-pointer transition-all duration-300" 
-                    onMouseEnter={() => setHovered(1)} 
-                    onMouseLeave={() => setHovered(null)}
-                >
-                    <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 1 ? "#ff4500" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
-                    <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
-                    <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Master Password</text>
-                    <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">ONLY EXISTS IN MEMORY</text>
-                </g>
+                    {/* --- PIPELINE NODES (BOXES) --- */}
 
-                {/* PBKDF2 Hashing - STEP 02 */}
-                <g 
-                    transform="translate(420, 40)" 
-                    className="pointer-events-auto cursor-pointer transition-all duration-300"
-                    onMouseEnter={() => setHovered(2)} 
-                    onMouseLeave={() => setHovered(null)}
-                >
-                    <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 2 ? "#00ffcc" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
-                    <rect x="-4" y="25" width="4" height="50" fill="#00ffcc" opacity="0.8" />
-                    <text x="20" y="35" fill="#00ffcc" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
-                    <text x="20" y="65" fill="#00ffcc" fontFamily="sans-serif" fontSize="20" fontWeight="bold">PBKDF2 Hashing</text>
-                    <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
-                </g>
+                    {/* Master Password - STEP 01 */}
+                    <g 
+                        transform="translate(40, 40)" 
+                        className="pointer-events-auto cursor-pointer transition-all duration-300" 
+                        onMouseEnter={() => setHovered(1)} 
+                        onMouseLeave={() => setHovered(null)}
+                    >
+                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 1 ? "#ff4500" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
+                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
+                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Master Password</text>
+                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">ONLY EXISTS IN MEMORY</text>
+                    </g>
 
-                {/* Cryptographic Key - STEP 03 */}
-                <g 
-                    transform="translate(420, 280)" 
-                    className="pointer-events-auto cursor-pointer transition-all duration-300"
-                    onMouseEnter={() => setHovered(3)} 
-                    onMouseLeave={() => setHovered(null)}
-                >
-                    <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 3 ? "#00ffcc" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
-                    <line x1="210" y1="0" x2="240" y2="0" stroke="#00ffcc" strokeWidth="4" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
-                    <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="18" fontWeight="bold">Cryptographic Key</text>
-                    <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">AES-256 (32 BYTES)</text>
-                </g>
+                    {/* PBKDF2 Hashing - STEP 02 */}
+                    <g 
+                        transform="translate(420, 40)" 
+                        className="pointer-events-auto cursor-pointer transition-all duration-300"
+                        onMouseEnter={() => setHovered(2)} 
+                        onMouseLeave={() => setHovered(null)}
+                    >
+                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 2 ? "#00ffcc" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <rect x="-4" y="25" width="4" height="50" fill="#00ffcc" opacity="0.8" />
+                        <text x="20" y="35" fill="#00ffcc" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
+                        <text x="20" y="65" fill="#00ffcc" fontFamily="sans-serif" fontSize="20" fontWeight="bold">PBKDF2 Hashing</text>
+                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
+                    </g>
 
-                {/* Private Vault Data - STEP 04 */}
-                <g 
-                    transform="translate(40, 280)" 
-                    className="pointer-events-auto cursor-pointer transition-all duration-300"
-                    onMouseEnter={() => setHovered(4)} 
-                    onMouseLeave={() => setHovered(null)}
-                >
-                    <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 4 ? "#ff4500" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
-                    <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
-                    <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Private Vault Data</text>
-                    <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">PASSWORDS & NOTES</text>
-                </g>
+                    {/* Cryptographic Key - STEP 03 */}
+                    <g 
+                        transform="translate(420, 280)" 
+                        className="pointer-events-auto cursor-pointer transition-all duration-300"
+                        onMouseEnter={() => setHovered(3)} 
+                        onMouseLeave={() => setHovered(null)}
+                    >
+                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 3 ? "#00ffcc" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <line x1="210" y1="0" x2="240" y2="0" stroke="#00ffcc" strokeWidth="4" />
+                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
+                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="18" fontWeight="bold">Cryptographic Key</text>
+                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">AES-256 (32 BYTES)</text>
+                    </g>
 
-                {/* AES-256-GCM Engine - STEP 05 */}
-                <g 
-                    transform="translate(40, 520)" 
-                    className="pointer-events-auto cursor-pointer transition-all duration-300"
-                    onMouseEnter={() => setHovered(5)} 
-                    onMouseLeave={() => setHovered(null)}
-                >
-                    <motion.rect
-                        width="240" height="100" rx="6" fill="#110515" stroke="#a855f7" strokeWidth="2.5"
-                        animate={hovered === 5 ? 
-                            { strokeOpacity: 1, boxShadow: "0px 0px 25px #a855f7" } : 
-                            { strokeOpacity: [1, 0.4, 1], boxShadow: ["0px 0px 5px #a855f7", "0px 0px 15px #a855f7", "0px 0px 5px #a855f7"] }
-                        }
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <text x="25" y="35" fill="#a855f7" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
-                    <text x="25" y="65" fill="#a855f7" fontFamily="sans-serif" fontSize="24" fontWeight="bold">AES-256-GCM</text>
-                    <text x="25" y="85" fill="#a855f7" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
+                    {/* Private Vault Data - STEP 04 */}
+                    <g 
+                        transform="translate(40, 280)" 
+                        className="pointer-events-auto cursor-pointer transition-all duration-300"
+                        onMouseEnter={() => setHovered(4)} 
+                        onMouseLeave={() => setHovered(null)}
+                    >
+                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 4 ? "#ff4500" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
+                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
+                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Private Vault Data</text>
+                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">PASSWORDS & NOTES</text>
+                    </g>
 
-                    {/* Inner decorative scanning line */}
-                    <motion.line
-                        x1="0" y1="50" x2="240" y2="50" stroke="#a855f7" strokeWidth="2" opacity="0.4"
-                        animate={{ y1: [10, 90, 10], y2: [10, 90, 10] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    />
-                </g>
+                    {/* AES-256-GCM Engine - STEP 05 */}
+                    <g 
+                        transform="translate(40, 520)" 
+                        className="pointer-events-auto cursor-pointer transition-all duration-300"
+                        onMouseEnter={() => setHovered(5)} 
+                        onMouseLeave={() => setHovered(null)}
+                    >
+                        <motion.rect
+                            width="240" height="100" rx="6" fill="#110515" stroke="#a855f7" strokeWidth="2.5"
+                            animate={hovered === 5 ? 
+                                { strokeOpacity: 1, boxShadow: "0px 0px 25px #a855f7" } : 
+                                { strokeOpacity: [1, 0.4, 1], boxShadow: ["0px 0px 5px #a855f7", "0px 0px 15px #a855f7", "0px 0px 5px #a855f7"] }
+                            }
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                        <text x="25" y="35" fill="#a855f7" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
+                        <text x="25" y="65" fill="#a855f7" fontFamily="sans-serif" fontSize="24" fontWeight="bold">AES-256-GCM</text>
+                        <text x="25" y="85" fill="#a855f7" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
 
-                {/* Cloud Server (Blind) - STEP 06 */}
-                <g 
-                    transform="translate(420, 520)" 
-                    className="pointer-events-auto cursor-pointer transition-all duration-300"
-                    onMouseEnter={() => setHovered(6)} 
-                    onMouseLeave={() => setHovered(null)}
-                >
-                    <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 6 ? "#888" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
-                    <rect x="236" y="25" width="4" height="50" fill="#a855f7" opacity="0.8" />
-                    <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
-                    <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Blind Server</text>
-                    <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">CANNOT DECRYPT</text>
+                        {/* Inner decorative scanning line */}
+                        <motion.line
+                            x1="0" y1="50" x2="240" y2="50" stroke="#a855f7" strokeWidth="2" opacity="0.4"
+                            animate={{ y1: [10, 90, 10], y2: [10, 90, 10] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        />
+                    </g>
+
+                    {/* Cloud Server (Blind) - STEP 06 */}
+                    <g 
+                        transform="translate(420, 520)" 
+                        className="pointer-events-auto cursor-pointer transition-all duration-300"
+                        onMouseEnter={() => setHovered(6)} 
+                        onMouseLeave={() => setHovered(null)}
+                    >
+                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 6 ? "#888" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <rect x="236" y="25" width="4" height="50" fill="#a855f7" opacity="0.8" />
+                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
+                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Blind Server</text>
+                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">CANNOT DECRYPT</text>
+                    </g>
                 </g>
 
                 {/* THE HOVER TOOLTIP (Rendered dynamically based on state) */}
