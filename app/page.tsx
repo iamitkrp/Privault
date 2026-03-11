@@ -75,8 +75,8 @@ export default function LandingPage() {
         transition={{ duration: 1, ease: "easeOut" }}
         className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-md border-b border-white/10 bg-black/40"
       >
-        <div className="flex items-center gap-3 font-semibold text-lg tracking-wide group cursor-pointer">
-          <motion.svg
+        <div className="flex items-center gap-3 font-semibold text-lg tracking-wide group cursor-pointer relative">
+          <svg
             width="28"
             height="28"
             viewBox="0 0 24 24"
@@ -85,13 +85,29 @@ export default function LandingPage() {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-white group-hover:text-amber-500 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,0.8)] transition-all duration-500"
+            className="text-white/20 group-hover:text-white/50 transition-colors duration-500"
+          >
+            {/* The base hexagon, always visible */}
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          </svg>
+
+          {/* The glowing animated tracer line */}
+          <motion.svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] group-hover:text-amber-500 group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,1)] transition-all duration-500 absolute left-0 top-1/2 -translate-y-1/2"
           >
             <motion.path
                 d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse", repeatDelay: 1 }}
+                initial={{ pathLength: 0, pathOffset: 0 }}
+                animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                transition={{ duration: 4, ease: "linear", repeat: Infinity }}
             />
           </motion.svg>
           <span className="mono text-sm tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 relative z-10 transition-colors duration-500 group-hover:from-white group-hover:to-amber-500">
