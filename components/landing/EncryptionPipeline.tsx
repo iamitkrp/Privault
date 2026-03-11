@@ -42,20 +42,24 @@ export default function EncryptionPipeline() {
     const [hovered, setHovered] = useState<StepKey>(null);
 
     return (
-        <div className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0">
+        <div className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0 group">
+            
+            {/* Ambient Background Glow Effect matching the theme */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/10 via-transparent to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+            
+            {/* Subtle Dot Matrix Background matching the grid theme */}
+            <div 
+                className="absolute inset-0 opacity-[0.10] pointer-events-none z-[-1]" 
+                style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.4) 1px, transparent 0)', backgroundSize: '32px 32px' }}
+            />
+
             <svg
                 viewBox="0 0 700 700"
-                className="w-full h-full drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] pointer-events-none"
+                className="w-full h-full drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] pointer-events-none relative z-10"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="xMidYMid meet"
             >
-                {/* Decorative Grid */}
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                </pattern>
-                <rect width="700" height="700" fill="url(#grid)" />
-
                 {/* DEFINITIONS for gradients and markers */}
                 <defs>
                     <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -263,10 +267,11 @@ export default function EncryptionPipeline() {
                 </AnimatePresence>
 
                 {/* Decorative corner brackets for SVG container */}
-                <path d="M 0 30 L 0 0 L 30 0" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 700 30 L 700 0 L 670 0" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 0 670 L 0 700 L 30 700" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 700 670 L 700 700 L 670 700" fill="none" stroke="#666" strokeWidth="2" />
+                {/* Pulled inward and down to prevent the top edge from being covered by the sticky navbar */}
+                <path d="M 15 75 L 15 45 L 45 45" fill="none" stroke="#666" strokeWidth="2" />
+                <path d="M 685 75 L 685 45 L 655 45" fill="none" stroke="#666" strokeWidth="2" />
+                <path d="M 15 655 L 15 685 L 45 685" fill="none" stroke="#666" strokeWidth="2" />
+                <path d="M 685 655 L 685 685 L 655 685" fill="none" stroke="#666" strokeWidth="2" />
 
             </svg>
 
