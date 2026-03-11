@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
 import { User } from "@supabase/supabase-js";
 import { UserProfile } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -22,103 +22,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Initialize supabase client and service once, passing the exact same client reference
-    // to prevent navigator.locks deadlocks inside @supabase/supabase-js during hydration
     const [supabaseClient] = useState(() => createClient());
     const [authService] = useState(() => new AuthService(supabaseClient));
 
+    // Guard so we never call setIsLoading(false) twice for the same event
+    const loadingResolved = useRef(false);
+
+    function resolveLoading() {
+        if (!loadingResolved.current) {
+            loadingResolved.current = true;
+            setIsLoading(false);
+        }
+    }
+
     useEffect(() => {
         let mounted = true;
-        const supabase = supabaseClient;
 
-        // We rely entirely on onAuthStateChange, which fires an INITIAL_SESSION 
-        // event synchronously or immediately after setup. Mixing manual getSession() 
-        // with onAuthStateChange() creates duplicate state, 
-        // concurrent race conditions, and GoTrue lock contentions.
-
-        // Next.js HMR Circuit Breaker: If the Supabase client gets deadlocked 
-        // on a navigator.lock (common in React 18 Strict Mode during fast refresh),
-        // we forcefully unblock the UI after 5 seconds so the user isn't permanently stuck.
-        const lockBreakerTimer = setTimeout(() => {
+        // Safety net: if onAuthStateChange never fires (e.g. network issue),
+        // unblock the UI after 6 seconds.
+        const fallbackTimer = setTimeout(() => {
             if (mounted) {
-                console.warn("[Auth] Supabase lock timeout! Forcing UI to unlock. If you are stuck in Dev mode, clear site data.");
-                setIsLoading(false);
+                console.warn("[Auth] Session check timed out. Forcing UI unlock.");
+                resolveLoading();
             }
-        }, 5000);
+        }, 6000);
 
-        let isChecking = false;
-
-        async function initializeSession() {
-            if (isChecking) return;
-            isChecking = true;
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user && mounted) {
-                    setUser(session.user);
-                    await authService.ensureProfileExists(session.user);
-                    const profileResult = await authService.getProfile(session.user.id);
-                    if (profileResult.success) {
-                        setProfile(profileResult.data);
-                    }
-                }
-            } catch (error) {
-                console.error("[Auth] getSession failed:", error);
-            } finally {
-                if (mounted) setIsLoading(false);
-                clearTimeout(lockBreakerTimer);
-            }
-        }
-
-        // 1. Manually check session to guarantee resolution during HMR reinstantiations
-        // 2. We don't await this directly so we can set up the listener immediately
-        initializeSession();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
             async (event, session) => {
                 console.log("[Auth] onAuthStateChange event:", event);
                 if (!mounted) return;
 
-                // Clear the deadlock circuit breaker
-                clearTimeout(lockBreakerTimer);
-
-                // Ignore INITIAL_SESSION if initializeSession is already handling it
-                if (event === 'INITIAL_SESSION' && isChecking) return;
+                // Cancel the fallback timer — we got a real event
+                clearTimeout(fallbackTimer);
 
                 if (session?.user) {
+                    setUser(session.user);
+                    // Load profile asynchronously — always resolve loading first
+                    // so the UI is never blocked by a slow profile fetch
+                    resolveLoading();
                     try {
-                        setUser(session.user);
                         await authService.ensureProfileExists(session.user);
                         const profileResult = await authService.getProfile(session.user.id);
-                        if (profileResult.success) {
+                        if (profileResult.success && mounted) {
                             setProfile(profileResult.data);
-                        } else {
-                            console.error("[Auth] onAuthStateChange Failed to load profile:", profileResult.error);
                         }
-                    } catch (err) {
-                        console.error("[Auth] onAuthStateChange Error:", err);
+                    } catch {
+                        // Non-fatal: profile load failure doesn't block the app
                     }
                 } else {
-                    console.log("[Auth] onAuthStateChange No session user, clearing state.");
                     setUser(null);
                     setProfile(null);
+                    resolveLoading();
                 }
-
-                setIsLoading(false);
             }
         );
 
         return () => {
             mounted = false;
+            clearTimeout(fallbackTimer);
             subscription.unsubscribe();
         };
-    }, [authService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const signOut = async () => {
         setIsLoading(true);
+        loadingResolved.current = false;
         await authService.signOut();
         setUser(null);
         setProfile(null);
         setIsLoading(false);
+        loadingResolved.current = true;
     };
 
     return (
@@ -135,3 +109,4 @@ export function useAuth() {
     }
     return context;
 }
+
