@@ -1,8 +1,12 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth/auth-context";
+import { VaultUnlock } from "@/components/vault/vault-unlock";
+import { AuthModal } from "@/components/auth/auth-modal";
 
 import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
 
@@ -57,6 +61,28 @@ export default function LandingPage() {
   const smoothScrollY = useSpring(scrollYProgress, { damping: 20, stiffness: 100 });
   const heroY = useTransform(smoothScrollY, [0, 0.3], ["0%", "50%"]);
   const heroOpacity = useTransform(smoothScrollY, [0, 0.3], [1, 0]);
+
+  const { user, profile } = useAuth();
+  const router = useRouter();
+  const [isVaultOpen, setIsVaultOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+
+  const handlePrimaryAction = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user && profile) {
+      setIsVaultOpen(true);
+    } else {
+      setAuthMode("signup");
+      setIsAuthModalOpen(true);
+    }
+  };
+
+  const handleLoginClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      setAuthMode("login");
+      setIsAuthModalOpen(true);
+  };
 
   return (
     <div
@@ -123,9 +149,18 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-6 mono text-xs">
-          <Link href="/login" className="px-6 py-2 border border-white/20 text-white hover:bg-white/10 transition-colors uppercase tracking-widest">
-            Sign In
-          </Link>
+          {user && profile ? (
+            <button
+                onClick={() => setIsVaultOpen(true)}
+                className="px-6 py-2 border border-white/20 text-white hover:bg-white/10 transition-colors uppercase tracking-widest"
+            >
+                Unlock Vault
+            </button>
+          ) : (
+            <button onClick={handleLoginClick} className="px-6 py-2 border border-white/20 text-white hover:bg-white/10 transition-colors uppercase tracking-widest">
+                Sign In
+            </button>
+          )}
         </div>
       </motion.nav>
 
@@ -179,9 +214,11 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col sm:flex-row items-center gap-4 w-full justify-start mono text-xs uppercase"
           >
-            <Link href="/signup" className="group relative overflow-hidden py-4 px-8 text-black bg-white hover:bg-gray-200 transition-colors w-full sm:w-auto text-center">
-              <span className="relative z-10 flex items-center justify-center gap-2 font-bold tracking-widest">Initialize Vault <ChevronRight className="w-4 h-4" /></span>
-            </Link>
+            <button onClick={handlePrimaryAction} className="group relative overflow-hidden py-4 px-8 text-black bg-white hover:bg-gray-200 transition-colors w-full sm:w-auto text-center">
+              <span className="relative z-10 flex items-center justify-center gap-2 font-bold tracking-widest">
+                {user && profile ? "Unlock Vault" : "Initialize Vault"} <ChevronRight className="w-4 h-4" />
+              </span>
+            </button>
 
             <Link href="/docs" className="group relative overflow-hidden py-4 px-8 border border-[#444] text-white hover:bg-white/5 transition-colors w-full sm:w-auto text-center">
               <span className="relative z-10 flex items-center justify-center gap-2 tracking-widest">Security Specs <ChevronRight className="w-4 h-4" /></span>
@@ -290,6 +327,27 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Vault Unlock Overlay */}
+      <AnimatePresence>
+        {isVaultOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center">
+             <VaultUnlock 
+                onUnlock={() => {
+                   setIsVaultOpen(false);
+                   router.push("/dashboard"); // Route successfully unlocked user to main dashboard
+                }} 
+                onClose={() => setIsVaultOpen(false)} 
+             />
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AuthModal 
+          isOpen={isAuthModalOpen} 
+          onClose={() => setIsAuthModalOpen(false)} 
+          initialMode={authMode} 
+      />
     </div>
   );
 }
