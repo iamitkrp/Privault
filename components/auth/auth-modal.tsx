@@ -157,41 +157,46 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                             </div>
                         ) : (
                             <>
-                                {/* Animated Logo */}
-                                <div className="relative w-16 h-16 mb-8 group flex items-center justify-center">
-                                    <svg
-                                        width="48"
-                                        height="48"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="text-white/20 transition-colors duration-500"
-                                    >
-                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                                    </svg>
+                                {/* Animated Logo + Brand Text */}
+                                <div className="flex items-center gap-3 mb-8 group">
+                                    <div className="relative w-10 h-10 flex items-center justify-center">
+                                        <svg
+                                            width="32"
+                                            height="32"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="text-white/20 transition-colors duration-500"
+                                        >
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                        </svg>
 
-                                    {/* The glowing animated tracer line */}
-                                    <motion.svg
-                                        width="48"
-                                        height="48"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="text-[#ff4500] drop-shadow-[0_0_12px_rgba(255,69,0,1)] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                                    >
-                                        <motion.path
-                                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
-                                            initial={{ pathLength: 0, pathOffset: 0 }}
-                                            animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
-                                            transition={{ duration: 4, ease: "linear", repeat: Infinity }}
-                                        />
-                                    </motion.svg>
+                                        {/* The glowing animated tracer line */}
+                                        <motion.svg
+                                            width="32"
+                                            height="32"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="text-[#ff4500] drop-shadow-[0_0_12px_rgba(255,69,0,1)] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                                        >
+                                            <motion.path
+                                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                                                initial={{ pathLength: 0, pathOffset: 0 }}
+                                                animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                                                transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+                                            />
+                                        </motion.svg>
+                                    </div>
+                                    <span className="mono text-base font-bold tracking-[0.2em] text-white">
+                                        PRIVAULT.
+                                    </span>
                                 </div>
 
                                 {/* Header */}
@@ -292,7 +297,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                     <button
                                         type="submit"
                                         disabled={isLoading || !email || !password || (mode === "signup" && !confirmPassword)}
-                                        className="w-full bg-white text-black font-semibold py-3 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:bg-white/20 disabled:text-gray-400 disabled:pointer-events-none flex items-center justify-center gap-2 mt-2 mono text-[11px] uppercase tracking-widest"
+                                        className="w-full bg-white text-black font-bold py-4 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:bg-white/20 disabled:text-gray-400 disabled:pointer-events-none flex items-center justify-center gap-2 mt-4 mono text-xs uppercase tracking-[0.2em]"
                                     >
                                         {isLoading ? (
                                             <div className="w-4 h-4 border-2 border-black/30 border-t-black animate-spin" />
@@ -302,8 +307,8 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                     </button>
                                 </form>
 
-                                <div className="mt-8 pt-6 border-t border-white/[0.04] flex items-center justify-between mono text-[9px] uppercase tracking-widest">
-                                    <div className="flex items-center gap-1.5 text-gray-500">
+                                <div className="mt-8 pt-6 border-t border-white/[0.04] flex items-center justify-between mono uppercase tracking-widest">
+                                    <div className="flex items-center gap-1.5 text-gray-500 text-[9px]">
                                         <Activity className="w-3 h-3 text-[#ff4500]" />
                                         <span>P2P-AES256 Encrypted</span>
                                     </div>
@@ -313,9 +318,9 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                             setMode(mode === "login" ? "signup" : "login");
                                             setError(null);
                                         }}
-                                        className="text-gray-500 hover:text-[#ff4500] transition-colors"
+                                        className="text-white hover:text-[#ff4500] bg-white/5 hover:bg-white/10 px-5 py-2.5 border border-white/10 transition-all text-xs font-bold"
                                     >
-                                        {mode === "login" ? "Create One →" : "Sign In →"}
+                                        {mode === "login" ? "SIGN UP →" : "SIGN IN →"}
                                     </button>
                                 </div>
                             </>
