@@ -346,7 +346,8 @@ export default function LandingPage() {
       <AuthModal 
           isOpen={isAuthModalOpen} 
           onClose={() => setIsAuthModalOpen(false)} 
-          initialMode={authMode} 
+          initialMode={authMode}
+          onSuccess={() => router.push("/dashboard")}
       />
     </div>
   );

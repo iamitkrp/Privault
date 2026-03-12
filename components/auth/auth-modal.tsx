@@ -12,9 +12,10 @@ interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialMode?: "login" | "signup";
+    onSuccess?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }: AuthModalProps) {
     const { authService, supabaseClient } = useAuth();
     const router = useRouter();
 
@@ -73,6 +74,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
         } else {
             setIsLoading(false);
             onClose(); // Close modal on successful login
+            if (onSuccess) onSuccess();
         }
     };
 
@@ -139,7 +141,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                         {/* Close button */}
                         <button 
                             onClick={onClose}
-                            className="absolute top-6 right-6 p-2 text-gray-500 hover:text-white border border-[#333] hover:border-[#444] bg-transparent hover:bg-white/5 transition-colors"
+                            className="absolute top-6 right-6 p-2 text-gray-500 hover:text-white border border-[#333] hover:border-[#444] bg-transparent hover:bg-white/5 transition-colors z-20"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -300,7 +302,39 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                         className="w-full bg-white text-black font-bold py-4 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:bg-white/20 disabled:text-gray-400 disabled:pointer-events-none flex items-center justify-center gap-2 mt-4 mono text-xs uppercase tracking-[0.2em]"
                                     >
                                         {isLoading ? (
-                                            <div className="w-4 h-4 border-2 border-black/30 border-t-black animate-spin" />
+                                            <div className="relative w-5 h-5 flex items-center justify-center">
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="text-black/20"
+                                                >
+                                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                                </svg>
+                                                <motion.svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="text-black drop-shadow-[0_0_6px_rgba(0,0,0,0.6)] absolute inset-0"
+                                                >
+                                                    <motion.path
+                                                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                                                        initial={{ pathLength: 0, pathOffset: 0 }}
+                                                        animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                                                        transition={{ duration: 2, ease: "linear", repeat: Infinity }}
+                                                    />
+                                                </motion.svg>
+                                            </div>
                                         ) : (
                                             mode === "login" ? "Sign In" : "Create Account"
                                         )}
@@ -323,6 +357,55 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                         {mode === "login" ? "SIGN UP →" : "SIGN IN →"}
                                     </button>
                                 </div>
+
+                                <AnimatePresence>
+                                    {isLoading && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.25 }}
+                                            className="absolute inset-0 bg-[#050505]/80 backdrop-blur-sm flex flex-col items-center justify-center z-10"
+                                        >
+                                            <div className="relative w-14 h-14 flex items-center justify-center mb-4">
+                                                <svg
+                                                    width="32"
+                                                    height="32"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="text-white/10"
+                                                >
+                                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                                </svg>
+                                                <motion.svg
+                                                    width="32"
+                                                    height="32"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.5"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="text-[#ff4500] drop-shadow-[0_0_16px_rgba(255,69,0,0.9)] absolute inset-0"
+                                                >
+                                                    <motion.path
+                                                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                                                        initial={{ pathLength: 0, pathOffset: 0 }}
+                                                        animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                                                        transition={{ duration: 3, ease: "linear", repeat: Infinity }}
+                                                    />
+                                                </motion.svg>
+                                            </div>
+                                            <span className="mono text-[9px] uppercase tracking-widest text-gray-500">
+                                                {mode === "login" ? "AUTHENTICATING..." : "PROVISIONING VAULT..."}
+                                            </span>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </>
                         )}
                     </motion.div>
