@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
 import { CRYPTO_CONFIG } from "@/constants";
-import { ChevronRight, Fingerprint, ShieldCheck, Unlock } from "lucide-react";
+import { ChevronRight, Activity, X } from "lucide-react";
 import { SecurityService } from "@/services/security.service";
 import { VaultService } from "@/services/vault.service";
 import { motion, AnimatePresence } from "framer-motion";
@@ -278,166 +278,182 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
         }
     };
 
+    /* ─── Hex path constant used for both base + tracer ─── */
+    const hexPath = "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z";
+
     return (
-        <>
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 w-full max-w-[420px] bg-[#050505] border border-white/10 shadow-2xl overflow-hidden p-8 sm:p-10 font-sans selection:bg-[#ff4500]/30"
+        >
+            {/* Subtle top highlight */}
+            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-            <motion.div 
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                transition={{ duration: 0.7, type: "spring", bounce: 0.3 }}
-                className="relative z-10 w-full max-w-[440px] flex flex-col items-center p-8 sm:p-12 mb-20"
-            >
-                {/* Glass Panel Base */}
-                <div className="absolute inset-0 bg-[#030303]/40 backdrop-blur-[50px] rounded-[32px] border border-white/[0.06] shadow-2xl pointer-events-none" />
-                
-                {/* Inner Highlight */}
-                <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_0_100px_rgba(255,255,255,0.01)] pointer-events-none" />
-                <div className="absolute top-0 inset-x-0 h-[1px] w-1/2 mx-auto bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+            {/* Grid background inside modal */}
+            <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
 
-                {/* Close Button */}
-                {onClose && (
-                    <button 
-                        onClick={onClose}
-                        className="absolute top-6 right-6 p-2 text-white/30 hover:text-white bg-white/[0.03] hover:bg-white/[0.1] rounded-full transition-all duration-300 z-50 backdrop-blur-md"
+            {/* Close button */}
+            {onClose && (
+                <button
+                    onClick={onClose}
+                    className="absolute top-6 right-6 p-2 text-gray-500 hover:text-white border border-[#333] hover:border-[#444] bg-transparent hover:bg-white/5 transition-colors z-20"
+                >
+                    <X className="w-4 h-4" />
+                </button>
+            )}
+
+            {/* ── Loading overlay ── */}
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-10 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center gap-6"
                     >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 6L6 18M6 6l12 12"/>
-                        </svg>
-                    </button>
+                        <div className="relative w-16 h-16">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="opacity-20">
+                                <path d={hexPath} />
+                            </svg>
+                            <motion.svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute inset-0 drop-shadow-[0_0_12px_rgba(255,69,0,0.8)]">
+                                <motion.path
+                                    d={hexPath}
+                                    initial={{ pathLength: 0, pathOffset: 0 }}
+                                    animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                                    transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+                                />
+                            </motion.svg>
+                        </div>
+                        <span className="mono text-[9px] uppercase tracking-widest text-gray-500">
+                            DECRYPTING VAULT...
+                        </span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* ── Header: Brand Logo ── */}
+            <div className="flex flex-col items-center mb-10 relative z-[1]">
+                {/* Hexagon logo with tracer — matches landing nav */}
+                <div className="relative w-10 h-10 mb-5">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/20">
+                        <path d={hexPath} />
+                    </svg>
+                    <motion.svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#ff4500] drop-shadow-[0_0_8px_rgba(255,69,0,0.8)] absolute inset-0">
+                        <motion.path
+                            d={hexPath}
+                            initial={{ pathLength: 0, pathOffset: 0 }}
+                            animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                            transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+                        />
+                    </motion.svg>
+                </div>
+
+                <span className="mono text-sm tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 mb-4">
+                    PRIVAULT.
+                </span>
+
+                <h2 className="text-2xl font-bold tracking-tight text-white uppercase mb-2">
+                    Unlock Vault
+                </h2>
+                <p className="mono text-[10px] text-gray-500 uppercase tracking-[0.15em] text-center leading-relaxed max-w-[280px]">
+                    Enter your master password to decrypt and mount your local vault
+                </p>
+            </div>
+
+            {/* ── Error banner ── */}
+            <AnimatePresence>
+                {error && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        animate={{ opacity: 1, height: "auto", marginBottom: 20 }}
+                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        className="mono text-[10px] uppercase tracking-wider text-red-400 border border-red-900/40 bg-red-950/20 px-4 py-3 flex items-start gap-3 overflow-hidden relative z-[1]"
+                    >
+                        <span className="text-red-500 font-bold shrink-0 mt-[1px]">!</span>
+                        <span className="leading-relaxed">{error}</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* ── Form ── */}
+            <form onSubmit={handleUnlock} className="relative z-[1] flex flex-col gap-6">
+                {/* Password input */}
+                <div className="flex flex-col gap-2">
+                    <label className="mono text-[9px] text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <Activity className="w-3 h-3 text-[#ff4500]" />
+                        Master Password
+                    </label>
+                    <div className="relative group">
+                        <input
+                            type="password"
+                            autoFocus
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={isLoading || isLockedOut}
+                            placeholder="Enter decryption key..."
+                            className="w-full h-12 bg-black/60 border border-[#333] focus:border-[#ff4500]/50 text-white mono text-sm tracking-wider px-4 outline-none transition-all duration-300 placeholder:text-gray-700 disabled:opacity-40 focus:shadow-[0_0_20px_rgba(255,69,0,0.08)]"
+                        />
+                        {/* Bottom glow line on focus */}
+                        <div className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#ff4500]/0 to-transparent group-focus-within:via-[#ff4500]/60 transition-all duration-500" />
+                    </div>
+                </div>
+
+                {/* Lockout timer */}
+                {isLockedOut && (
+                    <div className="mono text-[10px] text-[#ff4500] uppercase tracking-widest text-center">
+                        Locked — {remainingSeconds}s remaining
+                    </div>
                 )}
 
-                {/* Cryptographic Core Visualization */}
-                <div className="relative w-32 h-32 mb-8 flex items-center justify-center z-10">
-                    <motion.div 
-                        animate={{ rotate: 360 }} 
-                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-0 rounded-full border border-dashed border-white/10"
-                    />
-                    <motion.div 
-                        // Spin faster when user types
-                        animate={{ rotate: -360 }} 
-                        transition={{ duration: password.length > 0 ? Math.max(2, 10 - password.length) : 15, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-3 rounded-full border-[1.5px] border-transparent border-t-[#ff4500]/70 border-b-[#ff4500]/70"
-                    />
-                    <div className="absolute inset-6 bg-gradient-to-br from-[#1a1a1a] to-black rounded-full border border-white/10 shadow-[0_0_30px_rgba(255,69,0,0.1)] flex items-center justify-center overflow-hidden">
-                        {/* Shimmer inside core */}
-                        <motion.div 
-                            animate={{ y: ["-100%", "200%"] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 w-full bg-gradient-to-b from-transparent via-white/5 to-transparent skew-y-12"
+                {/* Submit button — landing page CTA style */}
+                <button
+                    type="submit"
+                    disabled={isLoading || !password || isLockedOut}
+                    className="group relative overflow-hidden h-12 text-black bg-white hover:bg-gray-200 transition-all duration-300 w-full disabled:opacity-30 disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed"
+                >
+                    {/* Shimmer sweep */}
+                    {!isLoading && password && !isLockedOut && (
+                        <motion.div
+                            animate={{ x: ["-100%", "200%"] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-black/10 to-transparent skew-x-12"
                         />
+                    )}
+                    <span className="relative z-10 flex items-center justify-center gap-2 mono text-[11px] font-bold uppercase tracking-widest">
                         {isLoading ? (
-                            <Unlock className="w-8 h-8 text-[#ff4500] animate-pulse relative z-10" strokeWidth={1.5} />
-                        ) : (
-                            <ShieldCheck className={`w-8 h-8 transition-colors duration-500 relative z-10 ${password.length > 0 ? 'text-white' : 'text-white/30'}`} strokeWidth={1.5} />
-                        )}
-                    </div>
-                </div>
-
-                <h2 className="relative z-10 text-3xl font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 mb-3 text-center w-full">
-                    Master Cipher
-                </h2>
-                <p className="relative z-10 text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] text-center w-full leading-relaxed mb-10 max-w-[280px]">
-                    Enter your decryption key to mount local vault
-                </p>
-
-                <form onSubmit={handleUnlock} className="w-full relative z-10 flex flex-col items-center">
-                    <AnimatePresence>
-                        {error && (
-                            <motion.div 
-                                initial={{ opacity: 0, height: 0, marginBottom: 0 }} 
-                                animate={{ opacity: 1, height: "auto", marginBottom: 24 }}
-                                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                                className="w-full border border-red-900/40 bg-red-950/20 text-red-400 font-mono text-[10px] uppercase px-4 py-3 rounded-xl flex items-start gap-3 backdrop-blur-md overflow-hidden"
-                            >
-                                <span className="font-bold shrink-0 mt-[1px] text-red-500">!</span>
-                                <span className="leading-relaxed">{error}</span>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Innovative Password Visualizer */}
-                    <div className="relative w-full mb-10 group cursor-text">
-                        <div className={`relative w-full h-16 bg-black/40 rounded-2xl border ${password ? 'border-[#ff4500]/40 shadow-[0_0_20px_rgba(255,69,0,0.1)]' : 'border-white/[0.05]'} shadow-inner overflow-hidden flex items-center justify-center transition-all duration-500`}>
-                            
-                            {/* Inner ambient glow on focus */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#ff4500]/5 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
-
-                            <div className="flex items-center gap-2 pointer-events-none relative z-10">
-                                {password.length === 0 ? (
-                                    <motion.span 
-                                        animate={{ opacity: [0.3, 1, 0.3] }} 
-                                        transition={{ duration: 2, repeat: Infinity }}
-                                        className="font-mono text-[11px] tracking-[0.3em] text-gray-600 uppercase flex items-center gap-2"
-                                    >
-                                        <Fingerprint className="w-3.5 h-3.5" /> Awaiting Input
-                                    </motion.span>
-                                ) : (
-                                    Array.from({ length: password.length }).map((_, i) => (
-                                        <motion.div 
-                                            key={i}
-                                            initial={{ scale: 0, opacity: 0, rotate: -45 }}
-                                            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                                            className="w-2 h-2 bg-white rounded-sm shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-                                        />
-                                    ))
-                                )}
-                                {password.length > 0 && (
-                                    <motion.div 
-                                        animate={{ opacity: [0, 1, 0] }}
-                                        transition={{ duration: 0.8, repeat: Infinity }}
-                                        className="w-2 h-4 bg-[#ff4500] ml-1 rounded-[1px]"
+                            <>
+                                <motion.svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black/40">
+                                    <motion.path
+                                        d={hexPath}
+                                        initial={{ pathLength: 0, pathOffset: 0 }}
+                                        animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                                        transition={{ duration: 2, ease: "linear", repeat: Infinity }}
                                     />
-                                )}
-                            </div>
-
-                            <input
-                                type="password"
-                                autoFocus
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                disabled={isLoading || isLockedOut}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-text z-20"
-                            />
-                        </div>
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={isLoading || !password || isLockedOut}
-                        className="relative w-full h-14 rounded-2xl bg-[#ff4500] text-black font-bold font-mono tracking-[0.2em] text-[11px] uppercase overflow-hidden group disabled:opacity-50 disabled:bg-white/5 disabled:text-white/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,69,0,0.3)] hover:-translate-y-0.5"
-                    >
-                        {!isLoading && password && !isLockedOut && (
-                            <motion.div 
-                                animate={{ x: ["-100%", "200%"] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
-                            />
+                                </motion.svg>
+                                Decrypting...
+                            </>
+                        ) : (
+                            <>
+                                Initialize Decryption <ChevronRight className="w-4 h-4" />
+                            </>
                         )}
-                        
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                            {isLoading ? (
-                                <>
-                                    <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                                    Decrypting Sequence...
-                                </>
-                            ) : (
-                                <>
-                                    Initialize Decryption <ChevronRight className="w-4 h-4" />
-                                </>
-                            )}
-                        </span>
-                    </button>
-                </form>
+                    </span>
+                </button>
+            </form>
 
-                <div className="mt-8 pt-6 border-t border-white/[0.04] w-full flex items-center justify-between opacity-60">
-                    <div className="font-mono text-[9px] text-gray-500 tracking-[0.2em] uppercase">
-                        Protocol: PBKDF2-HMAC-SHA256
-                    </div>
-                </div>
-            </motion.div>
-        </>
+            {/* ── Footer metadata ── */}
+            <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-between relative z-[1]">
+                <span className="mono text-[8px] text-gray-600 uppercase tracking-widest">
+                    Protocol: PBKDF2-HMAC-SHA256
+                </span>
+                <span className="mono text-[8px] text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
+                    <Activity className="w-2.5 h-2.5" /> AES-256-GCM
+                </span>
+            </div>
+        </motion.div>
     );
 }
