@@ -53,7 +53,7 @@ const CATEGORIES: Category[] = [
         icon: <ShieldCheck className="w-4 h-4" />,
         tools: [
             { id: "passwords", label: "Password Manager", icon: <LockKeyhole className="w-4 h-4" />, href: "/vault", live: true },
-            { id: "notes", label: "Secure Notes", icon: <FileText className="w-4 h-4" />, live: false },
+            { id: "notessec", label: "Secure Notes", icon: <FileText className="w-4 h-4" />, live: false },
             { id: "documents", label: "Document Vault", icon: <FolderOpen className="w-4 h-4" />, live: false },
             { id: "totp", label: "2FA / TOTP", icon: <KeyRound className="w-4 h-4" />, live: false },
             { id: "subscriptions", label: "Subscription Tracker", icon: <CreditCard className="w-4 h-4" />, live: false },
@@ -135,11 +135,11 @@ function CategorySection({
             {/* Category header */}
             <button
                 onClick={() => setOpen((o) => !o)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-[var(--radius-lg)] text-xs font-semibold uppercase tracking-widest text-[var(--fg-muted)] hover:text-[var(--fg-secondary)] hover:bg-white/5 transition-all duration-150 group"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-600 hover:text-gray-400 hover:bg-white/5 transition-all duration-150 group"
                 aria-expanded={open}
             >
                 <span className="flex items-center gap-2">
-                    <span className="text-[var(--fg-muted)] group-hover:text-[var(--fg-secondary)] transition-colors">
+                    <span className="text-gray-600 group-hover:text-gray-400 transition-colors">
                         {category.icon}
                     </span>
                     {category.label}
@@ -153,7 +153,7 @@ function CategorySection({
 
             {/* Tool list */}
             {open && (
-                <div className="ml-3 mt-0.5 border-l border-[var(--border-primary)] pl-2 space-y-0.5">
+                <div className="ml-3 mt-0.5 border-l border-[#222] pl-2 space-y-0.5">
                     {category.tools.map((tool) => {
                         const isActive = activeTool === tool.id;
 
@@ -162,13 +162,14 @@ function CategorySection({
                                 <Link
                                     key={tool.id}
                                     href={tool.href}
-                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-lg)] text-sm transition-all duration-150 ${
+                                    onClick={() => onToolClick(tool)}
+                                    className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-all duration-150 ${
                                         isActive
-                                            ? "bg-[var(--brand-primary-subtle)] text-[var(--fg-primary)] font-medium"
-                                            : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] hover:bg-white/5"
+                                            ? "bg-[#ff4500]/10 text-white font-medium"
+                                            : "text-gray-400 hover:text-white hover:bg-white/5"
                                     }`}
                                 >
-                                    <span className={isActive ? "text-[var(--color-success)]" : ""}>{tool.icon}</span>
+                                    <span className={isActive ? "text-[#ff4500]" : ""}>{tool.icon}</span>
                                     {tool.label}
                                 </Link>
                             );
@@ -178,11 +179,11 @@ function CategorySection({
                             <button
                                 key={tool.id}
                                 onClick={() => onToolClick(tool)}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-lg)] text-sm text-[var(--fg-muted)] hover:bg-white/5 hover:text-[var(--fg-secondary)] transition-all duration-150 group/tool"
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 hover:bg-white/5 hover:text-gray-400 transition-all duration-150 group/tool"
                             >
                                 <span>{tool.icon}</span>
                                 <span className="flex-1 text-left">{tool.label}</span>
-                                <span className="flex items-center gap-1 text-[10px] font-mono text-[var(--fg-muted)] bg-[var(--bg-elevated)] border border-[var(--border-primary)] px-1.5 py-0.5 rounded-sm group-hover/tool:border-[var(--border-secondary)] transition-colors">
+                                <span className="flex items-center gap-1 text-[10px] font-mono text-gray-600 bg-[#111] border border-[#222] px-1.5 py-0.5 rounded-sm group-hover/tool:border-[#333] transition-colors">
                                     <Lock className="w-2.5 h-2.5" />
                                     SOON
                                 </span>
@@ -219,8 +220,8 @@ export function DashboardSidebar({
                 onClick={onHomeClick}
                 className="px-3 mb-4 flex items-center gap-2 w-full hover:opacity-70 transition-opacity"
             >
-                <LayoutDashboard className="w-4 h-4 text-[var(--fg-muted)]" />
-                <span className="text-xs font-semibold uppercase tracking-widest text-[var(--fg-muted)]">Dashboard</span>
+                <LayoutDashboard className="w-4 h-4 text-gray-600" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-gray-600">Dashboard</span>
             </button>
 
             <div className="flex-1 px-2 space-y-0.5">
@@ -236,8 +237,8 @@ export function DashboardSidebar({
             </div>
 
             {/* Footer */}
-            <div className="px-4 pt-4 mt-4 border-t border-[var(--border-primary)]">
-                <p className="text-[10px] font-mono text-[var(--fg-muted)] leading-relaxed">
+            <div className="px-4 pt-4 mt-4 border-t border-[#222]">
+                <p className="text-[10px] font-mono text-gray-600 leading-relaxed">
                     PRIVAULT v2.0 — PERSONAL HQ
                 </p>
             </div>
@@ -247,7 +248,7 @@ export function DashboardSidebar({
     return (
         <>
             {/* Desktop sidebar */}
-            <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-[var(--border-primary)] bg-[var(--bg-secondary)] h-[calc(100vh-4rem)] sticky top-16 overflow-hidden">
+            <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-[#222] bg-[#050505] h-[calc(100vh-5rem)] sticky top-20 overflow-hidden">
                 {sidebarContent}
             </aside>
 
@@ -261,10 +262,10 @@ export function DashboardSidebar({
                         aria-hidden="true"
                     />
                     {/* Drawer */}
-                    <aside className="relative w-72 bg-[var(--bg-secondary)] border-r border-[var(--border-primary)] h-full z-10 animate-in slide-in-from-left-4 duration-200">
+                    <aside className="relative w-72 bg-[#050505] border-r border-[#222] h-full z-10 animate-in slide-in-from-left-4 duration-200">
                         <button
                             onClick={onMobileClose}
-                            className="absolute top-4 right-4 p-1.5 rounded-[var(--radius-lg)] text-[var(--fg-muted)] hover:text-[var(--fg-primary)] hover:bg-white/10 transition-all"
+                            className="absolute top-4 right-4 p-1.5 text-gray-600 hover:text-white hover:bg-white/10 transition-all"
                             aria-label="Close sidebar"
                         >
                             <X className="w-4 h-4" />

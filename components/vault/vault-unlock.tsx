@@ -27,10 +27,6 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
     const [remainingSeconds, setRemainingSeconds] = useState(0);
     const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    // Provide a default empty function if not provided so it can be used natively inside pages without closing.
-    const handleClose = () => {
-        if (onClose) onClose();
-    };
 
     // Timer-driven lockout countdown: ticks every second and auto-clears when expired
     useEffect(() => {
@@ -283,35 +279,7 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4 relative w-full font-sans selection:bg-[#ff4500]/30 overflow-hidden">
-            
-            {/* Ambient Background Blur & Lighting */}
-            <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none">
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-3xl pointer-events-auto cursor-pointer" onClick={handleClose} />
-                
-                {/* Fluid ambient light blobs */}
-                <motion.div 
-                    animate={{ 
-                        x: ["0%", "20%", "-20%", "0%"], 
-                        y: ["0%", "-20%", "20%", "0%"],
-                        rotate: [0, 90, 180, 0],
-                        scale: [1, 1.2, 0.8, 1]
-                    }}
-                    transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                    className="absolute top-1/4 left-1/4 w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] bg-[#ff4500]/10 rounded-full blur-[100px] mix-blend-screen pointer-events-none" 
-                />
-                <motion.div 
-                    animate={{ 
-                        x: ["0%", "-30%", "10%", "0%"], 
-                        y: ["0%", "30%", "-10%", "0%"],
-                        rotate: [0, -90, -180, 0],
-                        scale: [1, 0.9, 1.1, 1]
-                    }}
-                    transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                    className="absolute bottom-1/4 right-1/4 w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] bg-violet-600/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none" 
-                />
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
-            </div>
+        <>
 
             <motion.div 
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -470,6 +438,6 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
                     </div>
                 </div>
             </motion.div>
-        </div>
+        </>
     );
 }

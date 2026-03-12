@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/auth/auth-context";
 import { SecurityService } from "@/services/security.service";
 import { VALIDATION } from "@/constants";
-import { Activity, ChevronRight, AlertTriangle, X } from "lucide-react";
+import { Activity, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface AuthModalProps {
@@ -111,7 +111,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 font-sans selection:bg-[#ff4500]/30">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -120,7 +120,10 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                         transition={{ duration: 0.3 }}
                         onClick={onClose}
                         className="absolute inset-0 bg-black/80 backdrop-blur-md"
-                    />
+                    >
+                        {/* Grid background matching landing page */}
+                        <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
+                    </motion.div>
 
                     {/* Modal Content */}
                     <motion.div
@@ -128,17 +131,17 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        className="relative w-full max-w-md border border-[#222] bg-black p-8 shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-[400px] bg-[#050505] border border-white/10 shadow-2xl overflow-hidden p-8 sm:p-10"
                     >
-                        {/* Corner accent */}
-                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4500]" />
-                        
+                        {/* Subtle top highlight */}
+                        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
                         {/* Close button */}
                         <button 
                             onClick={onClose}
-                            className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"
+                            className="absolute top-6 right-6 p-2 text-gray-500 hover:text-white border border-[#333] hover:border-[#444] bg-transparent hover:bg-white/5 transition-colors"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-4 h-4" />
                         </button>
 
                         {signupSuccess ? (
@@ -148,35 +151,76 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                 </div>
                                 <div className="mono text-[10px] text-[#ff4500] tracking-widest uppercase mb-3">VAULT_INITIALIZED</div>
                                 <h1 className="text-2xl font-bold text-white tracking-tighter mb-3">Vault Created</h1>
-                                <p className="mono text-xs text-gray-500 uppercase tracking-widest leading-relaxed">
+                                <p className="mono text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed">
                                     Cryptographic provisioning complete. Redirecting to verification...
                                 </p>
                             </div>
                         ) : (
                             <>
+                                {/* Animated Logo */}
+                                <div className="relative w-16 h-16 mb-8 group flex items-center justify-center">
+                                    <svg
+                                        width="48"
+                                        height="48"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="text-white/20 transition-colors duration-500"
+                                    >
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                    </svg>
+
+                                    {/* The glowing animated tracer line */}
+                                    <motion.svg
+                                        width="48"
+                                        height="48"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="text-[#ff4500] drop-shadow-[0_0_12px_rgba(255,69,0,1)] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                                    >
+                                        <motion.path
+                                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                                            initial={{ pathLength: 0, pathOffset: 0 }}
+                                            animate={{ pathLength: [0, 0.4, 0], pathOffset: [0, 1, 2] }}
+                                            transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+                                        />
+                                    </motion.svg>
+                                </div>
+
                                 {/* Header */}
                                 <div className="mb-8 pr-8">
-                                    <div className="mono text-[10px] text-gray-500 tracking-widest uppercase flex items-center gap-2 mb-5">
-                                        <Activity className="w-3 h-3 text-[#ff4500]" />
-                                        {mode === "login" ? "SECURE_AUTH // VAULT_ACCESS" : "INITIALIZE_VAULT // ZERO_KNOWLEDGE"}
-                                    </div>
-                                    <h1 className="text-2xl md:text-3xl font-bold tracking-tighter text-white mb-2">
-                                        {mode === "login" ? "Welcome back" : "Create Your Vault"}
+                                    <h1 className="text-2xl font-bold tracking-tight text-white mb-2">
+                                        {mode === "login" ? "Welcome back." : "Create Vault."}
                                     </h1>
-                                    <p className="mono text-xs text-gray-500 uppercase tracking-widest">
-                                        {mode === "login" ? "Enter credentials to access your vault" : "Zero-knowledge encrypted storage"}
+                                    <p className="text-sm text-gray-400">
+                                        {mode === "login" ? "Enter your credentials to continue." : "Zero-knowledge encrypted storage."}
                                     </p>
                                 </div>
 
-                                <form onSubmit={handleSubmit} className="space-y-5">
-                                    {error && (
-                                        <div className="border border-red-900/60 bg-red-950/30 text-red-400 mono text-xs p-3 uppercase tracking-wide">
-                                            <span className="text-red-500 mr-1">!</span> {error}
-                                        </div>
-                                    )}
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <AnimatePresence>
+                                        {error && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, height: 0, marginBottom: 0 }} 
+                                                animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
+                                                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                                className="w-full border border-red-900/40 bg-red-950/20 text-red-400 text-xs px-4 py-3 flex items-start gap-2 overflow-hidden"
+                                            >
+                                                <span className="font-bold shrink-0 text-red-500">!</span>
+                                                <span className="leading-relaxed">{error}</span>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
 
                                     <div className="space-y-1.5">
-                                        <label htmlFor="email" className="mono text-[10px] uppercase tracking-widest text-gray-500">
+                                        <label htmlFor="email" className="mono text-[9px] uppercase tracking-widest text-gray-500">
                                             Email Address
                                         </label>
                                         <input
@@ -186,27 +230,27 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             disabled={isLoading}
-                                            className="w-full bg-[#050505] border border-[#333] px-4 py-3 text-white text-sm mono focus:outline-none focus:border-[#ff4500] transition-colors disabled:opacity-50 placeholder-gray-700"
+                                            className="w-full bg-[#111] border border-[#222] px-4 py-3 text-white text-sm focus:outline-none focus:border-[#ff4500]/60 focus:bg-[#1a1a1a] transition-all disabled:opacity-50 placeholder-gray-600"
                                             placeholder="you@example.com"
                                         />
                                     </div>
 
                                     <div className="space-y-1.5">
                                         <div className="flex items-center justify-between">
-                                            <label htmlFor="password" className="mono text-[10px] uppercase tracking-widest text-gray-500">
+                                            <label htmlFor="password" className="mono text-[9px] uppercase tracking-widest text-gray-500">
                                                 Master Password
                                             </label>
                                             {mode === "login" ? (
                                                 <button
                                                     type="button" 
                                                     onClick={() => router.push("/forgot-password")} 
-                                                    className="mono text-[10px] text-gray-600 hover:text-white transition-colors uppercase tracking-widest" 
+                                                    className="mono text-[9px] uppercase tracking-widest text-gray-500 hover:text-white transition-colors" 
                                                     tabIndex={-1}
                                                 >
-                                                    Forgot?
+                                                    Forgot Password?
                                                 </button>
                                             ) : (
-                                                <span className="mono text-[10px] text-gray-600 uppercase tracking-widest">Min {VALIDATION.password.minLength} chars</span>
+                                                <span className="text-[10px] text-gray-500">Min {VALIDATION.password.minLength} chars</span>
                                             )}
                                         </div>
                                         <input
@@ -216,83 +260,80 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             disabled={isLoading}
-                                            className="w-full bg-[#050505] border border-[#333] px-4 py-3 text-white mono tracking-widest focus:outline-none focus:border-[#ff4500] transition-colors disabled:opacity-50 placeholder-gray-700"
+                                            className="w-full bg-[#111] border border-[#222] px-4 py-3 text-white tracking-[0.2em] font-mono focus:outline-none focus:border-[#ff4500]/60 focus:bg-[#1a1a1a] transition-all disabled:opacity-50 placeholder-gray-600"
                                             placeholder="••••••••••••"
                                         />
                                     </div>
 
                                     {mode === "signup" && (
-                                        <>
-                                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                <label htmlFor="confirmPassword" className="mono text-[10px] uppercase tracking-widest text-gray-500">
-                                                    Confirm Master Password
-                                                </label>
-                                                <input
-                                                    id="confirmPassword"
-                                                    type="password"
-                                                    required
-                                                    value={confirmPassword}
-                                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                                    disabled={isLoading}
-                                                    className="w-full bg-[#050505] border border-[#333] px-4 py-3 text-white mono tracking-widest focus:outline-none focus:border-[#ff4500] transition-colors disabled:opacity-50 placeholder-gray-700"
-                                                    placeholder="••••••••••••"
-                                                />
-                                            </div>
-                                            
-                                            {/* Warning block */}
-                                            <div className="border border-[#333] bg-[#0a0a0a] p-4 flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300 delay-100">
-                                                <AlertTriangle className="w-4 h-4 text-[#ff4500] shrink-0 mt-0.5" />
-                                                <p className="mono text-[10px] text-gray-500 uppercase tracking-wide leading-relaxed">
-                                                    <span className="text-white">Critical:</span> If you forget your master password, your data cannot be recovered. Zero-knowledge encrypted.
-                                                </p>
-                                            </div>
-                                        </>
+                                        <motion.div 
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="space-y-1.5 overflow-hidden"
+                                        >
+                                            <label htmlFor="confirmPassword" className="mono text-[9px] uppercase tracking-widest text-gray-500">
+                                                Confirm Password
+                                            </label>
+                                            <input
+                                                id="confirmPassword"
+                                                type="password"
+                                                required
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                disabled={isLoading}
+                                                className="w-full bg-[#111] border border-[#222] px-4 py-3 text-white tracking-[0.2em] font-mono focus:outline-none focus:border-[#ff4500]/60 focus:bg-[#1a1a1a] transition-all disabled:opacity-50 placeholder-gray-600"
+                                                placeholder="••••••••••••"
+                                            />
+                                        </motion.div>
                                     )}
 
                                     <button
                                         type="submit"
                                         disabled={isLoading || !email || !password || (mode === "signup" && !confirmPassword)}
-                                        className="w-full bg-white text-black mono font-bold text-xs uppercase tracking-widest px-4 py-3.5 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 mt-4"
+                                        className="w-full bg-white text-black font-semibold py-3 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:bg-white/20 disabled:text-gray-400 disabled:pointer-events-none flex items-center justify-center gap-2 mt-2 mono text-[11px] uppercase tracking-widest"
                                     >
                                         {isLoading ? (
-                                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                            <div className="w-4 h-4 border-2 border-black/30 border-t-black animate-spin" />
                                         ) : (
-                                            <>
-                                                {mode === "login" ? "Unlock Vault" : "Initialize Vault"} 
-                                                <ChevronRight className="w-4 h-4" />
-                                            </>
+                                            mode === "login" ? "Sign In" : "Create Account"
                                         )}
                                     </button>
                                 </form>
 
-                                <div className="mt-8 pt-6 border-t border-[#1a1a1a] mono text-[10px] text-gray-600 uppercase tracking-widest text-center">
-                                    {mode === "login" ? (
-                                        <>
-                                            No vault?{" "}
-                                            <button 
-                                                type="button" 
-                                                onClick={() => setMode("signup")}
-                                                className="text-white hover:text-[#ff4500] transition-colors"
-                                            >
-                                                Create one →
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            Already have a vault?{" "}
-                                            <button 
-                                                type="button" 
-                                                onClick={() => setMode("login")}
-                                                className="text-white hover:text-[#ff4500] transition-colors"
-                                            >
-                                                Sign in →
-                                            </button>
-                                        </>
-                                    )}
+                                <div className="mt-8 pt-6 border-t border-white/[0.04] flex items-center justify-between mono text-[9px] uppercase tracking-widest">
+                                    <div className="flex items-center gap-1.5 text-gray-500">
+                                        <Activity className="w-3 h-3 text-[#ff4500]" />
+                                        <span>P2P-AES256 Encrypted</span>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            setMode(mode === "login" ? "signup" : "login");
+                                            setError(null);
+                                        }}
+                                        className="text-gray-500 hover:text-[#ff4500] transition-colors"
+                                    >
+                                        {mode === "login" ? "Create One →" : "Sign In →"}
+                                    </button>
                                 </div>
                             </>
                         )}
                     </motion.div>
+
+                    {/* Terminal bottom bar */}
+                    <div className="fixed bottom-0 inset-x-0 h-8 border-t border-[#333] bg-black/80 backdrop-blur-md z-50 flex items-center justify-between px-4 mono text-[10px] uppercase text-gray-500 hidden sm:flex pointer-events-none">
+                        <div className="flex items-center gap-4">
+                            <span className="text-white bg-[#333] px-2 py-0.5">SECURE_ENV: READY</span>
+                            <span>&gt;&gt;&gt;&gt;&gt;</span>
+                            <span className="text-[#ff4500]">0 / 100%</span>
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> VAULT_SYNC: STANDBY</span>
+                            <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> PROTOCOL: v2.4.0</span>
+                        </div>
+                    </div>
                 </div>
             )}
         </AnimatePresence>
