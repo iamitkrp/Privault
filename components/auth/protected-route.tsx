@@ -28,10 +28,9 @@ export function ProtectedRoute({ children, requireGuest = false }: ProtectedRout
             return;
         }
 
-        // 2. If route requires auth (e.g., /vault) and user IS NOT logged in -> Redirect to Login
+        // 2. If route requires auth (e.g., /vault) and user IS NOT logged in -> Redirect to Landing
         if (!requireGuest && !user) {
-            // Could preserve the intended destination in search params
-            router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+            router.replace("/");
             return;
         }
     }, [user, profile, isLoading, requireGuest, router, pathname]);
