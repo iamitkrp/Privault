@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
-import { VaultUnlock } from "@/components/vault/vault-unlock";
 import { AuthModal } from "@/components/auth/auth-modal";
+import { UserMenu } from "@/components/ui/user-menu";
 
 import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
 
@@ -64,14 +64,13 @@ export default function LandingPage() {
 
   const { user, profile } = useAuth();
   const router = useRouter();
-  const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
 
   const handlePrimaryAction = (e: React.MouseEvent) => {
     e.preventDefault();
     if (user && profile) {
-      setIsVaultOpen(true);
+      router.push("/vault");
     } else {
       setAuthMode("signup");
       setIsAuthModalOpen(true);
@@ -148,14 +147,9 @@ export default function LandingPage() {
           <Link href="#docs" className="hover:text-white transition-colors uppercase tracking-widest">Docs</Link>
         </div>
 
-        <div className="flex items-center gap-6 mono text-xs">
+        <div className="flex items-center gap-4 mono text-xs">
           {user && profile ? (
-            <button
-                onClick={() => setIsVaultOpen(true)}
-                className="px-6 py-2 border border-white/20 text-white hover:bg-white/10 transition-colors uppercase tracking-widest"
-            >
-                Unlock Vault
-            </button>
+              <UserMenu />
           ) : (
             <button onClick={handleLoginClick} className="px-6 py-2 border border-white/20 text-white hover:bg-white/10 transition-colors uppercase tracking-widest">
                 Sign In
@@ -216,7 +210,7 @@ export default function LandingPage() {
           >
             <button onClick={handlePrimaryAction} className="group relative overflow-hidden py-4 px-8 text-black bg-white hover:bg-gray-200 transition-colors w-full sm:w-auto text-center">
               <span className="relative z-10 flex items-center justify-center gap-2 font-bold tracking-widest">
-                {user && profile ? "Unlock Vault" : "Initialize Vault"} <ChevronRight className="w-4 h-4" />
+                {user && profile ? "Go to Dashboard" : "Initialize Vault"} <ChevronRight className="w-4 h-4" />
               </span>
             </button>
 
@@ -328,20 +322,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      <AnimatePresence>
-        {isVaultOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center">
-             <div className="absolute inset-0 bg-black/80 backdrop-blur-3xl" onClick={() => setIsVaultOpen(false)} />
-             <VaultUnlock 
-                onUnlock={() => {
-                   setIsVaultOpen(false);
-                   router.push("/dashboard"); // Route successfully unlocked user to main dashboard
-                }} 
-                onClose={() => setIsVaultOpen(false)} 
-             />
-          </div>
-        )}
-      </AnimatePresence>
 
       <AuthModal 
           isOpen={isAuthModalOpen} 

@@ -40,15 +40,6 @@ export default function VaultPage() {
         return unsubscribe;
     }, []);
 
-    if (!isUnlocked) {
-        return (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center font-sans">
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-3xl pointer-events-none" />
-                <VaultUnlock onUnlock={() => setIsUnlocked(true)} />
-            </div>
-        );
-    }
-
     function handleHomeNavigate(toolId: string, toolLabel: string) {
         setActiveTool({ id: toolId, label: toolLabel });
     }
@@ -65,8 +56,11 @@ export default function VaultPage() {
         if (tool.live && tool.href && tool.href !== '/vault') {
             router.push(tool.href);
         }
-        setMobileOpen(false); // Close mobile menu after selection
+        setMobileOpen(false);
     }
+
+    // Tools that require the vault to be unlocked (encrypted data)
+    const VAULT_REQUIRED_TOOLS = new Set(['passwords', 'notessec', 'documents', 'totp']);
 
     function renderContent() {
         if (!activeTool) {
@@ -75,6 +69,15 @@ export default function VaultPage() {
                     userName={user?.email}
                     onToolNavigate={handleHomeNavigate}
                 />
+            );
+        }
+
+        // If this tool requires vault unlock and vault is locked, show VaultUnlock inline
+        if (VAULT_REQUIRED_TOOLS.has(activeTool.id) && !isUnlocked) {
+            return (
+                <div className="flex items-center justify-center py-20">
+                    <VaultUnlock onUnlock={() => setIsUnlocked(true)} />
+                </div>
             );
         }
 
