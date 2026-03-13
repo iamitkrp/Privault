@@ -51,27 +51,28 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
 
         const result = await authService.signIn(email, password);
 
-        if (result.success) {
-            setPassword("");
-        }
-
-        try {
-            const supabase = supabaseClient;
-            const security = new SecurityService(supabase);
-            if (result.success) {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                    await security.trackLoginAttempt(session.user.id, true, email);
-                }
-            } else {
-                await security.logEvent(email, 'login_failure', 'warning', { email, reason: result.error.message });
-            }
-        } catch { /* non-blocking */ }
-
         if (!result.success) {
+            // Fire-and-forget: log failure event without blocking the UI
+            try {
+                const security = new SecurityService(supabaseClient);
+                security.logEvent(email, 'login_failure', 'warning', { email, reason: result.error.message }).catch(() => {});
+            } catch { /* non-blocking */ }
+
             setError(result.error.message);
             setIsLoading(false);
         } else {
+            setPassword("");
+
+            // Fire-and-forget: track the successful login without blocking the UI
+            try {
+                const security = new SecurityService(supabaseClient);
+                supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                    if (session?.user) {
+                        security.trackLoginAttempt(session.user.id, true, email).catch(() => {});
+                    }
+                }).catch(() => {});
+            } catch { /* non-blocking */ }
+
             setIsLoading(false);
             onClose(); // Close modal on successful login
             if (onSuccess) onSuccess();
