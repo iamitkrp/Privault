@@ -66,11 +66,9 @@ export class AuthService {
                 return { success: false, error: new Error(ERROR_MESSAGES.auth.invalidCredentials) };
             }
 
-            // Check if profile exists. If not, create it using the metadata salt.
-            const profileResult = await this.ensureProfileExists(data.user);
-            if (!profileResult.success) {
-                return { success: false, error: new Error('Account setup failed. Please contact support.') };
-            }
+            // Profile creation is handled by auth-context's onAuthStateChange (SIGNED_IN event).
+            // Do NOT await ensureProfileExists here — it runs concurrently via the auth listener
+            // and blocking on it causes the modal to stay stuck on "AUTHENTICATING..." on first login.
 
             return { success: true, data: { id: data.user.id } };
         } catch (e) {

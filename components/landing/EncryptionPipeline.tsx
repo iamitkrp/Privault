@@ -42,7 +42,12 @@ export default function EncryptionPipeline() {
     const [hovered, setHovered] = useState<StepKey>(null);
 
     return (
-        <div className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0 group">
+        <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0 group"
+        >
             
             {/* Ambient Background Glow Effect matching the theme */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/10 via-transparent to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
@@ -280,6 +285,6 @@ export default function EncryptionPipeline() {
             <div className="absolute inset-y-0 right-0 w-12 lg:w-24 bg-gradient-to-l from-black to-transparent pointer-events-none" />
             <div className="absolute inset-x-0 top-0 h-10 lg:h-20 bg-gradient-to-b from-black to-transparent pointer-events-none" />
             <div className="absolute inset-x-0 bottom-0 h-10 lg:h-20 bg-gradient-to-t from-black to-transparent pointer-events-none" />
-        </div>
+        </motion.div>
     );
 }
