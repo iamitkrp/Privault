@@ -151,7 +151,7 @@ export default function LandingPage() {
           {user && profile ? (
               <UserMenu />
           ) : (
-            <button onClick={handleLoginClick} className="px-6 py-2 border border-white/20 text-white hover:bg-white/10 transition-colors uppercase tracking-widest">
+            <button onClick={handleLoginClick} className="px-6 py-2 border border-white/20 text-white hover:bg-white/10 transition-colors uppercase tracking-widest cursor-pointer">
                 Sign In
             </button>
           )}
@@ -208,7 +208,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col sm:flex-row items-center gap-4 w-full justify-start mono text-xs uppercase"
           >
-            <button onClick={handlePrimaryAction} className="group relative overflow-hidden py-4 px-8 text-black bg-white hover:bg-gray-200 transition-colors w-full sm:w-auto text-center">
+            <button onClick={handlePrimaryAction} className="group relative overflow-hidden py-4 px-8 text-black bg-white hover:bg-gray-200 transition-colors w-full sm:w-auto text-center cursor-pointer">
               <span className="relative z-10 flex items-center justify-center gap-2 font-bold tracking-widest">
                 {user && profile ? "Go to Dashboard" : "Initialize Vault"} <ChevronRight className="w-4 h-4" />
               </span>

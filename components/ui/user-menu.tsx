@@ -34,7 +34,7 @@ export function UserMenu() {
         <div ref={menuRef} className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 mono text-xs text-gray-400 hover:text-white uppercase tracking-widest transition-colors px-3 py-2 border border-transparent hover:border-[#333] hover:bg-white/5"
+                className="flex items-center gap-2 mono text-xs text-gray-400 hover:text-white uppercase tracking-widest transition-colors px-3 py-2 border border-transparent hover:border-[#333] hover:bg-white/5 cursor-pointer"
             >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
                 <span className="max-w-[200px] truncate">{user.email}</span>
