@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/auth/auth-context";
 import { SecurityService } from "@/services/security.service";
@@ -16,7 +16,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }: AuthModalProps) {
-    const { authService, supabaseClient } = useAuth();
+    const { user, authService, supabaseClient } = useAuth();
     const router = useRouter();
 
     const [mode, setMode] = useState<"login" | "signup">(initialMode);
@@ -27,6 +27,9 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
     const [isLoading, setIsLoading] = useState(false);
     const [signupSuccess, setSignupSuccess] = useState(false);
 
+    // Track whether login API call succeeded, so we can wait for auth state
+    const loginSucceededRef = useRef(false);
+
     // Reset state when modal opens/closes or mode changes
     useEffect(() => {
         if (isOpen) {
@@ -36,6 +39,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
             setConfirmPassword("");
             setError(null);
             setSignupSuccess(false);
+            loginSucceededRef.current = false;
         }
     }, [isOpen, initialMode]);
 
@@ -43,6 +47,21 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
     useEffect(() => {
         setMode(initialMode);
     }, [initialMode]);
+
+    // Wait for the auth context's `user` to be set after a successful login,
+    // THEN navigate. This avoids the race where router.push fires before
+    // onAuthStateChange has updated the user state in context.
+    useEffect(() => {
+        if (loginSucceededRef.current && user) {
+            loginSucceededRef.current = false;
+            onClose();
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                router.push("/vault");
+            }
+        }
+    }, [user, onClose, onSuccess, router]);
 
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,9 +92,12 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
                 }).catch(() => {});
             } catch { /* non-blocking */ }
 
-            setIsLoading(false);
-            onClose(); // Close modal on successful login
-            if (onSuccess) onSuccess();
+            // Mark login as successful — the useEffect above will handle
+            // navigation once `user` is set by the auth context.
+            loginSucceededRef.current = true;
+
+            // Keep the loading overlay visible while we wait for onAuthStateChange
+            // to fire and the useEffect to navigate. Don't call onClose here.
         }
     };
 
