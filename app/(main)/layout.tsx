@@ -15,13 +15,17 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 <div className="fixed inset-0 bg-gradient-to-b from-transparent via-black/50 to-black pointer-events-none z-0" />
 
                 {/* ── Top Header — Logo + User Menu ── */}
-                <header className="fixed top-0 z-50 h-20 w-full flex items-center justify-between px-6 md:px-12 pointer-events-none">
-                     <div className="pointer-events-auto">
-                        <AnimatedLogo />
+                <header className="fixed top-0 z-50 w-full pointer-events-none">
+                     <div className="h-20 flex items-center justify-between px-6 md:px-12 bg-black/60 backdrop-blur-xl">
+                         <div className="pointer-events-auto">
+                            <AnimatedLogo />
+                         </div>
+                         <div className="pointer-events-auto">
+                            <UserMenu />
+                         </div>
                      </div>
-                     <div className="pointer-events-auto">
-                        <UserMenu />
-                     </div>
+                     {/* Gradient fade — eliminates the hard blur edge */}
+                     <div className="h-10 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
                 </header>
 
                 <SessionMonitor />

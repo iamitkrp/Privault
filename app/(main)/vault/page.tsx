@@ -56,7 +56,6 @@ export default function VaultPage() {
                     <div className="w-full">
                         {activeTool?.id === "passwords" ? (
                             <VaultCommandCenter
-                                userEmail={user?.email}
                                 credentials={credentials}
                                 onCredentialsLoad={setCredentials}
                                 onBack={goHome}
@@ -118,12 +117,10 @@ export default function VaultPage() {
 import { Activity } from "lucide-react";
 
 function VaultCommandCenter({
-    userEmail,
     credentials,
     onCredentialsLoad,
     onBack,
 }: {
-    userEmail?: string;
     credentials: VaultCredential[];
     onCredentialsLoad: (creds: VaultCredential[]) => void;
     onBack: () => void;
@@ -134,35 +131,23 @@ function VaultCommandCenter({
 
                 {/* ─── HERO HEADER ─── */}
                 <div className="px-6 md:px-12 pt-4 pb-0">
-                    {/* Back nav */}
-                    <motion.button
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.4 }}
-                        onClick={onBack}
-                        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white mb-8 transition-colors group mono uppercase tracking-widest"
-                    >
-                        <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                        <LayoutDashboard className="w-3 h-3" />
-                        Dashboard
-                    </motion.button>
-
-                    {/* Hero section */}
+                    {/* Hero section — two column: title left, badge + stats right */}
                     <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                         >
-                            {/* Status badge */}
-                            <div className="mono text-xs text-gray-500 mb-5 tracking-widest uppercase flex items-center gap-2 border border-[#333] px-3 py-1.5 bg-black/50 w-fit">
-                                <Activity className="w-3 h-3 text-[#ff4500]" />
-                                <span>[[ VAULT_MODE // DECRYPTED ]]</span>
-                            </div>
+                            {/* Dashboard back link — inline with title area */}
+                            <button
+                                onClick={onBack}
+                                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white mb-5 transition-colors group mono uppercase tracking-widest"
+                            >
+                                <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                                <LayoutDashboard className="w-3 h-3" />
+                                Dashboard
+                            </button>
 
-                            <p className="mono text-xs text-gray-500 uppercase tracking-widest mb-3">
-                                {userEmail}
-                            </p>
                             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.95] uppercase">
                                 Password
                             </h1>
@@ -171,27 +156,16 @@ function VaultCommandCenter({
                             </h2>
                         </motion.div>
 
-                        {/* Quick stats row — visible on large screens */}
+                        {/* Right side — status badge + quick stats */}
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="hidden lg:flex items-center gap-6"
+                            transition={{ duration: 0.6, delay: 0.15 }}
                         >
-                            <QuickStat label="Credentials" value={credentials.length} />
-                            <div className="w-px h-8 bg-[#222]" />
-                            <QuickStat
-                                label="Health"
-                                value={`${calcHealthScore(credentials)}`}
-                                suffix="/100"
-                                color={calcHealthScore(credentials) >= 90 ? "text-green-500" : calcHealthScore(credentials) >= 70 ? "text-yellow-500" : "text-red-500"}
-                            />
-                            <div className="w-px h-8 bg-[#222]" />
-                            <QuickStat
-                                label="Weak"
-                                value={countWeak(credentials)}
-                                color={countWeak(credentials) > 0 ? "text-red-500" : "text-white"}
-                            />
+                            <div className="mono text-xs text-gray-500 tracking-widest uppercase flex items-center gap-2 border border-[#333] px-3 py-1.5 bg-black/50">
+                                <Activity className="w-3 h-3 text-[#ff4500]" />
+                                <span>[[ VAULT_MODE // DECRYPTED ]]</span>
+                            </div>
                         </motion.div>
                     </div>
                 </div>
@@ -227,61 +201,5 @@ function VaultCommandCenter({
 }
 
 
-// ─── Quick Stat Pill ────────────────────────────────────────────────────────────
-
-function QuickStat({
-    label,
-    value,
-    suffix,
-    color = "text-white",
-}: {
-    label: string;
-    value: string | number;
-    suffix?: string;
-    color?: string;
-}) {
-    return (
-        <div className="text-right">
-            <p className="mono text-[10px] text-gray-600 uppercase tracking-widest mb-1">{label}</p>
-            <p className={`mono text-lg font-bold ${color} flex items-baseline gap-0.5 justify-end`}>
-                {value}
-                {suffix && <span className="text-xs text-gray-600 font-normal">{suffix}</span>}
-            </p>
-        </div>
-    );
-}
 
 
-// ─── Utility Functions ──────────────────────────────────────────────────────────
-
-function calcHealthScore(credentials: VaultCredential[]): number {
-    if (credentials.length === 0) return 100;
-
-    const expired = credentials.filter(c => c.expiration_status === "expired").length;
-    const expiringSoon = credentials.filter(c => c.expiration_status === "expiring_soon").length;
-
-    const passwordCounts = credentials.reduce((acc, c) => {
-        const pw = c.decrypted.password;
-        acc[pw] = (acc[pw] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-    const reusedPasswords = Object.values(passwordCounts).filter(count => count > 1).length;
-
-    const weakPasswords = countWeak(credentials);
-
-    let score = 100;
-    if (expired > 0) score -= 20;
-    if (reusedPasswords > 0) score -= 15 * reusedPasswords;
-    if (expiringSoon > 0) score -= 5 * expiringSoon;
-    if (weakPasswords > 0) score -= 5 * weakPasswords;
-
-    return Math.max(0, score);
-}
-
-function countWeak(credentials: VaultCredential[]): number {
-    return credentials.filter(c => {
-        if (c.category === "secure_note") return false;
-        const pw = c.decrypted.password;
-        return pw.length < 10 || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[^A-Za-z0-9]/.test(pw);
-    }).length;
-}
