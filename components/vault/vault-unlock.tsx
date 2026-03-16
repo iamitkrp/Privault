@@ -4,20 +4,19 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
 import { CRYPTO_CONFIG } from "@/constants";
-import { ChevronRight, Activity, X, Lock, Key, Terminal, AlertTriangle } from "lucide-react";
+import { ChevronRight, Activity, Lock, Key, Terminal, AlertTriangle } from "lucide-react";
 import { SecurityService } from "@/services/security.service";
 import { VaultService } from "@/services/vault.service";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface VaultUnlockProps {
     onUnlock: () => void;
-    onClose?: () => void;
 }
 
 /** Backoff only kicks in at this many failed attempts */
 const BACKOFF_THRESHOLD = 5;
 
-export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
+export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     const { profile, user, supabaseClient } = useAuth();
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -296,15 +295,6 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
                     <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#ff4500]/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
                     <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
 
-                    {onClose && (
-                        <button
-                            onClick={onClose}
-                            className="absolute top-6 right-6 p-2 text-gray-600 hover:text-white transition-colors z-20"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                    )}
-
                     <div className="flex flex-col gap-8 relative z-10 w-full">
                         {/* Header */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#222] pb-6">
@@ -331,9 +321,21 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
                             </p>
                         </div>
 
-                        {/* Error Banner */}
+                        {/* Error/Sync Banner */}
                         <AnimatePresence>
-                            {error && (
+                            {!profile ? (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="mono text-[10px] uppercase tracking-widest text-[#ff4500] bg-[#ff4500]/10 border border-[#ff4500]/20 px-4 py-3 flex items-start gap-3 mt-2">
+                                        <Activity className="w-3.5 h-3.5 shrink-0 mt-[1px] animate-pulse" />
+                                        <span className="leading-relaxed">SYNCHRONIZING SECURE PROFILE...</span>
+                                    </div>
+                                </motion.div>
+                            ) : error ? (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
@@ -345,7 +347,7 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
                                         <span className="leading-relaxed">{error}</span>
                                     </div>
                                 </motion.div>
-                            )}
+                            ) : null}
                         </AnimatePresence>
 
                         {/* Form */}
@@ -383,11 +385,11 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
 
                             <button
                                 type="submit"
-                                disabled={isLoading || !password || isLockedOut}
+                                disabled={isLoading || !password || isLockedOut || !profile}
                                 className="h-14 mt-2 bg-white hover:bg-gray-200 text-black transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-40 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed group relative overflow-hidden"
                             >
                                 {/* Shimmer sweep */}
-                                {!isLoading && password && !isLockedOut && (
+                                {!isLoading && password && !isLockedOut && profile && (
                                     <motion.div
                                         animate={{ x: ["-100%", "200%"] }}
                                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -407,6 +409,8 @@ export function VaultUnlock({ onUnlock, onClose }: VaultUnlockProps) {
                                             </motion.svg>
                                             Decrypting Volume...
                                         </>
+                                    ) : !profile ? (
+                                        <>Awaiting Profile Sync...</>
                                     ) : (
                                         <>
                                             Mount Volume <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
