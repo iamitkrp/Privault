@@ -10,6 +10,7 @@ import { ComingSoonPanel } from "@/components/dashboard/coming-soon-panel";
 import { DashboardHome } from "@/components/dashboard/dashboard-home";
 import { VaultCredential } from "@/types";
 import { LayoutDashboard, ChevronLeft } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 type ActiveTool = { id: string; label: string } | null;
 
@@ -36,49 +37,18 @@ export default function VaultPage() {
 
     const VAULT_REQUIRED_TOOLS = new Set(['passwords', 'notes']);
 
-    function renderContent() {
-        if (!activeTool) {
-            return (
-                <DashboardHome
-                    userName={user?.email}
-                    onToolNavigate={handleHomeNavigate}
-                />
-            );
-        }
-
-        if (VAULT_REQUIRED_TOOLS.has(activeTool.id) && !isUnlocked) {
-            return (
-                <div className="flex items-center justify-center py-20">
-                    <VaultUnlock onUnlock={() => setIsUnlocked(true)} />
-                </div>
-            );
-        }
-
-        if (activeTool.id === "passwords") {
-            return (
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
-                    <div className="xl:col-span-3">
-                        <CredentialList onCredentialsLoad={setCredentials} />
-                    </div>
-                    <div className="sticky top-6">
-                        <VaultHealth credentials={credentials} />
-                    </div>
-                </div>
-            );
-        }
-
-        return <ComingSoonPanel toolName={activeTool.label} />;
-    }
-
-    const isHome = !activeTool;
+    const isModalOpen = activeTool && VAULT_REQUIRED_TOOLS.has(activeTool.id) && !isUnlocked;
+    // We consider it "Home" if we are either truly on Home, OR if we are showing the unlock modal over Home.
+    const isHomeView = !activeTool || isModalOpen;
 
     return (
-        <div className="pt-20 min-h-screen">
+        <div className="pt-20 min-h-screen relative">
+            {/* The Main View Layer */}
             <div
                 className="w-full animate-in fade-in slide-in-from-bottom-4 duration-400"
-                key={activeTool?.id ?? "home"}
+                key={isHomeView ? "home" : activeTool?.id}
             >
-                {!isHome && (
+                {!isHomeView && (
                     <button
                         onClick={goHome}
                         className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 mb-5 transition-colors group mono uppercase tracking-widest"
@@ -89,7 +59,7 @@ export default function VaultPage() {
                     </button>
                 )}
 
-                {!isHome && (
+                {!isHomeView && (
                     <div className="mb-6">
                         <p className="text-xs font-mono text-gray-500 uppercase tracking-widest mb-1">
                             {user?.email}
@@ -100,8 +70,42 @@ export default function VaultPage() {
                     </div>
                 )}
 
-                {renderContent()}
+                {/* Render underlying dashboard or specific tool */}
+                {isHomeView ? (
+                    <DashboardHome
+                        userName={user?.email}
+                        onToolNavigate={handleHomeNavigate}
+                    />
+                ) : activeTool?.id === "passwords" ? (
+                    <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
+                        <div className="xl:col-span-3">
+                            <CredentialList onCredentialsLoad={setCredentials} />
+                        </div>
+                        <div className="sticky top-6">
+                            <VaultHealth credentials={credentials} />
+                        </div>
+                    </div>
+                ) : (
+                    <ComingSoonPanel toolName={activeTool!.label} />
+                )}
             </div>
+
+            {/* Modal Layer */}
+            <AnimatePresence>
+                {isModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-black/80 backdrop-blur-md"
+                    >
+                        <VaultUnlock 
+                            onUnlock={() => setIsUnlocked(true)} 
+                            onClose={goHome}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
