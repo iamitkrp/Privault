@@ -1,257 +1,245 @@
 "use client";
 
-import {
-    ShieldCheck,
-    FileText,
-    FolderOpen,
-    KeyRound,
-    CreditCard,
-    StickyNote,
-    Lightbulb,
-    BrainCircuit,
-    CheckSquare,
-    Flame,
-    Timer,
-    CalendarDays,
-    Wallet,
-    Clapperboard,
-    BookOpen,
-    ShoppingCart,
-    Bookmark,
-    LockKeyhole,
-    ChevronRight,
-} from "lucide-react";
+import { LockKeyhole, FileText, ArrowRight, Activity, Database, GitBranch, ShieldCheck, Fingerprint, Globe, Server } from "lucide-react";
+import { motion } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tool = {
-    id: string;
-    label: string;
-    icon: React.ReactNode;
-    live: boolean;
-};
-
-type Category = {
+type Module = {
     id: string;
     label: string;
     description: string;
     icon: React.ReactNode;
-    accentColor: string;
-    tools: Tool[];
+    badge: string;
+    live: boolean;
 };
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const CATEGORIES: Category[] = [
+const MODULES: Module[] = [
     {
-        id: "security",
-        label: "Security & Vault",
-        description: "Encrypted fortress for credentials and sensitive data.",
-        icon: <ShieldCheck className="w-5 h-5" />,
-        accentColor: "#ff4500",
-        tools: [
-            { id: "passwords", label: "Password Manager", icon: <LockKeyhole className="w-3 h-3" />, live: true },
-            { id: "notessec", label: "Secure Notes", icon: <FileText className="w-3 h-3" />, live: false },
-            { id: "documents", label: "Document Vault", icon: <FolderOpen className="w-3 h-3" />, live: false },
-            { id: "totp", label: "2FA / TOTP", icon: <KeyRound className="w-3 h-3" />, live: false },
-            { id: "subscriptions", label: "Subscription Tracker", icon: <CreditCard className="w-3 h-3" />, live: false },
-        ],
+        id: "passwords",
+        label: "Password Vault",
+        description: "AES-256-GCM encrypted. Your master key never leaves your device.",
+        icon: <LockKeyhole className="w-5 h-5" strokeWidth={1.5} />,
+        badge: "ACTIVE",
+        live: true,
     },
     {
-        id: "knowledge",
-        label: "Notes & Knowledge",
-        description: "Capture ideas, prompts, and knowledge privately.",
-        icon: <StickyNote className="w-5 h-5" />,
-        accentColor: "#6366f1",
-        tools: [
-            { id: "notes-kb", label: "Notes", icon: <StickyNote className="w-3 h-3" />, live: false },
-            { id: "idea-inbox", label: "Idea Inbox", icon: <Lightbulb className="w-3 h-3" />, live: false },
-            { id: "prompts", label: "Prompt Library", icon: <BrainCircuit className="w-3 h-3" />, live: false },
-        ],
-    },
-    {
-        id: "productivity",
-        label: "Tasks & Productivity",
-        description: "Stay focused and build momentum every day.",
-        icon: <CheckSquare className="w-5 h-5" />,
-        accentColor: "#10b981",
-        tools: [
-            { id: "todos", label: "To-Do List", icon: <CheckSquare className="w-3 h-3" />, live: false },
-            { id: "habits", label: "Habit Tracker", icon: <Flame className="w-3 h-3" />, live: false },
-            { id: "pomodoro", label: "Pomodoro Timer", icon: <Timer className="w-3 h-3" />, live: false },
-        ],
-    },
-    {
-        id: "life",
-        label: "Goals & Life Planning",
-        description: "Plan finances, goals, and life milestones.",
-        icon: <CalendarDays className="w-5 h-5" />,
-        accentColor: "#f59e0b",
-        tools: [
-            { id: "calendar", label: "Calendar", icon: <CalendarDays className="w-3 h-3" />, live: false },
-            { id: "budget", label: "Budget Tracker", icon: <Wallet className="w-3 h-3" />, live: false },
-        ],
-    },
-    {
-        id: "media",
-        label: "Media & Entertainment",
-        description: "Track what you watch, read, and learn.",
-        icon: <Clapperboard className="w-5 h-5" />,
-        accentColor: "#8b5cf6",
-        tools: [
-            { id: "watchlist", label: "Watchlist", icon: <Clapperboard className="w-3 h-3" />, live: false },
-            { id: "books", label: "Book Tracker", icon: <BookOpen className="w-3 h-3" />, live: false },
-        ],
-    },
-    {
-        id: "shopping",
-        label: "Shopping & Wishlist",
-        description: "Save what you want, track what you'll buy.",
-        icon: <ShoppingCart className="w-5 h-5" />,
-        accentColor: "#ec4899",
-        tools: [
-            { id: "wishlist", label: "Wishlist", icon: <ShoppingCart className="w-3 h-3" />, live: false },
-        ],
-    },
-    {
-        id: "web",
-        label: "Web & Bookmarks",
-        description: "Your private internet — links that matter.",
-        icon: <Bookmark className="w-5 h-5" />,
-        accentColor: "#06b6d4",
-        tools: [
-            { id: "bookmarks", label: "Bookmarks", icon: <Bookmark className="w-3 h-3" />, live: false },
-        ],
+        id: "notes",
+        label: "Secure Notes",
+        description: "End-to-end encrypted notes. Zero knowledge, always client-side.",
+        icon: <FileText className="w-5 h-5" strokeWidth={1.5} />,
+        badge: "LIVE",
+        live: true,
     },
 ];
 
-// ─── Category Card ─────────────────────────────────────────────────────────────
+const TRUST_STATS = [
+    { icon: <ShieldCheck className="w-3.5 h-3.5" />, label: "AES-256-GCM", sub: "Encryption standard" },
+    { icon: <Fingerprint className="w-3.5 h-3.5" />, label: "100K Iterations", sub: "PBKDF2 key derivation" },
+    { icon: <Globe className="w-3.5 h-3.5" />, label: "Zero-Knowledge", sub: "Blind server architecture" },
+    { icon: <Server className="w-3.5 h-3.5" />, label: "Client-Side Only", sub: "No data ever leaves" },
+];
 
-function CategoryCard({
-    category,
-    onToolClick,
+const SYSTEM_ROWS = [
+    { label: "Vault Encryption", value: "AES-256-GCM" },
+    { label: "Key Derivation", value: "PBKDF2 · 100K" },
+    { label: "Architecture", value: "Zero-Knowledge" },
+    { label: "Connection", value: "E2E Encrypted" },
+];
+
+// ─── Module Card ─────────────────────────────────────────────────────────────
+
+function ModuleCard({
+    module,
+    onNavigate,
+    index,
 }: {
-    category: Category;
-    onToolClick: (toolId: string, toolLabel: string) => void;
+    module: Module;
+    onNavigate: (id: string, label: string) => void;
+    index: number;
 }) {
-    const liveCount = category.tools.filter((t) => t.live).length;
-
     return (
-        <div
-            className="relative group bg-[#050505] border border-[#1a1a1a] hover:border-[#333] overflow-hidden flex flex-col transition-all duration-300"
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+            onClick={() => module.live && onNavigate(module.id, module.label)}
+            className="group relative cursor-pointer flex items-center gap-5 p-5 border border-[#222] bg-[#050505] hover:bg-[#080808] hover:border-[#444] transition-all duration-300 overflow-hidden"
         >
-            {/* Top accent line */}
-            <div className="h-[1px] w-full" style={{ background: category.accentColor, opacity: 0.4 }} />
-            <div
-                className="h-[1px] w-0 group-hover:w-full transition-all duration-500 -mt-[1px]"
-                style={{ background: category.accentColor }}
-            />
-
             {/* Corner accent */}
-            <div
-                className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l transition-colors"
-                style={{ borderColor: category.accentColor }}
-            />
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#333] group-hover:border-[#ff4500] transition-colors duration-300" />
 
-            {/* Card Header */}
-            <div className="px-5 pt-5 pb-4">
-                <div className="flex items-start justify-between gap-3 mb-4">
-                    <div
-                        className="p-2 border"
-                        style={{ borderColor: `${category.accentColor}30`, color: category.accentColor }}
-                    >
-                        {category.icon}
-                    </div>
-                    {liveCount > 0 && (
-                        <span className="mono text-[8px] flex items-center gap-1 uppercase tracking-widest border px-1.5 py-0.5"
-                            style={{ borderColor: `${category.accentColor}40`, color: category.accentColor }}>
-                            <span className="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style={{ background: category.accentColor }} />
-                            LIVE
-                        </span>
-                    )}
+            {/* Icon */}
+            <div className="shrink-0 w-10 h-10 border border-[#333] group-hover:border-[#555] bg-[#0a0a0a] flex items-center justify-center text-gray-600 group-hover:text-white transition-all duration-300">
+                {module.icon}
+            </div>
+
+            {/* Text */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1.5">
+                    <h3 className="mono text-xs font-bold text-white uppercase tracking-widest">{module.label}</h3>
+                    <span className="mono text-[9px] font-bold px-1.5 py-0.5 border border-[#ff4500]/40 text-[#ff4500] tracking-widest">
+                        {module.badge}
+                    </span>
                 </div>
-                <h3 className="mono font-bold text-white text-xs uppercase tracking-widest mb-2">{category.label}</h3>
-                <p className="mono text-gray-600 text-[10px] uppercase tracking-wide leading-relaxed">{category.description}</p>
+                <p className="mono text-[11px] text-gray-500 leading-relaxed uppercase tracking-wider group-hover:text-gray-400 transition-colors">{module.description}</p>
             </div>
 
-            {/* Tool list */}
-            <div className="px-5 pb-5 flex-1 border-t border-[#111] pt-4 space-y-1">
-                {category.tools.map((tool) => (
-                    <button
-                        key={tool.id}
-                        onClick={() => onToolClick(tool.id, tool.label)}
-                        disabled={!tool.live}
-                        className="w-full flex items-center gap-2 px-2 py-2 mono text-[10px] uppercase tracking-widest transition-all text-left group/tool"
-                        style={tool.live ? { color: category.accentColor } : { color: "#444" }}
-                    >
-                        <span>{tool.icon}</span>
-                        <span className="flex-1">{tool.label}</span>
-                        {tool.live ? (
-                            <ChevronRight className="w-3 h-3 opacity-0 group-hover/tool:opacity-100 transition-all" />
-                        ) : (
-                            <span className="text-[8px] border border-[#222] px-1 py-0.5 text-[#333]">SOON</span>
-                        )}
-                    </button>
-                ))}
-            </div>
-        </div>
+            {/* Arrow */}
+            <ArrowRight className="shrink-0 w-3.5 h-3.5 text-gray-700 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" />
+        </motion.div>
     );
 }
 
-// ─── Dashboard Home ────────────────────────────────────────────────────────────
+// ─── Dashboard Home ───────────────────────────────────────────────────────────
 
-type DashboardHomeProps = {
+export function DashboardHome({
+    userName = "User",
+    onToolNavigate,
+}: {
     userName?: string;
-    onToolNavigate: (toolId: string, toolLabel: string) => void;
-};
-
-export function DashboardHome({ userName, onToolNavigate }: DashboardHomeProps) {
-    const totalTools = CATEGORIES.reduce((sum, c) => sum + c.tools.length, 0);
-    const liveTools = CATEGORIES.reduce((sum, c) => sum + c.tools.filter((t) => t.live).length, 0);
+    onToolNavigate: (id: string, label: string) => void;
+}) {
+    const displayName = userName.includes("@")
+        ? userName.split("@")[0]
+        : userName.split(" ")[0];
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
-            <div className="mb-10">
-                <div className="mono text-[10px] text-gray-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span className="text-[#ff4500]">&gt;&gt;</span>
-                    {userName ?? "PERSONAL_HQ // DASHBOARD"}
-                </div>
-                <h1 className="text-4xl font-bold tracking-tighter text-white mb-5">
-                    Personal HQ
-                </h1>
+        <div className="relative w-full min-h-[calc(100vh-80px)] text-white overflow-hidden">
+            {/* ── Main layout: two-column split ── */}
+            <div className="relative z-10 flex flex-col lg:flex-row w-full h-full min-h-[calc(100vh-80px)]">
 
-                {/* Stats strip */}
-                <div className="flex items-center gap-6 mono text-[10px] uppercase tracking-widest text-gray-600 border-b border-[#111] pb-5">
-                    <span className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ff4500] animate-pulse" />
-                        {liveTools} live
-                    </span>
-                    <span>{totalTools - liveTools} in development</span>
-                    <span>{CATEGORIES.length} categories</span>
-                </div>
-            </div>
+                {/* ─── LEFT PANE ─── */}
+                <div className="flex-1 flex flex-col justify-center px-10 lg:px-16 py-8 lg:py-0 border-b lg:border-b-0 lg:border-r border-[#1a1a1a]">
 
-            {/* Category Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[1px] bg-[#111] border border-[#111]">
-                {CATEGORIES.map((category) => (
-                    <CategoryCard
-                        key={category.id}
-                        category={category}
-                        onToolClick={onToolNavigate}
-                    />
-                ))}
-            </div>
+                    {/* Status badge — landing page style */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="mono text-xs text-gray-500 mb-10 tracking-widest uppercase flex items-center gap-2 border border-[#333] px-3 py-1.5 bg-black/50 w-fit"
+                    >
+                        <Activity className="w-3 h-3 text-[#ff4500]" />
+                        <span>[[ VAULT_STATUS // SECURE ]]</span>
+                    </motion.div>
 
-            {/* Footer terminal bar */}
-            <div className="mt-6 border border-[#111] bg-[#050505] px-4 py-2.5 flex items-center justify-between mono text-[9px] uppercase tracking-widest text-gray-600">
-                <div className="flex items-center gap-4">
-                    <span className="text-white bg-[#1a1a1a] px-2 py-0.5">PRIVAULT v2.0</span>
-                    <span>&gt;&gt;&gt;</span>
-                    <span className="text-[#ff4500]">ZERO_KNOWLEDGE</span>
+                    {/* Greeting */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className="mb-12"
+                    >
+                        <p className="mono text-xs text-gray-500 uppercase tracking-widest mb-4">
+                            Welcome back, <span className="text-white">{displayName}</span>
+                        </p>
+                        <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tighter text-white mb-2 leading-[0.95] uppercase">
+                            Your
+                        </h1>
+                        <h2 className="text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tighter text-gray-500 mb-8 leading-[0.95] uppercase">
+                            [Secure Vault.]
+                        </h2>
+                        <p className="mono text-sm text-gray-400 max-w-sm leading-relaxed">
+                            Client-side encryption. Zero-knowledge architecture means only you can access your data.
+                        </p>
+                    </motion.div>
+
+                    {/* Trust stats grid */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.35 }}
+                        className="grid grid-cols-2 gap-[1px] bg-[#1a1a1a] border border-[#1a1a1a]"
+                    >
+                        {TRUST_STATS.map((s, i) => (
+                            <div key={i} className="flex items-start gap-3 p-4 bg-[#050505] hover:bg-[#080808] transition-colors duration-200">
+                                <span className="text-gray-600 mt-0.5 shrink-0">{s.icon}</span>
+                                <div>
+                                    <p className="mono text-white text-[11px] font-bold uppercase tracking-widest">{s.label}</p>
+                                    <p className="mono text-gray-600 text-[10px] mt-0.5 uppercase tracking-wide">{s.sub}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </motion.div>
                 </div>
-                <span>AES-256-GCM // PBKDF2</span>
+
+                {/* ─── RIGHT PANE ─── */}
+                <div className="w-full lg:w-[440px] xl:w-[500px] flex flex-col justify-center px-8 lg:px-10 py-8">
+
+                    {/* Section label */}
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5, delay: 0.25 }}
+                        className="mono text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600 mb-4"
+                    >
+                        Your Modules
+                    </motion.p>
+
+                    {/* Module cards */}
+                    <div className="flex flex-col gap-[1px] bg-[#1a1a1a] border border-[#1a1a1a] mb-8">
+                        {MODULES.map((module, idx) => (
+                            <ModuleCard
+                                key={module.id}
+                                module={module}
+                                onNavigate={onToolNavigate}
+                                index={idx}
+                            />
+                        ))}
+                    </div>
+
+                    {/* System status panel */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.5 }}
+                        className="border border-[#222] bg-[#050505] p-5"
+                    >
+                        <div className="flex items-center justify-between mb-5">
+                            <p className="mono text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">System Status</p>
+                            <span className="flex items-center gap-1.5 mono text-[10px] text-[#ff4500] uppercase tracking-widest">
+                                <Activity className="w-3 h-3" />
+                                Online
+                            </span>
+                        </div>
+
+                        <div className="space-y-3">
+                            {SYSTEM_ROWS.map((row, i) => (
+                                <div key={i} className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-1 h-1 bg-[#ff4500]" />
+                                        <span className="mono text-[11px] text-gray-500 uppercase tracking-wide">{row.label}</span>
+                                    </div>
+                                    <span className="mono text-[11px] font-bold text-gray-300 uppercase tracking-widest">{row.value}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-[#1a1a1a] flex items-center justify-between">
+                            <span className="mono text-[10px] text-gray-700 uppercase tracking-widest">Core version</span>
+                            <span className="mono text-[10px] text-gray-500">v2.4.0</span>
+                        </div>
+                    </motion.div>
+
+                    {/* Bottom status line */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.65, duration: 0.5 }}
+                        className="mt-5 flex items-center gap-3 mono text-[10px] text-gray-700 uppercase tracking-widest"
+                    >
+                        <Database className="w-3 h-3" />
+                        <span>Encrypted end-to-end.</span>
+                        <span className="text-gray-800">·</span>
+                        <GitBranch className="w-3 h-3" />
+                        <span>Never stored in plaintext.</span>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );
 }
+
+export type { Module };

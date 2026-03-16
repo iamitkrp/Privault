@@ -34,7 +34,7 @@ export default function VaultPage() {
         setActiveTool(null);
     }
 
-    const VAULT_REQUIRED_TOOLS = new Set(['passwords', 'notessec', 'documents', 'totp']);
+    const VAULT_REQUIRED_TOOLS = new Set(['passwords', 'notes']);
 
     function renderContent() {
         if (!activeTool) {
@@ -73,9 +73,9 @@ export default function VaultPage() {
     const isHome = !activeTool;
 
     return (
-        <div className="pt-20 pb-8 min-h-screen">
+        <div className="pt-20 min-h-screen">
             <div
-                className="max-w-6xl mx-auto px-6 py-8 animate-in fade-in slide-in-from-bottom-4 duration-400"
+                className="w-full animate-in fade-in slide-in-from-bottom-4 duration-400"
                 key={activeTool?.id ?? "home"}
             >
                 {!isHome && (

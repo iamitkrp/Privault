@@ -1,281 +1,130 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-
-import {
-    ShieldCheck,
-    FileText,
-    FolderOpen,
-    KeyRound,
-    CreditCard,
-    ChevronDown,
-    ChevronRight,
+import { usePathname } from "next/navigation";
+import { 
+    LayoutDashboard, 
+    Settings, 
+    LogOut,
     Lock,
-    StickyNote,
-    Lightbulb,
-    BrainCircuit,
-    CheckSquare,
-    Flame,
-    Timer,
-    CalendarDays,
-    Wallet,
-    Clapperboard,
-    BookOpen,
-    ShoppingCart,
-    Bookmark,
-    LockKeyhole,
-    LayoutDashboard,
-    X,
+    Hexagon,
+    Activity,
+    Server,
+    Database,
+    Network
 } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-context";
 
-// ─── Data Model ──────────────────────────────────────────────────────────────
+// ─── Data ──────────────────────────────────────────────────────────────────
 
-type Tool = {
-    id: string;
-    label: string;
-    icon: React.ReactNode;
-    href?: string;   // only set when tool is live
-    live: boolean;
-};
-
-type Category = {
-    id: string;
-    label: string;
-    icon: React.ReactNode;
-    tools: Tool[];
-};
-
-const CATEGORIES: Category[] = [
-    {
-        id: "security",
-        label: "Security & Vault",
-        icon: <ShieldCheck className="w-4 h-4" />,
-        tools: [
-            { id: "passwords", label: "Password Manager", icon: <LockKeyhole className="w-4 h-4" />, href: "/vault", live: true },
-            { id: "notessec", label: "Secure Notes", icon: <FileText className="w-4 h-4" />, live: false },
-            { id: "documents", label: "Document Vault", icon: <FolderOpen className="w-4 h-4" />, live: false },
-            { id: "totp", label: "2FA / TOTP", icon: <KeyRound className="w-4 h-4" />, live: false },
-            { id: "subscriptions", label: "Subscription Tracker", icon: <CreditCard className="w-4 h-4" />, live: false },
-        ],
-    },
-    {
-        id: "knowledge",
-        label: "Notes & Knowledge",
-        icon: <StickyNote className="w-4 h-4" />,
-        tools: [
-            { id: "notes-kb", label: "Notes", icon: <StickyNote className="w-4 h-4" />, live: false },
-            { id: "idea-inbox", label: "Idea Inbox", icon: <Lightbulb className="w-4 h-4" />, live: false },
-            { id: "prompts", label: "Prompt Library", icon: <BrainCircuit className="w-4 h-4" />, live: false },
-        ],
-    },
-    {
-        id: "productivity",
-        label: "Tasks & Productivity",
-        icon: <CheckSquare className="w-4 h-4" />,
-        tools: [
-            { id: "todos", label: "To-Do List", icon: <CheckSquare className="w-4 h-4" />, live: false },
-            { id: "habits", label: "Habit Tracker", icon: <Flame className="w-4 h-4" />, live: false },
-            { id: "pomodoro", label: "Pomodoro Timer", icon: <Timer className="w-4 h-4" />, live: false },
-        ],
-    },
-    {
-        id: "life",
-        label: "Goals & Life Planning",
-        icon: <CalendarDays className="w-4 h-4" />,
-        tools: [
-            { id: "calendar", label: "Calendar", icon: <CalendarDays className="w-4 h-4" />, live: false },
-            { id: "budget", label: "Budget Tracker", icon: <Wallet className="w-4 h-4" />, live: false },
-        ],
-    },
-    {
-        id: "media",
-        label: "Media & Entertainment",
-        icon: <Clapperboard className="w-4 h-4" />,
-        tools: [
-            { id: "watchlist", label: "Watchlist", icon: <Clapperboard className="w-4 h-4" />, live: false },
-            { id: "books", label: "Book Tracker", icon: <BookOpen className="w-4 h-4" />, live: false },
-        ],
-    },
-    {
-        id: "shopping",
-        label: "Shopping & Wishlist",
-        icon: <ShoppingCart className="w-4 h-4" />,
-        tools: [
-            { id: "wishlist", label: "Wishlist", icon: <ShoppingCart className="w-4 h-4" />, live: false },
-        ],
-    },
-    {
-        id: "web",
-        label: "Web & Bookmarks",
-        icon: <Bookmark className="w-4 h-4" />,
-        tools: [
-            { id: "bookmarks", label: "Bookmarks", icon: <Bookmark className="w-4 h-4" />, live: false },
-        ],
-    },
+const MAIN_NAV = [
+    { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Global Settings", href: "/settings", icon: Settings },
 ];
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Components ─────────────────────────────────────────────────────────────
 
-function CategorySection({
-    category,
-    defaultOpen,
-    activeTool,
-    onToolClick,
-}: {
-    category: Category;
-    defaultOpen: boolean;
-    activeTool: string | null;
-    onToolClick: (tool: Tool) => void;
-}) {
-    const [open, setOpen] = useState(defaultOpen);
-
+export function DashboardSidebar() {
+    const pathname = usePathname();
+    const { signOut } = useAuth();
+    
     return (
-        <div className="mb-1">
-            {/* Category header */}
-            <button
-                onClick={() => setOpen((o) => !o)}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-600 hover:text-gray-400 hover:bg-white/5 transition-all duration-150 group"
-                aria-expanded={open}
-            >
-                <span className="flex items-center gap-2">
-                    <span className="text-gray-600 group-hover:text-gray-400 transition-colors">
-                        {category.icon}
-                    </span>
-                    {category.label}
-                </span>
-                {open ? (
-                    <ChevronDown className="w-3 h-3 shrink-0" />
-                ) : (
-                    <ChevronRight className="w-3 h-3 shrink-0" />
-                )}
-            </button>
+        <aside className="w-[280px] h-full flex flex-col bg-black border-r border-[#111] z-40 relative">
+            
+            {/* Subtle Grid Background */}
+            <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
 
-            {/* Tool list */}
-            {open && (
-                <div className="ml-3 mt-0.5 border-l border-[#222] pl-2 space-y-0.5">
-                    {category.tools.map((tool) => {
-                        const isActive = activeTool === tool.id;
+            {/* ─── Header: Branding ─── */}
+            <div className="h-20 flex items-center px-6 border-b border-[#111] relative z-10 bg-black/80 backdrop-blur-md">
+                 <Link href="/dashboard" className="flex items-center gap-3 font-semibold group w-full">
+                      <div className="relative">
+                          <Hexagon className="w-6 h-6 text-white group-hover:text-[#ff4500] transition-colors duration-300 relative z-10" />
+                          <div className="absolute inset-0 bg-[#ff4500]/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      <span className="mono text-sm tracking-widest text-white group-hover:text-[#ff4500] transition-colors duration-300">
+                           PRIVAULT.
+                      </span>
+                 </Link>
+            </div>
 
-                        if (tool.live && tool.href) {
-                            return (
-                                <Link
-                                    key={tool.id}
-                                    href={tool.href}
-                                    onClick={() => onToolClick(tool)}
-                                    className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-all duration-150 ${
-                                        isActive
-                                            ? "bg-[#ff4500]/10 text-white font-medium"
-                                            : "text-gray-400 hover:text-white hover:bg-white/5"
-                                    }`}
-                                >
-                                    <span className={isActive ? "text-[#ff4500]" : ""}>{tool.icon}</span>
-                                    {tool.label}
-                                </Link>
-                            );
-                        }
+            {/* ─── Navigation Area ─── */}
+            <div className="flex-1 overflow-y-auto px-4 py-8 relative z-10 scrollbar-hide flex flex-col gap-8">
+                
+                {/* System Diagnostics Section */}
+                <div>
+                     <div className="mono text-[10px] tracking-widest text-gray-600 mb-4 px-3 flex items-center gap-2">
+                         <Activity className="w-3 h-3 text-emerald-500" />
+                         SYSTEM_LINKS
+                     </div>
+                     <nav className="flex flex-col gap-1">
+                         {MAIN_NAV.map((item) => {
+                             const isActive = pathname === item.href;
+                             return (
+                                 <Link 
+                                     key={item.href} 
+                                     href={item.href}
+                                     className={`group flex items-center gap-4 px-3 py-3 border border-transparent transition-all duration-300
+                                         ${isActive 
+                                             ? 'bg-[#111] border-gray-800 text-white' 
+                                             : 'text-gray-500 hover:text-white hover:bg-[#050505] hover:border-gray-900'}
+                                     `}
+                                 >
+                                      <div className={`transition-colors duration-300 ${isActive ? 'text-[#ff4500]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                          <item.icon className="w-5 h-5" strokeWidth={1.5} />
+                                      </div>
+                                      
+                                      <span className="mono text-xs uppercase tracking-widest flex-1">
+                                          {item.name}
+                                      </span>
 
-                        return (
-                            <button
-                                key={tool.id}
-                                onClick={() => onToolClick(tool)}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 hover:bg-white/5 hover:text-gray-400 transition-all duration-150 group/tool"
-                            >
-                                <span>{tool.icon}</span>
-                                <span className="flex-1 text-left">{tool.label}</span>
-                                <span className="flex items-center gap-1 text-[10px] font-mono text-gray-600 bg-[#111] border border-[#222] px-1.5 py-0.5 rounded-sm group-hover/tool:border-[#333] transition-colors">
-                                    <Lock className="w-2.5 h-2.5" />
-                                    SOON
-                                </span>
-                            </button>
-                        );
-                    })}
+                                      {isActive && (
+                                          <div className="w-1.5 h-1.5 rounded-full bg-[#ff4500] shadow-[0_0_8px_#ff4500] animate-pulse" />
+                                      )}
+                                 </Link>
+                             );
+                         })}
+                     </nav>
                 </div>
-            )}
-        </div>
+
+                {/* Secure Environment Details */}
+                <div className="mt-auto">
+                     <div className="mono text-[10px] tracking-widest text-gray-600 mb-4 px-3 border-t border-[#111] pt-6 flex items-center gap-2">
+                         <Lock className="w-3 h-3 text-violet-500" />
+                         SECURE_ENV
+                     </div>
+                     
+                     {/* Pseudo-telemetry for aesthetic */}
+                     <div className="flex flex-col gap-3 px-3">
+                          <div className="flex items-center justify-between mono text-[10px] text-gray-500 uppercase tracking-widest p-2 bg-[#050505] border border-[#111]">
+                              <span className="flex items-center gap-2"><Server className="w-3 h-3" /> Node</span>
+                              <span className="text-emerald-500">EU-WEST-LOCAL</span>
+                          </div>
+                          <div className="flex items-center justify-between mono text-[10px] text-gray-500 uppercase tracking-widest p-2 bg-[#050505] border border-[#111]">
+                              <span className="flex items-center gap-2"><Database className="w-3 h-3" /> Sync</span>
+                              <span className="text-gray-400">STANDBY</span>
+                          </div>
+                          <div className="flex items-center justify-between mono text-[10px] text-gray-500 uppercase tracking-widest p-2 bg-[#050505] border border-[#111]">
+                              <span className="flex items-center gap-2"><Network className="w-3 h-3" /> Uplink</span>
+                              <span className="text-[#ff4500]">ENCRYPTED</span>
+                          </div>
+                     </div>
+                </div>
+
+            </div>
+
+            {/* ─── Footer Action ─── */}
+            <div className="p-4 border-t border-[#111] bg-[#050505] relative z-10">
+                <button 
+                    onClick={signOut}
+                    className="w-full flex items-center justify-center gap-3 py-3 border border-[#333] text-gray-400 hover:text-[#ff4500] hover:border-[#ff4500] hover:bg-[#ff4500]/10 transition-all duration-300 group"
+                >
+                    <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    <span className="mono text-[11px] font-bold tracking-[0.2em] uppercase">Terminate Session</span>
+                </button>
+            </div>
+            
+        </aside>
     );
 }
 
-// ─── Main Sidebar ─────────────────────────────────────────────────────────────
-
-type DashboardSidebarProps = {
-    activeTool: string | null;
-    onToolSelect: (tool: Tool) => void;
-    onHomeClick: () => void;
-    mobileOpen: boolean;
-    onMobileClose: () => void;
-};
-
-export function DashboardSidebar({
-    activeTool,
-    onToolSelect,
-    onHomeClick,
-    mobileOpen,
-    onMobileClose,
-}: DashboardSidebarProps) {
-    const sidebarContent = (
-        <nav className="flex flex-col h-full py-4 overflow-y-auto custom-scrollbar">
-            {/* Dashboard label — clickable to go home */}
-            <button
-                onClick={onHomeClick}
-                className="px-3 mb-4 flex items-center gap-2 w-full hover:opacity-70 transition-opacity"
-            >
-                <LayoutDashboard className="w-4 h-4 text-gray-600" />
-                <span className="text-xs font-semibold uppercase tracking-widest text-gray-600">Dashboard</span>
-            </button>
-
-            <div className="flex-1 px-2 space-y-0.5">
-                {CATEGORIES.map((cat, i) => (
-                    <CategorySection
-                        key={cat.id}
-                        category={cat}
-                        defaultOpen={i === 0} // Security & Vault open by default
-                        activeTool={activeTool}
-                        onToolClick={onToolSelect}
-                    />
-                ))}
-            </div>
-
-            {/* Footer */}
-            <div className="px-4 pt-4 mt-4 border-t border-[#222]">
-                <p className="text-[10px] font-mono text-gray-600 leading-relaxed">
-                    PRIVAULT v2.0 — PERSONAL HQ
-                </p>
-            </div>
-        </nav>
-    );
-
-    return (
-        <>
-            {/* Desktop sidebar */}
-            <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-[#222] bg-[#050505] h-[calc(100vh-5rem)] sticky top-20 overflow-hidden">
-                {sidebarContent}
-            </aside>
-
-            {/* Mobile: backdrop + slide-in drawer */}
-            {mobileOpen && (
-                <div className="md:hidden fixed inset-0 z-50 flex">
-                    {/* Backdrop */}
-                    <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={onMobileClose}
-                        aria-hidden="true"
-                    />
-                    {/* Drawer */}
-                    <aside className="relative w-72 bg-[#050505] border-r border-[#222] h-full z-10 animate-in slide-in-from-left-4 duration-200">
-                        <button
-                            onClick={onMobileClose}
-                            className="absolute top-4 right-4 p-1.5 text-gray-600 hover:text-white hover:bg-white/10 transition-all"
-                            aria-label="Close sidebar"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                        {sidebarContent}
-                    </aside>
-                </div>
-            )}
-        </>
-    );
-}
-
-export type { Tool };
+export default DashboardSidebar;
