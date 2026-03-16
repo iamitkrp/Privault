@@ -17,7 +17,7 @@ interface VaultUnlockProps {
 const BACKOFF_THRESHOLD = 5;
 
 export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
-    const { profile, user, supabaseClient } = useAuth();
+    const { profile, profileError, user, supabaseClient } = useAuth();
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -188,10 +188,16 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 // Detect if previous bug upgraded verification data to 600K but abandoned items at 100K.
                 // ==========================================
                 if (targetIterations === CRYPTO_CONFIG.iterations) {
+                    console.log("[VaultUnlock] Running self-healing logic. Importing engine...");
                     const { deriveKeyFromPassword, encryptData, decryptData } = await import('@/lib/crypto/engine');
+                    console.log("[VaultUnlock] Engine imported. Deriving test key...");
                     const testKey = await deriveKeyFromPassword(password, profile.salt, targetIterations);
 
-                    const { data: rows } = await supabase.from('vault_credentials').select('*').eq('user_id', user.id);
+                    console.log("[VaultUnlock] Test key derived. Fetching rows...");
+                    const { data: rows, error: fetchError } = await supabase.from('vault_credentials').select('*').eq('user_id', user.id);
+                    if (fetchError) console.error("[VaultUnlock] Fetch error:", fetchError);
+                    console.log("[VaultUnlock] Rows fetched:", rows?.length);
+
                     let needsHeal = false;
 
                     if (rows && rows.length > 0) {
@@ -218,6 +224,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                             }
 
                             if (updates.length > 0) {
+                                console.log(`[VaultUnlock] Applying ${updates.length} row updates...`);
                                 // Iterate to update each row directly, bypassing any missing RPC functions.
                                 const updatePromises = updates.map(update =>
                                     supabase.from('vault_credentials')
@@ -226,12 +233,15 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                         .eq('id', update.id)
                                 );
                                 await Promise.all(updatePromises);
+                                console.log(`[VaultUnlock] Row updates complete.`);
 
                                 const { generateVerificationToken } = await import('@/lib/crypto/core');
                                 const vToken = generateVerificationToken();
+                                console.log(`[VaultUnlock] Encrypting new verification token...`);
                                 const vResult = await encryptData(vToken, testKey);
                                 const newVerificationDataStr = JSON.stringify({ ...vResult, scheme: 'random_token_v2' });
 
+                                console.log(`[VaultUnlock] Updating profile verification string...`);
                                 await supabase.from('profiles')
                                     // @ts-expect-error Dynamic payload for kdf upgrade
                                     .update({ vault_verification_data: newVerificationDataStr, kdf_iterations: CRYPTO_CONFIG.iterations })
@@ -244,6 +254,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                         }
                     }
                 }
+                console.log("[VaultUnlock] Self-healing block finished.");
                 // ==========================================
 
                 console.log("[VaultUnlock] Calling passphraseManager.unlock...");
@@ -323,16 +334,46 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
 
                         {/* Error/Sync Banner */}
                         <AnimatePresence>
-                            {!profile ? (
+                            {!profile && !profileError ? (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="mono text-[10px] uppercase tracking-widest text-[#ff4500] bg-[#ff4500]/10 border border-[#ff4500]/20 px-4 py-3 flex items-start gap-3 mt-2">
-                                        <Activity className="w-3.5 h-3.5 shrink-0 mt-[1px] animate-pulse" />
-                                        <span className="leading-relaxed">SYNCHRONIZING SECURE PROFILE...</span>
+                                    <div className="mono text-[10px] uppercase tracking-widest text-[#ff4500] bg-[#ff4500]/10 border border-[#ff4500]/20 px-4 py-3 flex items-center justify-between gap-3 mt-2">
+                                        <div className="flex items-start gap-3">
+                                            <Activity className="w-3.5 h-3.5 shrink-0 mt-[1px] animate-pulse" />
+                                            <span className="leading-relaxed">SYNCHRONIZING SECURE PROFILE...</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => window.location.reload()}
+                                            className="shrink-0 px-2 py-1 border border-[#ff4500]/30 hover:bg-[#ff4500]/20 transition-colors text-[9px]"
+                                        >
+                                            RETRY
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ) : profileError ? (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="mono text-[10px] uppercase tracking-widest text-red-500 bg-red-950/20 border border-red-900/40 px-4 py-3 flex items-center justify-between gap-3 mt-2">
+                                        <div className="flex items-start gap-3">
+                                            <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-[1px]" />
+                                            <span className="leading-relaxed">SYNC FAILED: {profileError}</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => window.location.reload()}
+                                            className="shrink-0 px-2 py-1 border border-red-500/30 hover:bg-red-500/20 transition-colors text-[9px]"
+                                        >
+                                            RETRY
+                                        </button>
                                     </div>
                                 </motion.div>
                             ) : error ? (
@@ -409,6 +450,8 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                             </motion.svg>
                                             Decrypting Volume...
                                         </>
+                                    ) : profileError ? (
+                                        <>SYNC ERROR</>
                                     ) : !profile ? (
                                         <>Awaiting Profile Sync...</>
                                     ) : (

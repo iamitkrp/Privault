@@ -45,9 +45,9 @@ export function VaultHealth({ credentials }: VaultHealthProps) {
     healthScore = Math.max(0, healthScore);
 
     const getHealthColor = () => {
-        if (healthScore >= 90) return "text-success bg-success/10 border-success/20";
-        if (healthScore >= 70) return "text-[#eab308] bg-[#eab308]/10 border-[#eab308]/20";
-        return "text-error bg-error/10 border-error/20";
+        if (healthScore >= 90) return "text-green-500 bg-green-500/10 border-green-500/30";
+        if (healthScore >= 70) return "text-yellow-500 bg-yellow-500/10 border-yellow-500/30";
+        return "text-red-500 bg-red-500/10 border-red-500/30";
     };
 
     const handleManualLock = () => {
@@ -55,75 +55,78 @@ export function VaultHealth({ credentials }: VaultHealthProps) {
     };
 
     return (
-        <div className="glass p-6 rounded-xl shadow-glass flex flex-col h-full border border-border/50">
-            <div className="flex justify-between items-start mb-6">
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-brand" />
-                    Vault Analytics
-                </h2>
-            </div>
+        <div className="bg-[#0A0A0A] border border-[#222] p-8 flex flex-col h-full relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
 
-            <div className="space-y-5 flex-1 w-full">
+            <div className="relative z-10 flex flex-col h-full">
+                <div className="flex justify-between items-start mb-8">
+                    <h2 className="mono text-xs font-bold uppercase tracking-widest text-white flex items-center gap-3">
+                        <Activity className="w-4 h-4 text-white" />
+                        Vault Analytics
+                    </h2>
+                </div>
 
-                {/* Health Score Card */}
-                <div className={`p-4 rounded-xl border flex items-center justify-between ${getHealthColor()} transition-colors`}>
-                    <div>
-                        <p className="text-xs font-medium uppercase tracking-wider opacity-80 mb-1">Health Score</p>
-                        <div className="text-3xl font-bold flex items-baseline gap-1">
-                            {healthScore} <span className="text-sm font-medium opacity-60">/ 100</span>
+                <div className="space-y-6 flex-1 w-full">
+                    {/* Health Score Card */}
+                    <div className={`p-5 border flex items-center justify-between ${getHealthColor()} transition-colors`}>
+                        <div>
+                            <p className="mono text-[10px] font-bold uppercase tracking-widest opacity-80 mb-2">Health Score</p>
+                            <div className="text-3xl font-bold flex items-baseline gap-1 mono">
+                                {healthScore} <span className="text-sm font-medium opacity-60">/ 100</span>
+                            </div>
+                        </div>
+                        {healthScore >= 90 ? <ShieldCheck className="w-8 h-8 opacity-80" /> : <ShieldAlert className="w-8 h-8 opacity-80" />}
+                    </div>
+
+                    {/* Metrics Grid */}
+                    <div className="grid grid-cols-2 gap-px bg-[#222] border border-[#222]">
+                        <div className="bg-[#0A0A0A] p-4">
+                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Total</p>
+                            <p className="mono text-lg font-bold text-white flex items-center gap-2">
+                                <KeyRound className="w-3.5 h-3.5 text-gray-400" /> {totalCount}
+                            </p>
+                        </div>
+                        <div className="bg-[#0A0A0A] p-4">
+                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Reused</p>
+                            <p className={`mono text-lg font-bold flex items-center gap-2 ${reusedPasswords > 0 ? 'text-yellow-500' : 'text-white'}`}>
+                                {reusedPasswords}
+                            </p>
+                        </div>
+                        <div className="bg-[#0A0A0A] p-4">
+                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Expiring</p>
+                            <p className={`mono text-lg font-bold flex items-center gap-2 ${expiringSoon > 0 ? 'text-yellow-500' : 'text-white'}`}>
+                                {expiringSoon}
+                            </p>
+                        </div>
+                        <div className="bg-[#0A0A0A] p-4">
+                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Weak</p>
+                            <p className={`mono text-lg font-bold flex items-center gap-2 ${weakPasswords > 0 ? 'text-red-500' : 'text-white'}`}>
+                                {weakPasswords}
+                            </p>
                         </div>
                     </div>
-                    {healthScore >= 90 ? <ShieldCheck className="w-10 h-10 opacity-80" /> : <ShieldAlert className="w-10 h-10 opacity-80" />}
-                </div>
 
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-background/40 border border-border/50 p-3 rounded-lg">
-                        <p className="text-xs text-secondary mb-1">Total</p>
-                        <p className="text-lg font-semibold text-foreground flex items-center gap-1.5">
-                            <KeyRound className="w-4 h-4 text-brand" /> {totalCount}
-                        </p>
-                    </div>
-                    <div className="bg-background/40 border border-border/50 p-3 rounded-lg">
-                        <p className="text-xs text-secondary mb-1">Reused</p>
-                        <p className={`text-lg font-semibold flex items-center gap-1.5 ${reusedPasswords > 0 ? 'text-[#eab308]' : 'text-foreground'}`}>
-                            {reusedPasswords}
-                        </p>
-                    </div>
-                    <div className="bg-background/40 border border-border/50 p-3 rounded-lg">
-                        <p className="text-xs text-secondary mb-1">Expiring</p>
-                        <p className={`text-lg font-semibold flex items-center gap-1.5 ${expiringSoon > 0 ? 'text-[#eab308]' : 'text-foreground'}`}>
-                            {expiringSoon}
-                        </p>
-                    </div>
-                    <div className="bg-background/40 border border-border/50 p-3 rounded-lg">
-                        <p className="text-xs text-secondary mb-1">Weak</p>
-                        <p className={`text-lg font-semibold flex items-center gap-1.5 ${weakPasswords > 0 ? 'text-error' : 'text-foreground'}`}>
-                            {weakPasswords}
+                    <div className="pt-6 border-t border-[#222] space-y-3">
+                        <p className="mono text-[10px] text-gray-500 tracking-widest uppercase leading-relaxed max-w-[280px]">
+                            Keys are stored securely in local memory. Auto-purge initialized on 15 minutes of inactivity.
                         </p>
                     </div>
                 </div>
 
-                <div className="pt-4 border-t border-border/50 space-y-3">
-                    <p className="text-xs text-secondary leading-relaxed">
-                        Keys are in memory. They will be securely purged after 15 minutes of inactivity.
-                    </p>
+                <div className="mt-8 flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#222]">
+                    <button
+                        onClick={handleManualLock}
+                        className="flex-1 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-white transition-colors mono text-[10px] uppercase tracking-widest font-bold border border-white/10 hover:border-white/30"
+                    >
+                        Lock Vault
+                    </button>
+                    <button
+                        onClick={signOut}
+                        className="flex-1 h-12 flex items-center justify-center bg-red-500/5 hover:bg-red-500/10 text-red-500 transition-colors mono text-[10px] uppercase tracking-widest font-bold border border-red-500/20 hover:border-red-500/30"
+                    >
+                        Disconnect
+                    </button>
                 </div>
-            </div>
-
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 pt-6 border-t border-border/50">
-                <button
-                    onClick={handleManualLock}
-                    className="flex-1 px-4 py-2 rounded-lg bg-error/10 hover:bg-error/20 text-error transition-colors text-sm font-medium border border-error/20"
-                >
-                    Lock Vault
-                </button>
-                <button
-                    onClick={signOut}
-                    className="flex-1 px-4 py-2 rounded-lg bg-background hover:bg-white/5 text-foreground transition-colors text-sm font-medium border border-border"
-                >
-                    Sign Out
-                </button>
             </div>
         </div>
     );

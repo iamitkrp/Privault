@@ -85,47 +85,47 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="glass w-full max-w-lg rounded-2xl shadow-2xl border border-border flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-[#0A0A0A] w-full max-w-lg shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-[#222] flex flex-col max-h-[90vh] relative overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border/50">
-                    <h2 className="text-xl font-semibold text-foreground">
+                <div className="flex items-center justify-between p-6 border-b border-[#222] relative z-10">
+                    <h2 className="mono text-xs font-bold uppercase tracking-widest text-white">
                         {isEditing ? "Edit Credential" : "Add to Vault"}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-white/5 text-secondary transition-colors focus:outline-none"
+                        className="p-1.5 hover:bg-white/5 text-gray-500 hover:text-white transition-colors focus:outline-none"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="overflow-y-auto p-6 flex-1 custom-scrollbar">
+                <div className="overflow-y-auto p-6 flex-1 custom-scrollbar relative z-10">
                     {error && (
-                        <div className="mb-6 p-3 rounded-lg bg-error/10 border border-error/20 flex gap-3 items-start text-error text-sm">
-                            <ShieldAlert className="w-5 h-5 shrink-0" />
-                            <p>{error}</p>
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 flex gap-3 items-start text-red-500 text-xs mono">
+                            <ShieldAlert className="w-4 h-4 shrink-0" />
+                            <p className="uppercase tracking-widest">{error}</p>
                         </div>
                     )}
 
-                    <form id="cred-form" onSubmit={handleSubmit} className="space-y-5">
+                    <form id="cred-form" onSubmit={handleSubmit} className="space-y-6">
 
                         {/* Type Tabs */}
                         {!isEditing && (
-                            <div className="flex bg-background/50 border border-border rounded-lg p-1">
+                            <div className="flex border border-[#222] bg-[#0A0A0A] p-1">
                                 <button
                                     type="button"
                                     onClick={() => setType("login")}
-                                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${type === "login" ? "bg-white/10 text-foreground shadow-sm" : "text-secondary hover:text-foreground"}`}
+                                    className={`flex-1 py-2 text-[10px] mono uppercase tracking-widest font-bold transition-colors ${type === "login" ? "bg-white text-black" : "text-gray-500 hover:text-white"}`}
                                 >
                                     Login
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setType("secure_note")}
-                                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${type === "secure_note" ? "bg-white/10 text-foreground shadow-sm" : "text-secondary hover:text-foreground"}`}
+                                    className={`flex-1 py-2 text-[10px] mono uppercase tracking-widest font-bold transition-colors ${type === "secure_note" ? "bg-white text-black" : "text-gray-500 hover:text-white"}`}
                                 >
                                     Secure Note
                                 </button>
@@ -133,22 +133,22 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                         )}
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className={`space-y-1.5 ${type === "secure_note" ? "col-span-2" : "col-span-2 md:col-span-1"}`}>
-                                <label className="text-sm font-medium text-secondary">
-                                    {type === "secure_note" ? "Note Title" : "Service / Site Name"} <span className="text-error">*</span>
+                            <div className={`space-y-2 ${type === "secure_note" ? "col-span-2" : "col-span-2 md:col-span-1"}`}>
+                                <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">
+                                    {type === "secure_note" ? "Note Title" : "Service Name"} <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text" required autoFocus
                                     value={siteName} onChange={e => setSiteName(e.target.value)}
-                                    className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand"
-                                    placeholder="e.g. Google, GitHub"
+                                    className="w-full h-12 bg-black/60 border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
+                                    placeholder="e.g. GitHub"
                                 />
                             </div>
-                            <div className="space-y-1.5 col-span-2 md:col-span-1">
-                                <label className="text-sm font-medium text-secondary">Category</label>
+                            <div className="space-y-2 col-span-2 md:col-span-1">
+                                <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Category</label>
                                 <select
                                     value={category} onChange={e => setCategory(e.target.value as VaultCredential['category'])}
-                                    className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand appearance-none"
+                                    className="w-full h-12 bg-[#0A0A0A] border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors text-sm appearance-none"
                                 >
                                     <option value="other">General / Other</option>
                                     <option value="work">Work</option>
@@ -161,12 +161,12 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
 
                         {/* Expiration */}
                         {type === "login" && (
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-medium text-secondary">Password Expiration</label>
+                            <div className="space-y-2">
+                                <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Password Expiration</label>
                                 <select
                                     value={expirationDays}
                                     onChange={e => setExpirationDays(e.target.value)}
-                                    className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand appearance-none"
+                                    className="w-full h-12 bg-[#0A0A0A] border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors text-sm appearance-none"
                                 >
                                     <option value="0">Never</option>
                                     <option value="30">30 days</option>
@@ -180,21 +180,21 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
 
                         {type === "login" && (
                             <>
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-secondary">Username / Email <span className="text-error">*</span></label>
+                                <div className="space-y-2">
+                                    <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Username / Email <span className="text-red-500">*</span></label>
                                     <input
                                         type="text" required spellCheck="false"
                                         value={username} onChange={e => setUsername(e.target.value)}
-                                        className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand"
-                                        placeholder="name@example.com"
+                                        className="w-full h-12 bg-black/60 border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
+                                        placeholder="admin"
                                     />
                                 </div>
 
-                                <div className="space-y-1.5">
-                                    <div className="flex justify-between items-end">
-                                        <label className="text-sm font-medium text-secondary">Password <span className="text-error">*</span></label>
-                                        <button type="button" onClick={() => setShowGenerator(!showGenerator)} className="text-xs text-brand hover:text-brand-hover hover:underline transition-colors focus:outline-none">
-                                            {showGenerator ? "Hide Generator" : "Generate Secure Password"}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-end mb-1">
+                                        <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Password <span className="text-red-500">*</span></label>
+                                        <button type="button" onClick={() => setShowGenerator(!showGenerator)} className="mono text-[10px] tracking-widest text-gray-500 hover:text-white uppercase transition-colors focus:outline-none decoration-transparent">
+                                            {showGenerator ? "Hide Generator" : "Generate"}
                                         </button>
                                     </div>
 
@@ -202,22 +202,22 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                                         <input
                                             type={showPassword ? "text" : "password"} required spellCheck="false"
                                             value={password} onChange={e => setPassword(e.target.value)}
-                                            className="w-full bg-background/50 border border-border rounded-lg pl-3 pr-20 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand font-mono"
+                                            className="w-full h-12 bg-black/60 border border-[#222] pl-4 pr-20 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
                                         />
-                                        <div className="absolute right-2 flex gap-1 bg-background/50 backdrop-blur-sm rounded px-1">
+                                        <div className="absolute right-2 flex gap-1 bg-[#0A0A0A] px-1">
                                             <button
                                                 type="button" tabIndex={-1}
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="p-1.5 text-secondary hover:text-foreground transition-colors rounded focus:outline-none"
+                                                className="p-1.5 text-gray-500 hover:text-white transition-colors focus:outline-none"
                                             >
                                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
                                             <button
                                                 type="button" tabIndex={-1}
                                                 onClick={copyPassword}
-                                                className="p-1.5 text-secondary hover:text-success transition-colors rounded focus:outline-none"
+                                                className="p-1.5 text-gray-500 hover:text-green-500 transition-colors focus:outline-none"
                                             >
-                                                {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                                                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                                             </button>
                                         </div>
                                     </div>
@@ -228,12 +228,7 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                                         <PasswordGenerator
                                             onSelectPattern={(generated, userInitiated) => {
                                                 setPassword((prev) => {
-                                                    // Only auto-update the password field if explicitly triggered by the user (button/slider)
-                                                    // OR if the field is currently completely empty on mount.
-                                                    if (userInitiated || !prev) {
-                                                        return generated;
-                                                    }
-                                                    // Otherwise, preserve the existing password (e.g. they opened generator while editing)
+                                                    if (userInitiated || !prev) return generated;
                                                     return prev;
                                                 });
                                             }}
@@ -241,28 +236,28 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                                     </div>
                                 )}
 
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-secondary">Website URL</label>
+                                <div className="space-y-2">
+                                    <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Website URL</label>
                                     <input
                                         type="url" placeholder="https://"
                                         value={url} onChange={e => setUrl(e.target.value)}
-                                        className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand"
+                                        className="w-full h-12 bg-black/60 border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
                                     />
                                 </div>
                             </>
                         )}
 
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-secondary">
+                        <div className="space-y-2">
+                            <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">
                                 {type === "secure_note" ? "Secure Note Content" : "Additional Notes"}
-                                {type === "secure_note" && <span className="text-error ml-1">*</span>}
+                                {type === "secure_note" && <span className="text-red-500 ml-1">*</span>}
                             </label>
                             <textarea
                                 rows={type === "secure_note" ? 10 : 3}
                                 required={type === "secure_note"}
                                 value={notes} onChange={e => setNotes(e.target.value)}
-                                className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-foreground focus:ring-1 focus:ring-brand focus:border-brand resize-none"
-                                placeholder="Any additional recovery codes or notes..."
+                                className="w-full bg-black/60 border border-[#222] px-4 py-3 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm resize-none"
+                                placeholder="..."
                             />
                         </div>
 
@@ -270,27 +265,27 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-border/50 bg-white/5 flex gap-3 justify-end rounded-b-2xl">
+                <div className="p-6 border-t border-[#222] bg-[#0A0A0A] flex gap-4 justify-end items-center relative z-10">
                     <button
                         type="button" onClick={onClose} disabled={isSaving}
-                        className="px-6 py-2 rounded-lg font-medium text-secondary hover:text-foreground hover:bg-white/5 transition-colors disabled:opacity-50"
+                        className="mono text-[10px] uppercase tracking-widest font-bold text-gray-500 hover:text-white transition-colors disabled:opacity-50"
                     >
                         Cancel
                     </button>
                     <button
                         form="cred-form" type="submit"
                         disabled={isSaving || !siteName || (type === "login" && (!username || !password)) || (type === "secure_note" && !notes)}
-                        className="px-6 py-2 rounded-lg font-semibold bg-brand text-brand-foreground hover:bg-brand-hover hover:scale-105 active:scale-95 transition-all shadow-glow disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2"
+                        className="h-12 px-8 bg-white hover:bg-gray-200 text-black mono text-[10px] uppercase tracking-widest font-bold transition-all flex items-center gap-2 group disabled:opacity-50 disabled:pointer-events-none"
                     >
                         {isSaving ? (
                             <>
-                                <span className="w-4 h-4 border-2 border-brand-foreground/30 border-t-brand-foreground rounded-full animate-spin block" />
-                                {isEditing ? "Updating..." : "Encrypting..."}
+                                <span className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin block" />
+                                {isEditing ? "Updating" : "Encrypting"}
                             </>
-                        ) : (isEditing ? "Update securely" : "Save securely")}
+                        ) : (isEditing ? "Update" : "Save Securely")}
                     </button>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }

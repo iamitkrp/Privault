@@ -9,6 +9,7 @@ import { AuthService } from "@/services/auth.service";
 interface AuthContextType {
     user: User | null;
     profile: UserProfile | null;
+    profileError: string | null;
     isLoading: boolean;
     signOut: () => Promise<void>;
     authService: AuthService;
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [profileError, setProfileError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const [supabaseClient] = useState(() => createClient());
@@ -60,18 +62,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     // Load profile asynchronously — always resolve loading first
                     // so the UI is never blocked by a slow profile fetch
                     resolveLoading();
-                    try {
-                        await authService.ensureProfileExists(session.user);
+
+                    // Retry-capable profile fetch with per-attempt timeouts.
+                    // This handles stale Supabase sessions and transient network issues.
+                    const MAX_RETRIES = 3;
+                    const PER_ATTEMPT_TIMEOUT_MS = 8_000;
+                    const RETRY_DELAY_MS = 2_000;
+
+                    const fetchProfileOnce = async (): Promise<void> => {
+                        const ensureResult = await authService.ensureProfileExists(session.user);
+                        if (!ensureResult.success) {
+                            throw new Error("Profile init failed: " + ensureResult.error?.message);
+                        }
+
                         const profileResult = await authService.getProfile(session.user.id);
                         if (profileResult.success && mounted) {
                             setProfile(profileResult.data);
+                            setProfileError(null);
+                        } else if (!profileResult.success) {
+                            throw new Error("Profile load failed: " + profileResult.error?.message);
                         }
-                    } catch {
-                        // Non-fatal: profile load failure doesn't block the app
+                    };
+
+                    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                        if (!mounted) break;
+
+                        console.log(`[Auth] Profile sync attempt ${attempt}/${MAX_RETRIES}...`);
+
+                        // On retries, refresh the Supabase session to get a fresh token
+                        if (attempt > 1) {
+                            try {
+                                await supabaseClient.auth.refreshSession();
+                                console.log("[Auth] Session refreshed for retry.");
+                            } catch { /* non-blocking */ }
+                        }
+
+                        const timeout = new Promise<never>((_, reject) =>
+                            setTimeout(() => reject(new Error(`Attempt ${attempt} timed out`)), PER_ATTEMPT_TIMEOUT_MS)
+                        );
+
+                        try {
+                            await Promise.race([fetchProfileOnce(), timeout]);
+                            console.log("[Auth] Profile loaded successfully.");
+                            break; // Success — exit retry loop
+                        } catch (err: any) {
+                            console.warn(`[Auth] Attempt ${attempt} failed:`, err?.message);
+                            if (attempt === MAX_RETRIES) {
+                                // Final attempt failed — surface the error
+                                console.error("[Auth] All profile sync attempts exhausted.");
+                                if (mounted) setProfileError("Profile sync failed after multiple retries. Please refresh.");
+                            } else {
+                                // Wait before retrying
+                                await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+                            }
+                        }
                     }
                 } else {
                     setUser(null);
                     setProfile(null);
+                    setProfileError(null);
                     resolveLoading();
                 }
             }
@@ -96,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, profile, isLoading, signOut, authService, supabaseClient }}>
+        <AuthContext.Provider value={{ user, profile, profileError, isLoading, signOut, authService, supabaseClient }}>
             {children}
         </AuthContext.Provider>
     );
