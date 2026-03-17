@@ -51,22 +51,22 @@ export function CredentialRow({ credential, onEdit, onDelete }: CredentialRowPro
     const isNote = credential.category === "secure_note";
 
     return (
-        <div className="group relative bg-[#050505] hover:bg-[#080808] transition-all duration-200 overflow-hidden">
+        <div className="group relative bg-bg-secondary hover:bg-bg-tertiary transition-all duration-200 overflow-hidden">
             {/* Corner accent */}
-            <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#333] group-hover:border-[#ff4500] transition-colors duration-300" />
+            <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-border-secondary group-hover:border-success transition-colors duration-300" />
 
             <div className="flex items-center gap-4 px-5 py-4">
                 {/* Icon / Initial */}
-                <div className="shrink-0 w-9 h-9 border border-[#333] group-hover:border-[#555] bg-[#0a0a0a] flex items-center justify-center text-gray-600 group-hover:text-white transition-all duration-300 mono text-sm font-bold">
+                <div className="shrink-0 w-9 h-9 border border-border-secondary group-hover:border-border bg-background flex items-center justify-center text-fg-muted group-hover:text-foreground transition-all duration-300 mono text-sm font-bold">
                     {credential.decrypted.site_name.charAt(0).toUpperCase()}
                 </div>
 
                 {/* Site Name + Category */}
                 <div className="min-w-[120px] w-[180px] shrink-0">
-                    <h3 className="text-white text-sm font-bold leading-tight truncate tracking-wide">
+                    <h3 className="text-foreground text-sm font-bold leading-tight truncate tracking-wide">
                         {credential.decrypted.site_name}
                     </h3>
-                    <span className="mono text-[9px] text-gray-600 uppercase tracking-widest">
+                    <span className="mono text-[9px] text-fg-muted uppercase tracking-widest">
                         {credential.category}
                     </span>
                 </div>
@@ -76,12 +76,12 @@ export function CredentialRow({ credential, onEdit, onDelete }: CredentialRowPro
                     <div className="flex-1 min-w-0 flex items-center gap-6">
                         {/* Username */}
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <span className="text-gray-400 text-xs truncate mono" title={credential.decrypted.username}>
+                            <span className="text-fg-secondary text-xs truncate mono" title={credential.decrypted.username}>
                                 {credential.decrypted.username}
                             </span>
                             <button
                                 onClick={() => handleCopy("username")}
-                                className="shrink-0 text-gray-700 hover:text-white transition-colors"
+                                className="shrink-0 text-fg-secondary hover:text-foreground transition-colors"
                                 title="Copy Username"
                             >
                                 {copied === "username" ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -90,13 +90,13 @@ export function CredentialRow({ credential, onEdit, onDelete }: CredentialRowPro
 
                         {/* Password */}
                         <div className="flex items-center gap-2 shrink-0">
-                            <div className="text-gray-600 font-mono tracking-widest flex items-center gap-2 text-xs">
+                            <div className="text-fg-muted font-mono tracking-widest flex items-center gap-2 text-xs">
                                 <KeyRound className="w-3 h-3" />
                                 ••••••••
                             </div>
                             <button
                                 onClick={() => handleCopy("password")}
-                                className="shrink-0 text-gray-700 hover:text-white transition-colors"
+                                className="shrink-0 text-fg-secondary hover:text-foreground transition-colors"
                                 title="Copy Password"
                             >
                                 {copied === "password" ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -105,7 +105,7 @@ export function CredentialRow({ credential, onEdit, onDelete }: CredentialRowPro
                     </div>
                 ) : (
                     <div className="flex-1 min-w-0">
-                        <p className="text-gray-500 text-xs mono truncate">
+                        <p className="text-fg-muted text-xs mono truncate">
                             {credential.decrypted.notes || "No content"}
                         </p>
                     </div>
@@ -134,7 +134,7 @@ export function CredentialRow({ credential, onEdit, onDelete }: CredentialRowPro
                     )}
 
                     {/* Date */}
-                    <span className="mono text-[9px] text-gray-700 uppercase tracking-widest hidden xl:block">
+                    <span className="mono text-[9px] text-fg-secondary uppercase tracking-widest hidden xl:block">
                         {new Date(credential.updated_at).toLocaleDateString()}
                     </span>
                 </div>
@@ -143,7 +143,7 @@ export function CredentialRow({ credential, onEdit, onDelete }: CredentialRowPro
                 <div className="relative shrink-0">
                     <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-1.5 text-gray-700 hover:text-white transition-colors"
+                        className="p-1.5 text-fg-secondary hover:text-foreground transition-colors"
                     >
                         <MoreVertical className="w-4 h-4" />
                     </button>
@@ -154,16 +154,16 @@ export function CredentialRow({ credential, onEdit, onDelete }: CredentialRowPro
                                 className="fixed inset-0 z-10"
                                 onClick={() => setShowMenu(false)}
                             />
-                            <div className="absolute right-0 top-full mt-1 w-32 bg-[#0A0A0A] border border-[#222] shadow-2xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                            <div className="absolute right-0 top-full mt-1 w-32 bg-background border border-border shadow-2xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                                 <button
                                     onClick={() => { setShowMenu(false); onEdit(credential); }}
-                                    className="w-full text-left px-3 py-2.5 text-[10px] mono uppercase tracking-widest text-gray-400 hover:bg-white/5 hover:text-white flex items-center gap-2.5 transition-colors"
+                                    className="w-full text-left px-3 py-2.5 text-[10px] mono uppercase tracking-widest text-fg-secondary hover:bg-foreground/5 hover:text-foreground flex items-center gap-2.5 transition-colors"
                                 >
                                     <Edit2 className="w-3 h-3" /> Edit
                                 </button>
                                 <button
                                     onClick={() => { setShowMenu(false); onDelete(credential.id); }}
-                                    className="w-full text-left px-3 py-2.5 text-[10px] mono uppercase tracking-widest text-red-500/80 hover:bg-red-500/10 hover:text-red-500 flex items-center gap-2.5 transition-colors border-t border-[#222]"
+                                    className="w-full text-left px-3 py-2.5 text-[10px] mono uppercase tracking-widest text-red-500/80 hover:bg-red-500/10 hover:text-red-500 flex items-center gap-2.5 transition-colors border-t border-border"
                                 >
                                     <Trash2 className="w-3 h-3" /> Delete
                                 </button>

@@ -64,7 +64,7 @@ export default function VaultPage() {
                             <div className="px-6 md:px-12 max-w-[1600px] mx-auto pt-4 md:pt-8 w-full">
                                 <button
                                     onClick={goHome}
-                                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white mb-6 transition-colors group mono uppercase tracking-widest"
+                                    className="flex items-center gap-1.5 text-xs text-fg-muted hover:text-foreground mb-6 transition-colors group mono uppercase tracking-widest"
                                 >
                                     <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                                     <LayoutDashboard className="w-3 h-3" />
@@ -72,10 +72,10 @@ export default function VaultPage() {
                                 </button>
 
                                 <div className="mb-8">
-                                    <p className="text-xs font-mono text-gray-500 uppercase tracking-widest mb-1.5">
+                                    <p className="text-xs font-mono text-fg-muted uppercase tracking-widest mb-1.5">
                                         {user?.email}
                                     </p>
-                                    <h1 className="text-3xl font-bold tracking-tight text-white capitalize">
+                                    <h1 className="text-3xl font-bold tracking-tight text-foreground capitalize">
                                         {activeTool?.label}
                                     </h1>
                                 </div>
@@ -94,7 +94,7 @@ export default function VaultPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-black/80 backdrop-blur-md cursor-pointer"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background/80 backdrop-blur-md cursor-pointer"
                         onMouseDown={(e) => {
                             if (e.target === e.currentTarget) {
                                 goHome();
@@ -126,7 +126,7 @@ function VaultCommandCenter({
     onBack: () => void;
 }) {
     return (
-        <div className="relative w-full min-h-[calc(100vh-80px)] text-white overflow-hidden">
+        <div className="relative w-full min-h-[calc(100vh-80px)] text-foreground overflow-hidden">
             <div className="relative z-10 flex flex-col w-full">
 
                 {/* ─── HERO HEADER ─── */}
@@ -141,17 +141,17 @@ function VaultCommandCenter({
                             {/* Dashboard back link — inline with title area */}
                             <button
                                 onClick={onBack}
-                                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white mb-5 transition-colors group mono uppercase tracking-widest"
+                                className="flex items-center gap-1.5 text-xs text-fg-muted hover:text-foreground mb-5 transition-colors group mono uppercase tracking-widest"
                             >
                                 <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                                 <LayoutDashboard className="w-3 h-3" />
                                 Dashboard
                             </button>
 
-                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.95] uppercase">
+                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-foreground leading-[0.95] uppercase">
                                 Password
                             </h1>
-                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tighter text-gray-500 leading-[0.95] uppercase">
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tighter text-fg-muted leading-[0.95] uppercase">
                                 [Vault.]
                             </h2>
                         </motion.div>
@@ -162,8 +162,8 @@ function VaultCommandCenter({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.15 }}
                         >
-                            <div className="mono text-xs text-gray-500 tracking-widest uppercase flex items-center gap-2 border border-[#333] px-3 py-1.5 bg-black/50">
-                                <Activity className="w-3 h-3 text-[#ff4500]" />
+                            <div className="mono text-xs text-fg-muted tracking-widest uppercase flex items-center gap-2 border border-border-secondary px-3 py-1.5 bg-background/50">
+                                <Activity className="w-3 h-3 text-success" />
                                 <span>[[ VAULT_MODE // DECRYPTED ]]</span>
                             </div>
                         </motion.div>
@@ -171,7 +171,7 @@ function VaultCommandCenter({
                 </div>
 
                 {/* Divider */}
-                <div className="border-t border-[#1a1a1a]" />
+                <div className="border-t border-border" />
 
                 {/* ─── TWO-COLUMN BODY ─── */}
                 <div className="flex flex-col lg:flex-row w-full flex-1">
@@ -180,7 +180,7 @@ function VaultCommandCenter({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.15 }}
-                        className="flex-1 px-6 md:px-12 py-8 lg:border-r border-[#1a1a1a] min-w-0"
+                        className="flex-1 px-6 md:px-12 py-8 lg:border-r border-border min-w-0"
                     >
                         <CredentialList onCredentialsLoad={onCredentialsLoad} />
                     </motion.div>

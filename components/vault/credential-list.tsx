@@ -93,10 +93,10 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-[#0A0A0A] border border-[#222]">
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-background border border-border">
                 <ServerCrash className="w-10 h-10 mb-6 text-red-500 opacity-50" />
                 <h3 className="mono text-sm tracking-widest font-bold text-red-500 uppercase mb-2">Decryption Failed</h3>
-                <p className="mono text-[10px] text-gray-500 tracking-widest uppercase">{error}</p>
+                <p className="mono text-[10px] text-fg-muted tracking-widest uppercase">{error}</p>
             </div>
         );
     }
@@ -104,8 +104,8 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <div className="flex items-center gap-3 mono text-xs text-gray-500 uppercase tracking-widest">
-                    <div className="w-2 h-2 bg-gray-500 animate-pulse" />
+                <div className="flex items-center gap-3 mono text-xs text-fg-muted uppercase tracking-widest">
+                    <div className="w-2 h-2 bg-fg-muted animate-pulse" />
                     Decrypting Local Volume...
                 </div>
             </div>
@@ -119,28 +119,28 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
                 {/* Search */}
                 <div className="relative flex-1 flex items-center group">
-                    <Search className="w-4 h-4 absolute left-4 text-gray-600 group-focus-within:text-white transition-colors" />
+                    <Search className="w-4 h-4 absolute left-4 text-fg-muted group-focus-within:text-foreground transition-colors" />
                     <input
                         type="text"
                         placeholder="SEARCH VAULT..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-11 bg-[#050505] border border-[#222] focus:border-[#444] text-white mono text-[10px] tracking-widest uppercase pl-11 pr-4 outline-none transition-all duration-300 placeholder:text-gray-800 focus:shadow-[0_0_20px_rgba(255,255,255,0.03)]"
+                        className="w-full h-11 bg-bg-secondary border border-border focus:border-foreground text-foreground mono text-[10px] tracking-widest uppercase pl-11 pr-4 outline-none transition-all duration-300 placeholder:text-fg-secondary focus:shadow-[0_0_20px_rgba(255,255,255,0.03)]"
                     />
                 </div>
 
                 {/* View toggle */}
-                <div className="flex border border-[#222] bg-[#050505] h-11">
+                <div className="flex border border-border bg-bg-secondary h-11">
                     <button
                         onClick={() => setViewMode("list")}
-                        className={`px-3 flex items-center justify-center transition-colors ${viewMode === "list" ? "bg-white/5 text-white" : "text-gray-600 hover:text-gray-400"}`}
+                        className={`px-3 flex items-center justify-center transition-colors ${viewMode === "list" ? "bg-foreground/5 text-foreground" : "text-fg-muted hover:text-fg-secondary"}`}
                         title="List View"
                     >
                         <List className="w-4 h-4" />
                     </button>
                     <button
                         onClick={() => setViewMode("grid")}
-                        className={`px-3 flex items-center justify-center transition-colors border-l border-[#222] ${viewMode === "grid" ? "bg-white/5 text-white" : "text-gray-600 hover:text-gray-400"}`}
+                        className={`px-3 flex items-center justify-center transition-colors border-l border-border ${viewMode === "grid" ? "bg-foreground/5 text-foreground" : "text-fg-muted hover:text-fg-secondary"}`}
                         title="Grid View"
                     >
                         <LayoutGrid className="w-4 h-4" />
@@ -150,7 +150,7 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
                 {/* Add button */}
                 <button
                     onClick={() => { setEditingCred(undefined); setIsModalOpen(true); }}
-                    className="h-11 px-6 bg-white hover:bg-gray-200 text-black transition-all duration-300 flex items-center justify-center gap-2 group relative overflow-hidden shrink-0"
+                    className="h-11 px-6 bg-foreground hover:opacity-90 text-background transition-all duration-300 flex items-center justify-center gap-2 group relative overflow-hidden shrink-0"
                 >
                     <span className="mono text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 relative z-10">
                         <Plus className="w-3.5 h-3.5" />
@@ -161,11 +161,11 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
 
             {/* ── Results Header ── */}
             <div className="flex items-center justify-between mb-4 px-1">
-                <p className="mono text-[10px] text-gray-600 uppercase tracking-widest">
+                <p className="mono text-[10px] text-fg-muted uppercase tracking-widest">
                     {filteredCreds.length} {filteredCreds.length === 1 ? "entry" : "entries"}
-                    {searchQuery && <span className="text-gray-700"> · matching &quot;{searchQuery}&quot;</span>}
+                    {searchQuery && <span className="text-fg-secondary"> · matching &quot;{searchQuery}&quot;</span>}
                 </p>
-                <p className="mono text-[10px] text-gray-700 uppercase tracking-widest">
+                <p className="mono text-[10px] text-fg-secondary uppercase tracking-widest">
                     {viewMode === "list" ? "LIST" : "GRID"} VIEW
                 </p>
             </div>
@@ -175,24 +175,24 @@ export function CredentialList({ onCredentialsLoad }: CredentialListProps) {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center py-20 bg-[#050505] border border-[#222] border-dashed relative overflow-hidden"
+                    className="text-center py-20 bg-bg-secondary border border-border border-dashed relative overflow-hidden"
                 >
-                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#333]" />
-                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#333]" />
-                    <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#333]" />
-                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#333]" />
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-border-secondary" />
+                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-border-secondary" />
+                    <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-border-secondary" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-border-secondary" />
 
-                    <div className="w-14 h-14 bg-white/5 border border-white/10 text-white flex items-center justify-center mx-auto mb-5">
+                    <div className="w-14 h-14 bg-foreground/5 border border-foreground/10 text-foreground flex items-center justify-center mx-auto mb-5">
                         <KeyRound className="w-5 h-5" />
                     </div>
-                    <h3 className="mono text-xs font-bold tracking-widest text-white uppercase mb-2">Vault Empty</h3>
-                    <p className="mono text-[10px] text-gray-500 tracking-widest uppercase">
+                    <h3 className="mono text-xs font-bold tracking-widest text-foreground uppercase mb-2">Vault Empty</h3>
+                    <p className="mono text-[10px] text-fg-muted tracking-widest uppercase">
                         {searchQuery ? "No matches found." : "Store your credentials securely."}
                     </p>
                 </motion.div>
             ) : viewMode === "list" ? (
                 /* ── LIST VIEW: Compact rows ── */
-                <div className="flex flex-col gap-[1px] bg-[#1a1a1a] border border-[#1a1a1a]">
+                <div className="flex flex-col gap-[1px] bg-border border border-border">
                     {filteredCreds.map((cred, idx) => (
                         <motion.div
                             key={cred.id}

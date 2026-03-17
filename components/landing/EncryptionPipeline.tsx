@@ -146,11 +146,11 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(1)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 1 ? "#ff4500" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 1 ? "#ff4500" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
-                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Master Password</text>
-                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">ONLY EXISTS IN MEMORY</text>
+                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
+                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Master Password</text>
+                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">ONLY EXISTS IN MEMORY</text>
                     </g>
 
                     {/* PBKDF2 Hashing - STEP 02 */}
@@ -160,11 +160,11 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(2)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 2 ? "#00ffcc" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 2 ? "#00ffcc" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <rect x="-4" y="25" width="4" height="50" fill="#00ffcc" opacity="0.8" />
                         <text x="20" y="35" fill="#00ffcc" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
                         <text x="20" y="65" fill="#00ffcc" fontFamily="sans-serif" fontSize="20" fontWeight="bold">PBKDF2 Hashing</text>
-                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
+                        <text x="20" y="85" fill="#00ffcc" opacity="0.7" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
                     </g>
 
                     {/* Cryptographic Key - STEP 03 */}
@@ -174,11 +174,11 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(3)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 3 ? "#00ffcc" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 3 ? "#00ffcc" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <line x1="210" y1="0" x2="240" y2="0" stroke="#00ffcc" strokeWidth="4" />
-                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
-                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="18" fontWeight="bold">Cryptographic Key</text>
-                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">AES-256 (32 BYTES)</text>
+                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
+                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="18" fontWeight="bold">Cryptographic Key</text>
+                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">AES-256 (32 BYTES)</text>
                     </g>
 
                     {/* Private Vault Data - STEP 04 */}
@@ -188,11 +188,11 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(4)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 4 ? "#ff4500" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 4 ? "#ff4500" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
-                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Private Vault Data</text>
-                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">PASSWORDS & NOTES</text>
+                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
+                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Private Vault Data</text>
+                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">PASSWORDS & NOTES</text>
                     </g>
 
                     {/* AES-256-GCM Engine - STEP 05 */}
@@ -203,7 +203,7 @@ export default function EncryptionPipeline() {
                         onMouseLeave={() => setHovered(null)}
                     >
                         <motion.rect
-                            width="240" height="100" rx="6" fill="#110515" stroke="#a855f7" strokeWidth="2.5"
+                            width="240" height="100" rx="6" className="fill-bg-elevated" stroke="#a855f7" strokeWidth="2.5"
                             animate={hovered === 5 ? 
                                 { strokeOpacity: 1, boxShadow: "0px 0px 25px #a855f7" } : 
                                 { strokeOpacity: [1, 0.4, 1], boxShadow: ["0px 0px 5px #a855f7", "0px 0px 15px #a855f7", "0px 0px 5px #a855f7"] }
@@ -212,7 +212,7 @@ export default function EncryptionPipeline() {
                         />
                         <text x="25" y="35" fill="#a855f7" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
                         <text x="25" y="65" fill="#a855f7" fontFamily="sans-serif" fontSize="24" fontWeight="bold">AES-256-GCM</text>
-                        <text x="25" y="85" fill="#a855f7" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
+                        <text x="25" y="85" fill="#a855f7" opacity="0.7" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
 
                         {/* Inner decorative scanning line */}
                         <motion.line
@@ -229,11 +229,11 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(6)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" fill="#080808" stroke={hovered === 6 ? "#888" : "#333"} strokeWidth="2" className="transition-colors duration-300" />
+                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 6 ? "var(--color-fg-muted)" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <rect x="236" y="25" width="4" height="50" fill="#a855f7" opacity="0.8" />
-                        <text x="20" y="35" fill="#888" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
-                        <text x="20" y="65" fill="#fff" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Blind Server</text>
-                        <text x="20" y="85" fill="#666" fontFamily="monospace" fontSize="10">CANNOT DECRYPT</text>
+                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
+                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Blind Server</text>
+                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">CANNOT DECRYPT</text>
                     </g>
                 </g>
 
@@ -248,21 +248,21 @@ export default function EncryptionPipeline() {
                             className="pointer-events-none"
                         >
                             <foreignObject x={TOOLTIPS[hovered].x} y={TOOLTIPS[hovered].y} width="320" height="180" className="overflow-visible">
-                                <div className="p-4 rounded-xl border border-white/20 shadow-[0_0_30px_rgba(0,0,0,1)] backdrop-blur-3xl bg-black/90 relative overflow-hidden group">
+                                <div className="p-4 rounded-xl border border-border bg-background/90 shadow-lg backdrop-blur-3xl relative overflow-hidden group">
                                     {/* Glassmorphism gradient effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-transparent pointer-events-none"></div>
                                     <h3 
                                         className="font-mono text-xs mb-3 font-semibold tracking-wider"
                                         style={{ 
                                             color: hovered === 1 || hovered === 4 ? "#ff4500" : 
                                                    hovered === 2 || hovered === 3 ? "#00ffcc" : 
-                                                   hovered === 5 ? "#a855f7" : "#fff" 
+                                                   hovered === 5 ? "#a855f7" : "var(--color-foreground)" 
                                         }}
                                     >
                                         {TOOLTIPS[hovered].title}
                                     </h3>
-                                    <div className="h-px w-full bg-white/10 mb-3" />
-                                    <p className="text-gray-300 text-sm leading-relaxed font-sans shadow-black drop-shadow-md">
+                                    <div className="h-px w-full bg-border mb-3" />
+                                    <p className="text-fg-secondary text-sm leading-relaxed font-sans drop-shadow-sm">
                                         {TOOLTIPS[hovered].text}
                                     </p>
                                 </div>
@@ -281,10 +281,10 @@ export default function EncryptionPipeline() {
             </svg>
 
             {/* Edge Fades for Seamless Integration */}
-            <div className="absolute inset-y-0 left-0 w-12 lg:w-24 bg-gradient-to-r from-black to-transparent pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-12 lg:w-24 bg-gradient-to-l from-black to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-10 lg:h-20 bg-gradient-to-b from-black to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-10 lg:h-20 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-12 lg:w-24 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-12 lg:w-24 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-10 lg:h-20 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-10 lg:h-20 bg-gradient-to-t from-background to-transparent pointer-events-none" />
         </motion.div>
     );
 }

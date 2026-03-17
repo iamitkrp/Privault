@@ -55,13 +55,13 @@ export function VaultHealth({ credentials }: VaultHealthProps) {
     };
 
     return (
-        <div className="bg-[#0A0A0A] border border-[#222] p-8 flex flex-col h-full relative overflow-hidden">
+        <div className="bg-bg-secondary border border-border p-8 flex flex-col h-full relative overflow-hidden">
             <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
 
             <div className="relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-8">
-                    <h2 className="mono text-xs font-bold uppercase tracking-widest text-white flex items-center gap-3">
-                        <Activity className="w-4 h-4 text-white" />
+                    <h2 className="mono text-xs font-bold uppercase tracking-widest text-foreground flex items-center gap-3">
+                        <Activity className="w-4 h-4 text-foreground" />
                         Vault Analytics
                     </h2>
                 </div>
@@ -79,44 +79,44 @@ export function VaultHealth({ credentials }: VaultHealthProps) {
                     </div>
 
                     {/* Metrics Grid */}
-                    <div className="grid grid-cols-2 gap-px bg-[#222] border border-[#222]">
-                        <div className="bg-[#0A0A0A] p-4">
-                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Total</p>
-                            <p className="mono text-lg font-bold text-white flex items-center gap-2">
-                                <KeyRound className="w-3.5 h-3.5 text-gray-400" /> {totalCount}
+                    <div className="grid grid-cols-2 gap-px bg-border border border-border">
+                        <div className="bg-bg-secondary p-4">
+                            <p className="mono text-[10px] text-fg-muted tracking-widest uppercase mb-2">Total</p>
+                            <p className="mono text-lg font-bold text-foreground flex items-center gap-2">
+                                <KeyRound className="w-3.5 h-3.5 text-fg-secondary" /> {totalCount}
                             </p>
                         </div>
-                        <div className="bg-[#0A0A0A] p-4">
-                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Reused</p>
-                            <p className={`mono text-lg font-bold flex items-center gap-2 ${reusedPasswords > 0 ? 'text-yellow-500' : 'text-white'}`}>
+                        <div className="bg-bg-secondary p-4">
+                            <p className="mono text-[10px] text-fg-muted tracking-widest uppercase mb-2">Reused</p>
+                            <p className={`mono text-lg font-bold flex items-center gap-2 ${reusedPasswords > 0 ? 'text-yellow-500' : 'text-foreground'}`}>
                                 {reusedPasswords}
                             </p>
                         </div>
-                        <div className="bg-[#0A0A0A] p-4">
-                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Expiring</p>
-                            <p className={`mono text-lg font-bold flex items-center gap-2 ${expiringSoon > 0 ? 'text-yellow-500' : 'text-white'}`}>
+                        <div className="bg-bg-secondary p-4">
+                            <p className="mono text-[10px] text-fg-muted tracking-widest uppercase mb-2">Expiring</p>
+                            <p className={`mono text-lg font-bold flex items-center gap-2 ${expiringSoon > 0 ? 'text-yellow-500' : 'text-foreground'}`}>
                                 {expiringSoon}
                             </p>
                         </div>
-                        <div className="bg-[#0A0A0A] p-4">
-                            <p className="mono text-[10px] text-gray-500 tracking-widest uppercase mb-2">Weak</p>
-                            <p className={`mono text-lg font-bold flex items-center gap-2 ${weakPasswords > 0 ? 'text-red-500' : 'text-white'}`}>
+                        <div className="bg-bg-secondary p-4">
+                            <p className="mono text-[10px] text-fg-muted tracking-widest uppercase mb-2">Weak</p>
+                            <p className={`mono text-lg font-bold flex items-center gap-2 ${weakPasswords > 0 ? 'text-red-500' : 'text-foreground'}`}>
                                 {weakPasswords}
                             </p>
                         </div>
                     </div>
 
-                    <div className="pt-6 border-t border-[#222] space-y-3">
-                        <p className="mono text-[10px] text-gray-500 tracking-widest uppercase leading-relaxed max-w-[280px]">
+                    <div className="pt-6 border-t border-border space-y-3">
+                        <p className="mono text-[10px] text-fg-muted tracking-widest uppercase leading-relaxed max-w-[280px]">
                             Keys are stored securely in local memory. Auto-purge initialized on 15 minutes of inactivity.
                         </p>
                     </div>
                 </div>
 
-                <div className="mt-8 flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#222]">
+                <div className="mt-8 flex flex-col sm:flex-row gap-3 pt-6 border-t border-border">
                     <button
                         onClick={handleManualLock}
-                        className="flex-1 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-white transition-colors mono text-[10px] uppercase tracking-widest font-bold border border-white/10 hover:border-white/30"
+                        className="flex-1 h-12 flex items-center justify-center bg-foreground/5 hover:bg-foreground/10 text-foreground transition-colors mono text-[10px] uppercase tracking-widest font-bold border border-foreground/10 hover:border-foreground/30"
                     >
                         Lock Vault
                     </button>

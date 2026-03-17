@@ -38,11 +38,11 @@ export default function ForgotPasswordPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-[#050505] border border-[#222] p-8 text-center"
+                className="bg-bg-secondary border border-border p-8 text-center"
             >
                 {/* Animated Logo */}
                 <div className="relative w-16 h-16 mb-8 flex items-center justify-center mx-auto">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-white/20">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-foreground/20">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                     </svg>
                     <motion.svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#ff4500] drop-shadow-[0_0_12px_rgba(255,69,0,1)] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -55,16 +55,16 @@ export default function ForgotPasswordPage() {
                     </motion.svg>
                 </div>
 
-                <div className="mono text-[10px] text-[#ff4500] tracking-widest uppercase mb-3">LINK_DISPATCHED // SECURE_CHANNEL</div>
-                <h1 className="text-2xl font-bold tracking-tight text-white mb-4">
+                <div className="mono text-[10px] text-success tracking-widest uppercase mb-3">LINK_DISPATCHED // SECURE_CHANNEL</div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground mb-4">
                     Check Your Email
                 </h1>
-                <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+                <p className="text-fg-secondary text-sm mb-8 leading-relaxed">
                     If an account exists for that email, we&apos;ve sent a secure password reset link.
                 </p>
                 <Link
                     href="/"
-                    className="mono text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition-colors"
+                    className="mono text-[10px] text-fg-muted hover:text-foreground uppercase tracking-widest transition-colors"
                 >
                     ← Return to Home
                 </Link>
@@ -77,11 +77,11 @@ export default function ForgotPasswordPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-[#050505] border border-[#222] p-8"
+            className="bg-bg-secondary border border-border p-8"
         >
             {/* Animated Logo */}
             <div className="relative w-16 h-16 mb-8 flex items-center justify-center">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-white/20">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-foreground/20">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                 </svg>
                 <motion.svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#ff4500] drop-shadow-[0_0_12px_rgba(255,69,0,1)] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -95,11 +95,11 @@ export default function ForgotPasswordPage() {
             </div>
 
             <div className="mb-8">
-                <div className="mono text-[10px] text-[#ff4500] tracking-widest uppercase mb-3">PWD_RECOVERY // SECURE_CHANNEL</div>
-                <h1 className="text-2xl font-bold tracking-tight text-white mb-2">
+                <div className="mono text-[10px] text-success tracking-widest uppercase mb-3">PWD_RECOVERY // SECURE_CHANNEL</div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">
                     Reset Password
                 </h1>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-fg-secondary text-sm leading-relaxed">
                     Enter your email address and we&apos;ll send you a link to reset your master password.
                 </p>
             </div>
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
                 </AnimatePresence>
 
                 <div className="space-y-1.5">
-                    <label htmlFor="email" className="mono text-[9px] uppercase tracking-widest text-gray-500">
+                    <label htmlFor="email" className="mono text-[9px] uppercase tracking-widest text-fg-muted">
                         Email Address
                     </label>
                     <input
@@ -129,22 +129,22 @@ export default function ForgotPasswordPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isLoading}
-                        className="w-full bg-[#111] border border-[#222] px-4 py-3 text-white text-sm focus:outline-none focus:border-[#ff4500]/60 focus:bg-[#1a1a1a] transition-all disabled:opacity-50 placeholder-gray-600"
+                        className="w-full bg-bg-tertiary border border-border px-4 py-3 text-foreground text-sm focus:outline-none focus:border-success/60 focus:bg-border transition-all disabled:opacity-50 placeholder-fg-muted"
                         placeholder="you@example.com"
                     />
                 </div>
 
-                <div className="bg-[#ff8c00]/10 border border-[#ff8c00]/20 p-4 text-xs text-[#ff8c00] mono uppercase tracking-wider leading-relaxed">
+                <div className="bg-warning/10 border border-warning/20 p-4 text-xs text-warning mono uppercase tracking-wider leading-relaxed">
                     <strong>Warning:</strong> Resetting your master password does not recover your old encrypted data. Your old data remains encrypted with your old password.
                 </div>
 
                 <button
                     type="submit"
                     disabled={isLoading || !email}
-                    className="w-full bg-white text-black font-semibold px-4 py-3 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center mono text-sm uppercase tracking-widest"
+                    className="w-full bg-foreground text-background font-semibold px-4 py-3 hover:opacity-90 transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center mono text-sm uppercase tracking-widest"
                 >
                     {isLoading ? (
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
                     ) : (
                         "Send Reset Link"
                     )}
@@ -152,7 +152,7 @@ export default function ForgotPasswordPage() {
             </form>
 
             <div className="mt-8 text-center">
-                <Link href="/" className="mono text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition-colors">
+                <Link href="/" className="mono text-[10px] text-fg-muted hover:text-foreground uppercase tracking-widest transition-colors">
                     ← Back to Home
                 </Link>
             </div>

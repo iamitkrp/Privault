@@ -15,7 +15,7 @@ export function AnimatedLogo() {
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-white/20 group-hover:text-white/50 transition-colors duration-500"
+                className="text-foreground/30 group-hover:text-foreground/70 transition-colors duration-500"
             >
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
             </svg>
@@ -29,7 +29,7 @@ export function AnimatedLogo() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] group-hover:text-amber-500 group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,1)] transition-all duration-500 absolute left-0 top-1/2 -translate-y-1/2"
+                className="text-foreground drop-shadow-[0_0_8px_rgba(var(--color-foreground),0.8)] group-hover:text-amber-500 group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,1)] transition-all duration-500 absolute left-0 top-1/2 -translate-y-1/2"
             >
                 <motion.path
                     d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
@@ -39,7 +39,7 @@ export function AnimatedLogo() {
                 />
             </motion.svg>
 
-            <span className="mono text-sm tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 relative z-10 transition-colors duration-500 group-hover:from-white group-hover:to-amber-500">
+            <span className="mono text-sm tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-foreground to-fg-secondary relative z-10 transition-colors duration-500 group-hover:from-foreground group-hover:to-amber-500">
                 PRIVAULT.
             </span>
         </Link>

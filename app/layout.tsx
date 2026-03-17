@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/auth/auth-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,13 +43,20 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <ErrorBoundary>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </ErrorBoundary>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <ErrorBoundary>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </ErrorBoundary>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

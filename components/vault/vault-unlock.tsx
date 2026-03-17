@@ -301,33 +301,33 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
         >
             <div className="flex flex-col gap-8 w-full">
                 {/* Main Panel */}
-                <div className="border border-[#222] bg-[#0A0A0A] p-8 sm:p-10 relative overflow-hidden">
+                <div className="border border-border bg-bg-secondary p-8 sm:p-10 relative overflow-hidden">
                     {/* Background accents */}
-                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#ff4500]/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-success/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
 
                     <div className="flex flex-col gap-8 relative z-10 w-full">
                         {/* Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#222] pb-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-secondary pb-6">
                             <div className="flex items-center gap-3">
-                                <Lock className="w-5 h-5 text-[#ff4500]" />
-                                <span className="mono text-sm uppercase tracking-[0.2em] text-white">
+                                <Lock className="w-5 h-5 text-success" />
+                                <span className="mono text-sm uppercase tracking-[0.2em] text-foreground">
                                     Encrypted Storage
                                 </span>
                             </div>
-                            <div className="flex items-center gap-2 mono text-[10px] uppercase tracking-widest text-[#ff4500] px-3 py-1.5 bg-[#ff4500]/10 border border-[#ff4500]/20">
-                                <div className="w-1.5 h-1.5 rounded-full bg-[#ff4500] animate-pulse" />
+                            <div className="flex items-center gap-2 mono text-[10px] uppercase tracking-widest text-success px-3 py-1.5 bg-success/10 border border-success/20">
+                                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                                 Locked
                             </div>
                         </div>
 
                         {/* Description */}
                         <div className="flex flex-col gap-3">
-                            <h3 className="mono text-sm tracking-widest text-gray-400 uppercase flex items-center gap-2">
+                            <h3 className="mono text-sm tracking-widest text-fg-muted uppercase flex items-center gap-2">
                                 <Terminal className="w-4 h-4" />
                                 Authentication Required
                             </h3>
-                            <p className="mono text-xs leading-relaxed text-gray-500 uppercase tracking-widest max-w-[480px]">
+                            <p className="mono text-xs leading-relaxed text-fg-secondary uppercase tracking-widest max-w-[480px]">
                                 Your vault is currently sealed using AES-256-GCM encryption. Provide your master decryption key to mount the local secure volume.
                             </p>
                         </div>
@@ -341,7 +341,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                     exit={{ opacity: 0, height: 0 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="mono text-[10px] uppercase tracking-widest text-[#ff4500] bg-[#ff4500]/10 border border-[#ff4500]/20 px-4 py-3 flex items-center justify-between gap-3 mt-2">
+                                    <div className="mono text-[10px] uppercase tracking-widest text-success bg-success/10 border border-success/20 px-4 py-3 flex items-center justify-between gap-3 mt-2">
                                         <div className="flex items-start gap-3">
                                             <Activity className="w-3.5 h-3.5 shrink-0 mt-[1px] animate-pulse" />
                                             <span className="leading-relaxed">SYNCHRONIZING SECURE PROFILE...</span>
@@ -349,7 +349,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                         <button
                                             type="button"
                                             onClick={() => window.location.reload()}
-                                            className="shrink-0 px-2 py-1 border border-[#ff4500]/30 hover:bg-[#ff4500]/20 transition-colors text-[9px]"
+                                            className="shrink-0 px-2 py-1 border border-success/30 hover:bg-success/20 transition-colors text-[9px]"
                                         >
                                             RETRY
                                         </button>
@@ -362,7 +362,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                     exit={{ opacity: 0, height: 0 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="mono text-[10px] uppercase tracking-widest text-red-500 bg-red-950/20 border border-red-900/40 px-4 py-3 flex items-center justify-between gap-3 mt-2">
+                                    <div className="mono text-[10px] uppercase tracking-widest text-error bg-error/10 border border-error/20 px-4 py-3 flex items-center justify-between gap-3 mt-2">
                                         <div className="flex items-start gap-3">
                                             <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-[1px]" />
                                             <span className="leading-relaxed">SYNC FAILED: {profileError}</span>
@@ -370,7 +370,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                         <button
                                             type="button"
                                             onClick={() => window.location.reload()}
-                                            className="shrink-0 px-2 py-1 border border-red-500/30 hover:bg-red-500/20 transition-colors text-[9px]"
+                                            className="shrink-0 px-2 py-1 border border-error/30 hover:bg-error/20 transition-colors text-[9px]"
                                         >
                                             RETRY
                                         </button>
@@ -383,7 +383,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                     exit={{ opacity: 0, height: 0 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="mono text-[10px] uppercase tracking-widest text-red-500 bg-red-950/20 border border-red-900/40 px-4 py-3 flex items-start gap-3 mt-2">
+                                    <div className="mono text-[10px] uppercase tracking-widest text-error bg-error/10 border border-error/20 px-4 py-3 flex items-start gap-3 mt-2">
                                         <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-[1px]" />
                                         <span className="leading-relaxed">{error}</span>
                                     </div>
@@ -394,12 +394,12 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                         {/* Form */}
                         <form onSubmit={handleUnlock} className="flex flex-col gap-6 mt-2">
                             <div className="flex flex-col gap-3">
-                                <label className="mono text-[10px] text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                                    <Key className="w-3 h-3 text-[#ff4500]" />
+                                <label className="mono text-[10px] text-fg-secondary uppercase tracking-widest flex items-center gap-2">
+                                    <Key className="w-3 h-3 text-success" />
                                     Master Decryption Key
                                 </label>
                                 <div className="relative flex items-center group">
-                                    <span className="absolute left-4 text-[#ff4500] font-mono text-sm group-focus-within:animate-pulse">
+                                    <span className="absolute left-4 text-success font-mono text-sm group-focus-within:animate-pulse">
                                         &gt;
                                     </span>
                                     <input
@@ -410,16 +410,16 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                         onChange={(e) => setPassword(e.target.value)}
                                         disabled={isLoading || isLockedOut}
                                         placeholder="Enter decryption key..."
-                                        className="w-full h-14 bg-black/60 border border-[#333] focus:border-[#ff4500]/50 text-white mono text-sm sm:text-base tracking-[0.2em] sm:tracking-[0.3em] pl-10 pr-4 outline-none transition-all duration-300 placeholder:text-gray-800 focus:shadow-[0_0_20px_rgba(255,69,0,0.05)] disabled:opacity-50"
+                                        className="w-full h-14 bg-background/60 border border-border-secondary focus:border-success/50 text-foreground mono text-sm sm:text-base tracking-[0.2em] sm:tracking-[0.3em] pl-10 pr-4 outline-none transition-all duration-300 placeholder:text-fg-muted focus:shadow-[0_0_20px_rgba(255,69,0,0.05)] disabled:opacity-50"
                                     />
                                     {/* Bottom glow line on focus */}
-                                    <div className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#ff4500]/0 to-transparent group-focus-within:via-[#ff4500]/40 transition-all duration-500" />
+                                    <div className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-success/0 to-transparent group-focus-within:via-success/40 transition-all duration-500" />
                                 </div>
                             </div>
 
                             {/* Lockout Timer */}
                             {isLockedOut && (
-                                <div className="mono text-[10px] text-[#ff4500] uppercase tracking-widest mt-[-8px]">
+                                <div className="mono text-[10px] text-success uppercase tracking-widest mt-[-8px]">
                                     Locked — {remainingSeconds}s remaining
                                 </div>
                             )}
@@ -427,14 +427,14 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                             <button
                                 type="submit"
                                 disabled={isLoading || !password || isLockedOut || !profile}
-                                className="h-14 mt-2 bg-white hover:bg-gray-200 text-black transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-40 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed group relative overflow-hidden"
+                                className="h-14 mt-2 bg-foreground hover:opacity-90 text-background transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-40 disabled:bg-foreground/10 disabled:text-fg-secondary disabled:cursor-not-allowed group relative overflow-hidden"
                             >
                                 {/* Shimmer sweep */}
                                 {!isLoading && password && !isLockedOut && profile && (
                                     <motion.div
                                         animate={{ x: ["-100%", "200%"] }}
                                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                        className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-black/10 to-transparent skew-x-12"
+                                        className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-background/10 to-transparent skew-x-12"
                                     />
                                 )}
                                 <span className="relative z-10 flex items-center gap-2 mono text-xs font-bold uppercase tracking-[0.2em]">
@@ -466,10 +466,10 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 </div>
 
                 {/* Footer Metrics */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-gray-500 mono text-[9px] uppercase tracking-widest px-2 relative z-10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-fg-secondary mono text-[9px] uppercase tracking-widest px-2 relative z-10">
                     <div className="flex items-center gap-6">
                         <span className="flex items-center gap-2">
-                            <Activity className="w-3 h-3 text-[#ff4500]" /> 
+                            <Activity className="w-3 h-3 text-success" /> 
                             SYSTEM_STATUS: OK
                         </span>
                         <span className="hidden sm:inline">PROTOCOL: PBKDF2-HMAC-SHA256</span>

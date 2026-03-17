@@ -85,17 +85,17 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-[#0A0A0A] w-full max-w-lg shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-[#222] flex flex-col max-h-[90vh] relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-bg-secondary w-full max-w-lg shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-border flex flex-col max-h-[90vh] relative overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-[#222] relative z-10">
-                    <h2 className="mono text-xs font-bold uppercase tracking-widest text-white">
+                <div className="flex items-center justify-between p-6 border-b border-border relative z-10">
+                    <h2 className="mono text-xs font-bold uppercase tracking-widest text-foreground">
                         {isEditing ? "Edit Credential" : "Add to Vault"}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-1.5 hover:bg-white/5 text-gray-500 hover:text-white transition-colors focus:outline-none"
+                        className="p-1.5 hover:bg-foreground/5 text-fg-muted hover:text-foreground transition-colors focus:outline-none"
                     >
                         <X className="w-4 h-4" />
                     </button>
@@ -114,18 +114,18 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
 
                         {/* Type Tabs */}
                         {!isEditing && (
-                            <div className="flex border border-[#222] bg-[#0A0A0A] p-1">
+                            <div className="flex border border-border bg-bg-secondary p-1">
                                 <button
                                     type="button"
                                     onClick={() => setType("login")}
-                                    className={`flex-1 py-2 text-[10px] mono uppercase tracking-widest font-bold transition-colors ${type === "login" ? "bg-white text-black" : "text-gray-500 hover:text-white"}`}
+                                    className={`flex-1 py-2 text-[10px] mono uppercase tracking-widest font-bold transition-colors ${type === "login" ? "bg-foreground text-background" : "text-fg-muted hover:text-foreground"}`}
                                 >
                                     Login
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setType("secure_note")}
-                                    className={`flex-1 py-2 text-[10px] mono uppercase tracking-widest font-bold transition-colors ${type === "secure_note" ? "bg-white text-black" : "text-gray-500 hover:text-white"}`}
+                                    className={`flex-1 py-2 text-[10px] mono uppercase tracking-widest font-bold transition-colors ${type === "secure_note" ? "bg-foreground text-background" : "text-fg-muted hover:text-foreground"}`}
                                 >
                                     Secure Note
                                 </button>
@@ -134,21 +134,21 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className={`space-y-2 ${type === "secure_note" ? "col-span-2" : "col-span-2 md:col-span-1"}`}>
-                                <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">
-                                    {type === "secure_note" ? "Note Title" : "Service Name"} <span className="text-red-500">*</span>
+                                <label className="mono text-[10px] tracking-widest text-fg-muted uppercase">
+                                    {type === "secure_note" ? "Note Title" : "Service Name"} <span className="text-error">*</span>
                                 </label>
                                 <input
                                     type="text" required autoFocus
                                     value={siteName} onChange={e => setSiteName(e.target.value)}
-                                    className="w-full h-12 bg-black/60 border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
+                                    className="w-full h-12 bg-background/60 border border-border px-4 text-foreground mono focus:border-foreground focus:outline-none transition-colors placeholder:text-fg-secondary text-sm"
                                     placeholder="e.g. GitHub"
                                 />
                             </div>
                             <div className="space-y-2 col-span-2 md:col-span-1">
-                                <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Category</label>
+                                <label className="mono text-[10px] tracking-widest text-fg-muted uppercase">Category</label>
                                 <select
                                     value={category} onChange={e => setCategory(e.target.value as VaultCredential['category'])}
-                                    className="w-full h-12 bg-[#0A0A0A] border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors text-sm appearance-none"
+                                    className="w-full h-12 bg-bg-secondary border border-border px-4 text-foreground mono focus:border-foreground focus:outline-none transition-colors text-sm appearance-none"
                                 >
                                     <option value="other">General / Other</option>
                                     <option value="work">Work</option>
@@ -162,11 +162,11 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                         {/* Expiration */}
                         {type === "login" && (
                             <div className="space-y-2">
-                                <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Password Expiration</label>
+                                <label className="mono text-[10px] tracking-widest text-fg-muted uppercase">Password Expiration</label>
                                 <select
                                     value={expirationDays}
                                     onChange={e => setExpirationDays(e.target.value)}
-                                    className="w-full h-12 bg-[#0A0A0A] border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors text-sm appearance-none"
+                                    className="w-full h-12 bg-bg-secondary border border-border px-4 text-foreground mono focus:border-foreground focus:outline-none transition-colors text-sm appearance-none"
                                 >
                                     <option value="0">Never</option>
                                     <option value="30">30 days</option>
@@ -181,19 +181,19 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                         {type === "login" && (
                             <>
                                 <div className="space-y-2">
-                                    <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Username / Email <span className="text-red-500">*</span></label>
+                                    <label className="mono text-[10px] tracking-widest text-fg-muted uppercase">Username / Email <span className="text-error">*</span></label>
                                     <input
                                         type="text" required spellCheck="false"
                                         value={username} onChange={e => setUsername(e.target.value)}
-                                        className="w-full h-12 bg-black/60 border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
+                                        className="w-full h-12 bg-background/60 border border-border px-4 text-foreground mono focus:border-foreground focus:outline-none transition-colors placeholder:text-fg-secondary text-sm"
                                         placeholder="admin"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-end mb-1">
-                                        <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Password <span className="text-red-500">*</span></label>
-                                        <button type="button" onClick={() => setShowGenerator(!showGenerator)} className="mono text-[10px] tracking-widest text-gray-500 hover:text-white uppercase transition-colors focus:outline-none decoration-transparent">
+                                        <label className="mono text-[10px] tracking-widest text-fg-muted uppercase">Password <span className="text-error">*</span></label>
+                                        <button type="button" onClick={() => setShowGenerator(!showGenerator)} className="mono text-[10px] tracking-widest text-fg-muted hover:text-foreground uppercase transition-colors focus:outline-none decoration-transparent">
                                             {showGenerator ? "Hide Generator" : "Generate"}
                                         </button>
                                     </div>
@@ -202,22 +202,22 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                                         <input
                                             type={showPassword ? "text" : "password"} required spellCheck="false"
                                             value={password} onChange={e => setPassword(e.target.value)}
-                                            className="w-full h-12 bg-black/60 border border-[#222] pl-4 pr-20 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
+                                            className="w-full h-12 bg-background/60 border border-border pl-4 pr-20 text-foreground mono focus:border-foreground focus:outline-none transition-colors placeholder:text-fg-secondary text-sm"
                                         />
-                                        <div className="absolute right-2 flex gap-1 bg-[#0A0A0A] px-1">
+                                        <div className="absolute right-2 flex gap-1 bg-bg-secondary px-1">
                                             <button
                                                 type="button" tabIndex={-1}
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="p-1.5 text-gray-500 hover:text-white transition-colors focus:outline-none"
+                                                className="p-1.5 text-fg-muted hover:text-foreground transition-colors focus:outline-none"
                                             >
                                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
                                             <button
                                                 type="button" tabIndex={-1}
                                                 onClick={copyPassword}
-                                                className="p-1.5 text-gray-500 hover:text-green-500 transition-colors focus:outline-none"
+                                                className="p-1.5 text-fg-muted hover:text-success transition-colors focus:outline-none"
                                             >
-                                                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                                                {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                                             </button>
                                         </div>
                                     </div>
@@ -237,26 +237,26 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                                 )}
 
                                 <div className="space-y-2">
-                                    <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">Website URL</label>
+                                    <label className="mono text-[10px] tracking-widest text-fg-muted uppercase">Website URL</label>
                                     <input
                                         type="url" placeholder="https://"
                                         value={url} onChange={e => setUrl(e.target.value)}
-                                        className="w-full h-12 bg-black/60 border border-[#222] px-4 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm"
+                                        className="w-full h-12 bg-background/60 border border-border px-4 text-foreground mono focus:border-foreground focus:outline-none transition-colors placeholder:text-fg-secondary text-sm"
                                     />
                                 </div>
                             </>
                         )}
 
                         <div className="space-y-2">
-                            <label className="mono text-[10px] tracking-widest text-gray-500 uppercase">
+                            <label className="mono text-[10px] tracking-widest text-fg-muted uppercase">
                                 {type === "secure_note" ? "Secure Note Content" : "Additional Notes"}
-                                {type === "secure_note" && <span className="text-red-500 ml-1">*</span>}
+                                {type === "secure_note" && <span className="text-error ml-1">*</span>}
                             </label>
                             <textarea
                                 rows={type === "secure_note" ? 10 : 3}
                                 required={type === "secure_note"}
                                 value={notes} onChange={e => setNotes(e.target.value)}
-                                className="w-full bg-black/60 border border-[#222] px-4 py-3 text-white mono focus:border-white focus:outline-none transition-colors placeholder:text-gray-800 text-sm resize-none"
+                                className="w-full bg-background/60 border border-border px-4 py-3 text-foreground mono focus:border-foreground focus:outline-none transition-colors placeholder:text-fg-secondary text-sm resize-none"
                                 placeholder="..."
                             />
                         </div>
@@ -265,21 +265,21 @@ export function CredentialModal({ isOpen, onClose, onSave, existingCredential }:
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-[#222] bg-[#0A0A0A] flex gap-4 justify-end items-center relative z-10">
+                <div className="p-6 border-t border-border bg-bg-secondary flex gap-4 justify-end items-center relative z-10">
                     <button
                         type="button" onClick={onClose} disabled={isSaving}
-                        className="mono text-[10px] uppercase tracking-widest font-bold text-gray-500 hover:text-white transition-colors disabled:opacity-50"
+                        className="mono text-[10px] uppercase tracking-widest font-bold text-fg-muted hover:text-foreground transition-colors disabled:opacity-50"
                     >
                         Cancel
                     </button>
                     <button
                         form="cred-form" type="submit"
                         disabled={isSaving || !siteName || (type === "login" && (!username || !password)) || (type === "secure_note" && !notes)}
-                        className="h-12 px-8 bg-white hover:bg-gray-200 text-black mono text-[10px] uppercase tracking-widest font-bold transition-all flex items-center gap-2 group disabled:opacity-50 disabled:pointer-events-none"
+                        className="h-12 px-8 bg-foreground hover:opacity-90 text-background mono text-[10px] uppercase tracking-widest font-bold transition-all flex items-center gap-2 group disabled:opacity-50 disabled:pointer-events-none"
                     >
                         {isSaving ? (
                             <>
-                                <span className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin block" />
+                                <span className="w-3 h-3 border-2 border-background/30 border-t-background rounded-full animate-spin block" />
                                 {isEditing ? "Updating" : "Encrypting"}
                             </>
                         ) : (isEditing ? "Update" : "Save Securely")}
