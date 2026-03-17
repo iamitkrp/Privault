@@ -50,7 +50,7 @@ export default function EncryptionPipeline() {
         >
             
             {/* Ambient Background Glow Effect matching the theme */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/10 via-transparent to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand/20 via-transparent to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
             
             {/* Subtle Dot Matrix Background matching the grid theme */}
             <div 
@@ -60,7 +60,7 @@ export default function EncryptionPipeline() {
 
             <svg
                 viewBox="0 0 700 700"
-                className="w-full h-full drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] pointer-events-none relative z-10"
+                className="w-full h-full svg-shadow pointer-events-none relative z-10"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="xMidYMid meet"
@@ -149,7 +149,7 @@ export default function EncryptionPipeline() {
                         <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 1 ? "#ff4500" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
-                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Master Password</text>
+                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Master Password</text>
                         <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">ONLY EXISTS IN MEMORY</text>
                     </g>
 
@@ -162,9 +162,9 @@ export default function EncryptionPipeline() {
                     >
                         <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 2 ? "#00ffcc" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <rect x="-4" y="25" width="4" height="50" fill="#00ffcc" opacity="0.8" />
-                        <text x="20" y="35" fill="#00ffcc" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
-                        <text x="20" y="65" fill="#00ffcc" fontFamily="sans-serif" fontSize="20" fontWeight="bold">PBKDF2 Hashing</text>
-                        <text x="20" y="85" fill="#00ffcc" opacity="0.7" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
+                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
+                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">PBKDF2 Hashing</text>
+                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
                     </g>
 
                     {/* Cryptographic Key - STEP 03 */}
@@ -177,7 +177,7 @@ export default function EncryptionPipeline() {
                         <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 3 ? "#00ffcc" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <line x1="210" y1="0" x2="240" y2="0" stroke="#00ffcc" strokeWidth="4" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
-                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="18" fontWeight="bold">Cryptographic Key</text>
+                        <text x="20" y="65" className="fill-foreground font-sans text-lg font-bold">Cryptographic Key</text>
                         <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">AES-256 (32 BYTES)</text>
                     </g>
 
@@ -191,7 +191,7 @@ export default function EncryptionPipeline() {
                         <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 4 ? "#ff4500" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
-                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Private Vault Data</text>
+                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Private Vault Data</text>
                         <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">PASSWORDS & NOTES</text>
                     </g>
 
@@ -210,9 +210,9 @@ export default function EncryptionPipeline() {
                             }
                             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                         />
-                        <text x="25" y="35" fill="#a855f7" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
-                        <text x="25" y="65" fill="#a855f7" fontFamily="sans-serif" fontSize="24" fontWeight="bold">AES-256-GCM</text>
-                        <text x="25" y="85" fill="#a855f7" opacity="0.7" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
+                        <text x="25" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
+                        <text x="25" y="65" className="fill-foreground font-sans text-2xl font-bold">AES-256-GCM</text>
+                        <text x="25" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
 
                         {/* Inner decorative scanning line */}
                         <motion.line
@@ -232,7 +232,7 @@ export default function EncryptionPipeline() {
                         <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 6 ? "var(--color-fg-muted)" : "var(--color-border-secondary)"} strokeWidth="2" />
                         <rect x="236" y="25" width="4" height="50" fill="#a855f7" opacity="0.8" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
-                        <text x="20" y="65" className="fill-foreground" fontFamily="sans-serif" fontSize="20" fontWeight="bold">Blind Server</text>
+                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Blind Server</text>
                         <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">CANNOT DECRYPT</text>
                     </g>
                 </g>

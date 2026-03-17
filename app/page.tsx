@@ -91,7 +91,7 @@ export default function LandingPage() {
     >
       {/* Immersive Grid Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-grid-pattern opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background/90" />
       </div>
 
       {/* Navigation - Minimalist Technical */}
@@ -172,7 +172,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mono text-xs text-secondary-foreground mb-8 tracking-widest uppercase flex items-center gap-2 border border-border px-3 py-1 bg-background/50"
+            className="mono text-xs text-fg-secondary mb-8 tracking-widest uppercase flex items-center gap-2 border border-border px-3 py-1 bg-background/50"
           >
             <Activity className="w-3 h-3 text-success" />
             <span>[[ SYSTEM ENCRYPTED // AES-256 ]]</span>
@@ -190,7 +190,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-5xl md:text-7xl font-normal tracking-tighter text-gray-500 mt-2 mb-8 leading-[0.9]"
+            className="text-4xl sm:text-5xl md:text-7xl font-normal tracking-tighter text-gradient mt-2 mb-8 leading-[0.9]"
           >
             [Zero Knowledge.]
           </motion.h2>
@@ -199,7 +199,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="mono text-sm text-gray-400 max-w-lg leading-relaxed mb-12"
+            className="mono text-sm text-fg-muted max-w-lg leading-relaxed mb-12"
           >
             Client-side encryption before data leaves your device. We cannot see, share, or sell your passwords. We are mathematically blind to your vault.
           </motion.p>
@@ -242,7 +242,7 @@ export default function LandingPage() {
       </div>
 
       {/* Feature Grid */}
-      <section id="features" className="relative z-20 py-32 px-6 lg:px-12 bg-bg-secondary border-y border-border">
+      <section id="features" className="relative z-20 py-32 px-6 lg:px-12 bg-background border-y border-border/50">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20">
             <motion.h2
@@ -259,13 +259,13 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="mono text-sm text-gray-400 max-w-2xl uppercase tracking-widest leading-relaxed"
+              className="mono text-sm text-fg-muted max-w-2xl uppercase tracking-widest leading-relaxed"
             >
               We've stripped away the noise and focused entirely on cryptographic perfection.
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border border border-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border border-border glass p-[1px]">
             {features.map((f, i) => (
               <motion.div
                 key={i}
@@ -289,14 +289,14 @@ export default function LandingPage() {
                   {f.title}
                 </h3>
 
-                <p className="mono text-gray-500 text-[10px] sm:text-xs leading-relaxed uppercase tracking-wider pr-4 group-hover:text-gray-400 transition-colors">
+                <p className="mono text-fg-secondary text-[10px] sm:text-xs leading-relaxed uppercase tracking-wider pr-4 group-hover:text-foreground transition-colors">
                   {f.desc}
                 </p>
 
                 {/* Tech metadata details */}
                 <div className="absolute bottom-4 right-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
-                  <div className="mono text-[7px] text-gray-700">STATUS: VERIFIED</div>
-                  <div className="mono text-[7px] text-gray-700 font-bold px-1.5 py-0.5 border border-gray-800">MOD_{i + 1}</div>
+                  <div className="mono text-[7px] text-fg-muted">STATUS: VERIFIED</div>
+                  <div className="mono text-[7px] text-fg-muted font-bold px-1.5 py-0.5 border border-border">MOD_{i + 1}</div>
                 </div>
 
                 {/* Decorative corner square */}
@@ -313,7 +313,7 @@ export default function LandingPage() {
       <footer className="relative z-20 pt-16 pb-20 border-t border-border bg-background text-xs text-fg-secondary mono uppercase tracking-widest">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <Hexagon className="w-4 h-4 text-gray-500" strokeWidth={1.5} />
+            <Hexagon className="w-4 h-4 text-fg-muted" strokeWidth={1.5} />
             <span>© {new Date().getFullYear()} Privault [SECURE].</span>
           </div>
           <div className="flex items-center gap-8">

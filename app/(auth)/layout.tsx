@@ -9,7 +9,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
                 {/* Grid background matching landing page */}
                 <div className="fixed inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
-                <div className="fixed inset-0 bg-gradient-to-b from-transparent via-black/60 to-black pointer-events-none" />
+                <div className="fixed inset-0 bg-gradient-to-b from-transparent via-background/60 to-background pointer-events-none" />
 
                 {/* Nav bar */}
                 <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-md border-b border-foreground/10 bg-background/40">
@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                     <div className="flex items-center gap-4">
                         <span className="text-foreground bg-bg-secondary px-2 py-0.5">SECURE_ENV: READY</span>
                         <span>&gt;&gt;&gt;&gt;&gt;</span>
-                        <span className="text-[#ff4500]">0 / 100%</span>
+                        <span className="text-success">0 / 100%</span>
                     </div>
                     <div className="flex items-center gap-6">
                         <span className="flex items-center gap-1"><Database className="w-3 h-3" /> VAULT_SYNC: STANDBY</span>

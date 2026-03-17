@@ -23,6 +23,10 @@
   --fg-muted: #555555;
   --fg-inverted: #000000;
 
+  /* Text Gradients */
+  --text-gradient-start: #ffffff;
+  --text-gradient-end: #888888;
+
   /* Brand – Hacker/Technical Accent */
   --brand-primary: #ffffff;
   --brand-primary-hover: #cccccc;
@@ -65,41 +69,49 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg-primary: #ffffff;
+  /* Background layers - premium off-white */
+  --bg-primary: #fafafa;
   --bg-secondary: #f4f4f5;
   --bg-tertiary: #e4e4e7;
   --bg-elevated: #ffffff;
-  --bg-overlay: rgba(0, 0, 0, 0.4);
+  --bg-overlay: rgba(255, 255, 255, 0.8);
 
+  /* Foreground / text */
   --fg-primary: #09090b;
   --fg-secondary: #52525b;
-  --fg-muted: #a1a1aa;
-  --fg-inverted: #fafafa;
+  --fg-muted: #71717a;
+  --fg-inverted: #ffffff;
 
-  --brand-primary: #059669;
-  --brand-primary-hover: #047857;
-  --brand-primary-subtle: rgba(5, 150, 105, 0.08);
-  --brand-primary-muted: rgba(5, 150, 105, 0.15);
+  /* Text Gradients */
+  --text-gradient-start: #18181b; 
+  --text-gradient-end: #3f3f46; 
 
+  /* Brand – minimalist technical black */
+  --brand-primary: #09090b;
+  --brand-primary-hover: #18181b;
+  --brand-primary-subtle: rgba(9, 9, 11, 0.1);
+  --brand-primary-muted: rgba(9, 9, 11, 0.15);
+
+  /* Semantic colors */
   --color-success: #16a34a;
-  --color-warning: #d97706;
+  --color-warning: #ea580c;
   --color-error: #dc2626;
-  --color-info: #2563eb;
+  --color-info: #09090b;
 
-  --color-success-subtle: rgba(22, 163, 74, 0.08);
-  --color-warning-subtle: rgba(217, 119, 6, 0.08);
-  --color-error-subtle: rgba(220, 38, 38, 0.08);
-  --color-info-subtle: rgba(37, 99, 235, 0.08);
+  --color-success-subtle: rgba(22, 163, 74, 0.1);
+  --color-warning-subtle: rgba(234, 88, 12, 0.1);
+  --color-error-subtle: rgba(220, 38, 38, 0.1);
+  --color-info-subtle: rgba(9, 9, 11, 0.1);
 
   --border-primary: #e4e4e7;
   --border-secondary: #d4d4d8;
-  --border-focus: #059669;
+  --border-focus: #18181b;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 20px rgba(5, 150, 105, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.025);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.025);
+  --shadow-glow: 0 0 24px rgba(0, 0, 0, 0.1);
 }
 
 /* ---- Register tokens with Tailwind v4 ---- */
@@ -135,6 +147,12 @@ body {
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="light"] body {
+  background-color: var(--bg-primary);
+  background-image: radial-gradient(100% 100% at 50% 0%, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
+  background-attachment: fixed;
 }
 
 /* Tailwind preflight resets button cursor to 'default' — restore pointer globally */
@@ -186,6 +204,12 @@ a {
   background-size: 50px 50px;
 }
 
+[data-theme="light"] .bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
 /* Glassmorphism card - more solid/noise based for technical look */
 .glass {
   background: rgba(10, 10, 10, 0.6);
@@ -195,13 +219,16 @@ a {
 }
 
 [data-theme="light"] .glass {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Text gradient */
 .text-gradient {
-  background: linear-gradient(135deg, #ffffff, #888888);
+  background: linear-gradient(135deg, var(--text-gradient-start), var(--text-gradient-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -210,6 +237,14 @@ a {
 /* Glow effect for brand elements */
 .glow {
   box-shadow: var(--shadow-glow);
+}
+
+.svg-shadow {
+  filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.8));
+}
+
+[data-theme="light"] .svg-shadow {
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.05));
 }
 
 /* Smooth page transitions */

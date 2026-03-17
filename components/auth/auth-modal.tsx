@@ -136,7 +136,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 font-sans selection:bg-[#ff4500]/30">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 font-sans selection:bg-success/30">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -209,7 +209,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
                                             strokeWidth="1.5"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
-                                            className="text-[#ff4500] drop-shadow-[0_0_12px_rgba(255,69,0,1)] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                                            className="text-success drop-shadow-[0_0_12px_var(--color-success)] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                                         >
                                             <motion.path
                                                 d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
@@ -413,7 +413,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
                                                     strokeWidth="1.5"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
-                                                    className="text-[#ff4500] drop-shadow-[0_0_16px_rgba(255,69,0,0.9)] absolute inset-0"
+                                                    className="text-success drop-shadow-[0_0_16px_var(--color-success)] absolute inset-0"
                                                 >
                                                     <motion.path
                                                         d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
@@ -423,7 +423,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
                                                     />
                                                 </motion.svg>
                                             </div>
-                                            <span className="mono text-[9px] uppercase tracking-widest text-gray-500">
+                                            <span className="mono text-[9px] uppercase tracking-widest text-fg-muted">
                                                 {mode === "login" ? "AUTHENTICATING..." : "PROVISIONING VAULT..."}
                                             </span>
                                         </motion.div>

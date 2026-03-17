@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
         <div className="min-h-screen bg-background text-foreground font-sans relative overflow-hidden">
             {/* Grid background matching landing page */}
             <div className="fixed inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0" />
-            <div className="fixed inset-0 bg-gradient-to-b from-transparent via-black/50 to-black pointer-events-none z-0" />
+            <div className="fixed inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none z-0" />
 
             {/* Navigation bar */}
             <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-md border-b border-foreground/10 bg-background/40">
@@ -30,11 +30,11 @@ export default function PrivacyPolicyPage() {
             {/* Main content */}
             <main className="relative z-10 pt-28 pb-24 px-6 max-w-4xl mx-auto">
                 <div className="flex items-center gap-3 mb-12">
-                    <Shield className="w-8 h-8 text-[#ff4500]" />
+                    <Shield className="w-8 h-8 text-success" />
                     <h1 className="text-3xl font-bold text-foreground mono tracking-widest uppercase">Privacy Policy</h1>
                 </div>
                 <div className="space-y-12 text-fg-secondary leading-relaxed mono uppercase tracking-wider">
-                    <p className="text-xs text-gray-600 tracking-widest">Last updated: March 8, 2026</p>
+                    <p className="text-xs text-fg-muted tracking-widest">Last updated: March 8, 2026</p>
 
                     <section>
                         <h2 className="text-xl font-semibold text-foreground mb-4 tracking-widest">1. Zero-Knowledge Architecture</h2>
@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
                     <section>
                         <h2 className="text-xl font-semibold text-foreground mb-4 tracking-widest">2. Data We Collect</h2>
                         <p>We collect the minimum data necessary to provide the service:</p>
-                        <ul className="list-disc ml-6 space-y-2 mt-4 text-[#ff4500]/80">
+                        <ul className="list-disc ml-6 space-y-2 mt-4 text-success/80">
                             <li><span className="text-fg-secondary">Email address (for authentication and account recovery)</span></li>
                             <li><span className="text-fg-secondary">Encrypted vault data (unreadable without your master password)</span></li>
                             <li><span className="text-fg-secondary">Account metadata (creation date, last login timestamp)</span></li>
@@ -55,7 +55,7 @@ export default function PrivacyPolicyPage() {
                     <section>
                         <h2 className="text-xl font-semibold text-foreground mb-4 tracking-widest">3. Data We Cannot Access</h2>
                         <p>Due to our zero-knowledge design, we <strong className="text-foreground">cannot</strong> access:</p>
-                        <ul className="list-disc ml-6 space-y-2 mt-4 text-[#ff4500]/80">
+                        <ul className="list-disc ml-6 space-y-2 mt-4 text-success/80">
                             <li><span className="text-fg-secondary">Your master password</span></li>
                             <li><span className="text-fg-secondary">Your decrypted passwords, notes, or credentials</span></li>
                             <li><span className="text-fg-secondary">Your derived encryption keys</span></li>
@@ -84,7 +84,7 @@ export default function PrivacyPolicyPage() {
                 <div className="flex items-center gap-4">
                     <span className="text-foreground bg-bg-secondary px-2 py-0.5">SECURE_ENV: READY</span>
                     <span>&gt;&gt;&gt;&gt;&gt;</span>
-                    <span className="text-[#ff4500]">LEGAL: VERIFIED</span>
+                    <span className="text-success">LEGAL: VERIFIED</span>
                 </div>
                 <div className="flex items-center gap-6">
                     <span className="flex items-center gap-1"><Database className="w-3 h-3" /> VAULT_SYNC: ACTIVE</span>

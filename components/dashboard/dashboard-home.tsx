@@ -66,13 +66,13 @@ function ModuleCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             onClick={() => module.live && onNavigate(module.id, module.label)}
-            className="group relative cursor-pointer flex items-center gap-5 p-5 border border-border bg-bg-secondary hover:bg-bg-tertiary hover:border-border-secondary transition-all duration-300 overflow-hidden"
+            className="group relative cursor-pointer flex items-center gap-5 p-5 border-b border-border/40 last:border-b-0 bg-transparent hover:bg-fg-primary/5 transition-all duration-300 overflow-hidden"
         >
             {/* Corner accent */}
             <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-border-secondary group-hover:border-success transition-colors duration-300" />
 
             {/* Icon */}
-            <div className="shrink-0 w-10 h-10 border border-border-secondary group-hover:border-border bg-background flex items-center justify-center text-fg-muted group-hover:text-foreground transition-all duration-300">
+            <div className="shrink-0 w-10 h-10 border border-border/50 group-hover:border-brand/40 group-hover:shadow-[0_0_15px_var(--color-brand-muted)] bg-background/50 flex items-center justify-center text-fg-muted group-hover:text-brand transition-all duration-300 rounded-md">
                 {module.icon}
             </div>
 
@@ -119,7 +119,7 @@ export function DashboardHome({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6, delay: 0.1 }}
-                        className="mono text-xs text-fg-secondary mb-10 tracking-widest uppercase flex items-center gap-2 border border-border-secondary px-3 py-1.5 bg-background/50 w-fit"
+                        className="mono text-xs text-fg-secondary mb-10 tracking-widest uppercase flex items-center gap-2 border border-success/30 px-3 py-1.5 bg-success/5 w-fit shadow-[0_0_15px_var(--color-success-subtle)]"
                     >
                         <Activity className="w-3 h-3 text-success" />
                         <span>[[ VAULT_STATUS // SECURE ]]</span>
@@ -138,7 +138,7 @@ export function DashboardHome({
                         <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tighter text-foreground mb-2 leading-[0.95] uppercase">
                             Your
                         </h1>
-                        <h2 className="text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tighter text-fg-secondary mb-8 leading-[0.95] uppercase">
+                        <h2 className="text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tighter text-gradient mb-8 leading-[0.95] uppercase drop-shadow-sm">
                             [Secure Vault.]
                         </h2>
                         <p className="mono text-sm text-fg-muted max-w-sm leading-relaxed">
@@ -151,11 +151,11 @@ export function DashboardHome({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.35 }}
-                        className="grid grid-cols-2 gap-[1px] bg-border border border-border"
+                        className="grid grid-cols-2 gap-[1px] bg-border/40 border border-border/40 glass p-[1px]"
                     >
                         {TRUST_STATS.map((s, i) => (
-                            <div key={i} className="flex items-start gap-3 p-4 bg-bg-secondary hover:bg-bg-tertiary transition-colors duration-200">
-                                <span className="text-fg-muted mt-0.5 shrink-0">{s.icon}</span>
+                            <div key={i} className="flex items-start gap-3 p-4 bg-background/40 backdrop-blur-sm hover:bg-background/80 transition-colors duration-200">
+                                <span className="text-brand mt-0.5 shrink-0">{s.icon}</span>
                                 <div>
                                     <p className="mono text-foreground text-[11px] font-bold uppercase tracking-widest">{s.label}</p>
                                     <p className="mono text-fg-muted text-[10px] mt-0.5 uppercase tracking-wide">{s.sub}</p>
@@ -179,7 +179,7 @@ export function DashboardHome({
                     </motion.p>
 
                     {/* Module cards */}
-                    <div className="flex flex-col gap-[1px] bg-border border border-border mb-8">
+                    <div className="flex flex-col glass border border-border/40 mb-8 p-1">
                         {MODULES.map((module, idx) => (
                             <ModuleCard
                                 key={module.id}
@@ -195,31 +195,31 @@ export function DashboardHome({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.5 }}
-                        className="border border-border bg-bg-secondary p-5"
+                        className="border border-border/40 glass p-6"
                     >
-                        <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center justify-between mb-5 pb-4 border-b border-border/30">
                             <p className="mono text-[10px] font-bold uppercase tracking-[0.2em] text-fg-muted">System Status</p>
-                            <span className="flex items-center gap-1.5 mono text-[10px] text-success uppercase tracking-widest">
+                            <span className="flex items-center gap-1.5 mono text-[10px] text-success uppercase tracking-widest bg-success/10 px-2 py-1 rounded">
                                 <Activity className="w-3 h-3" />
                                 Online
                             </span>
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {SYSTEM_ROWS.map((row, i) => (
-                                <div key={i} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-1 h-1 bg-success" />
-                                        <span className="mono text-[11px] text-fg-secondary uppercase tracking-wide">{row.label}</span>
+                                <div key={i} className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-success/60 shadow-[0_0_8px_var(--color-success)]" />
+                                        <span className="mono text-[11px] text-fg-secondary uppercase tracking-wide group-hover:text-foreground transition-colors">{row.label}</span>
                                     </div>
-                                    <span className="mono text-[11px] font-bold text-foreground uppercase tracking-widest">{row.value}</span>
+                                    <span className="mono text-[11px] font-bold text-foreground uppercase tracking-widest opacity-80">{row.value}</span>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                        <div className="mt-6 pt-5 border-t border-border/30 flex items-center justify-between">
                             <span className="mono text-[10px] text-fg-muted uppercase tracking-widest">Core version</span>
-                            <span className="mono text-[10px] text-fg-secondary">v2.4.0</span>
+                            <span className="mono text-[10px] font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">v2.4.0</span>
                         </div>
                     </motion.div>
 
