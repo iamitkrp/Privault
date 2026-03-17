@@ -48,15 +48,7 @@ export default function EncryptionPipeline() {
             transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0 group"
         >
-            
-            {/* Ambient Background Glow Effect matching the theme */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand/20 via-transparent to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-            
-            {/* Subtle Dot Matrix Background matching the grid theme */}
-            <div 
-                className="absolute inset-0 opacity-[0.10] pointer-events-none z-[-1]" 
-                style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.4) 1px, transparent 0)', backgroundSize: '32px 32px' }}
-            />
+
 
             <svg
                 viewBox="0 0 700 700"
@@ -72,23 +64,6 @@ export default function EncryptionPipeline() {
                         <stop offset="50%" stopColor="#ff4500" stopOpacity="1" />
                         <stop offset="100%" stopColor="#ff4500" stopOpacity="0" />
                     </linearGradient>
-                    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
-                        <feMerge>
-                            <feMergeNode in="blur" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                    
-                    {/* Tooltip Background Blur (Safari support) */}
-                    <filter id="tooltipBlur">
-                        <feGaussianBlur stdDeviation="15" result="blur" />
-                        <feComponentTransfer in="blur" result="faded">
-                            <feFuncA type="linear" slope="0.8" />
-                        </feComponentTransfer>
-                        <feColorMatrix type="matrix" values="0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 1 0" />
-                        <feComposite in="SourceGraphic" in2="faded" operator="over" />
-                    </filter>
                 </defs>
 
                 {/* THE ENTIRE VISUAL LAYOUT SHIFTED DOWN 30px FOR PERFECT VERTICAL CENTERING */}
@@ -109,22 +84,22 @@ export default function EncryptionPipeline() {
                         <path d="M 280 570 L 420 570" stroke={hovered === 5 || hovered === 6 ? "#a855f7" : undefined} className="transition-all duration-500" />
                     </g>
 
-                    {/* DATA DOTS ANIMATIONS */}
-                    <g filter="url(#neonGlow)">
-                        <circle r="4" fill="#ff4500">
-                            <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
+                    {/* DATA DOTS ANIMATIONS — no blur filter for performance */}
+                    <g>
+                        <circle r="4" fill="#ff4500" opacity="0.9">
+                            <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
                         </circle>
-                        <circle r="3" fill="#00ffcc">
-                            <animateMotion dur="1.5s" begin="0.5s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
+                        <circle r="3" fill="#00ffcc" opacity="0.9">
+                            <animateMotion dur="2.5s" begin="0.5s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
                         </circle>
-                        <circle r="5" fill="#00ffcc">
-                            <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-key-data" /></animateMotion>
+                        <circle r="4" fill="#00ffcc" opacity="0.9">
+                            <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-key-data" /></animateMotion>
                         </circle>
-                        <circle r="4" fill="#ff4500">
-                            <animateMotion dur="1.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
+                        <circle r="4" fill="#ff4500" opacity="0.9">
+                            <animateMotion dur="2.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
                         </circle>
-                        <circle r="5" fill="#a855f7">
-                            <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
+                        <circle r="4" fill="#a855f7" opacity="0.9">
+                            <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
                         </circle>
                     </g>
 
@@ -202,24 +177,13 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(5)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <motion.rect
+                        <rect
                             width="240" height="100" rx="6" className="fill-bg-elevated" stroke="#a855f7" strokeWidth="2.5"
-                            animate={hovered === 5 ? 
-                                { strokeOpacity: 1, boxShadow: "0px 0px 25px #a855f7" } : 
-                                { strokeOpacity: [1, 0.4, 1], boxShadow: ["0px 0px 5px #a855f7", "0px 0px 15px #a855f7", "0px 0px 5px #a855f7"] }
-                            }
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            opacity={hovered === 5 ? 1 : 0.8}
                         />
                         <text x="25" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
                         <text x="25" y="65" className="fill-foreground font-sans text-2xl font-bold">AES-256-GCM</text>
                         <text x="25" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
-
-                        {/* Inner decorative scanning line */}
-                        <motion.line
-                            x1="0" y1="50" x2="240" y2="50" stroke="#a855f7" strokeWidth="2" opacity="0.4"
-                            animate={{ y1: [10, 90, 10], y2: [10, 90, 10] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        />
                     </g>
 
                     {/* Cloud Server (Blind) - STEP 06 */}

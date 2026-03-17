@@ -66,7 +66,7 @@ function ModuleCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             onClick={() => module.live && onNavigate(module.id, module.label)}
-            className="group relative cursor-pointer flex items-center gap-5 p-5 border-b border-border/40 last:border-b-0 bg-transparent hover:bg-fg-primary/5 transition-all duration-300 overflow-hidden"
+            className="group relative cursor-pointer flex items-center gap-5 p-5 border-b border-border/40 last:border-b-0 bg-transparent hover:bg-fg-primary/5 transition-colors duration-200 overflow-hidden"
         >
             {/* Corner accent */}
             <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-border-secondary group-hover:border-success transition-colors duration-300" />
@@ -154,7 +154,7 @@ export function DashboardHome({
                         className="grid grid-cols-2 gap-[1px] bg-border/40 border border-border/40 glass p-[1px]"
                     >
                         {TRUST_STATS.map((s, i) => (
-                            <div key={i} className="flex items-start gap-3 p-4 bg-background/40 backdrop-blur-sm hover:bg-background/80 transition-colors duration-200">
+                            <div key={i} className="flex items-start gap-3 p-4 bg-background/60 hover:bg-background/80 transition-colors duration-200">
                                 <span className="text-brand mt-0.5 shrink-0">{s.icon}</span>
                                 <div>
                                     <p className="mono text-foreground text-[11px] font-bold uppercase tracking-widest">{s.label}</p>

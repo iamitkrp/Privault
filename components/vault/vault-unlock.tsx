@@ -303,7 +303,6 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                 {/* Main Panel */}
                 <div className="border border-border bg-bg-secondary p-8 sm:p-10 relative overflow-hidden">
                     {/* Background accents */}
-                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-success/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
                     <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
 
                     <div className="flex flex-col gap-8 relative z-10 w-full">
@@ -431,11 +430,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                             >
                                 {/* Shimmer sweep */}
                                 {!isLoading && password && !isLockedOut && profile && (
-                                    <motion.div
-                                        animate={{ x: ["-100%", "200%"] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                        className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-background/10 to-transparent skew-x-12"
-                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 )}
                                 <span className="relative z-10 flex items-center gap-2 mono text-xs font-bold uppercase tracking-[0.2em]">
                                     {isLoading ? (

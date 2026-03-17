@@ -15,7 +15,7 @@ export function ComingSoonPanel({ toolName, toolIcon }: ComingSoonPanelProps) {
                 <div className="w-20 h-20 border border-border-secondary flex items-center justify-center text-fg-muted">
                     <span>{toolIcon ?? <Construction className="w-8 h-8" />}</span>
                 </div>
-                <div className="absolute inset-0 border border-success/20 animate-ping opacity-30" />
+
             </div>
 
             {/* Badge */}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
@@ -9,7 +9,7 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { UserMenu } from "@/components/ui/user-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
-import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon, Activity, Database, GitBranch } from "lucide-react";
+import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon, Activity } from "lucide-react";
 
 import EncryptionPipeline from "@/components/landing/EncryptionPipeline";
 
@@ -53,16 +53,6 @@ const features = [
 ];
 
 export default function LandingPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
-
-  const smoothScrollY = useSpring(scrollYProgress, { damping: 20, stiffness: 100 });
-  const heroY = useTransform(smoothScrollY, [0, 0.3], ["0%", "50%"]);
-  const heroOpacity = useTransform(smoothScrollY, [0, 0.3], [1, 0]);
-
   const { user, profile } = useAuth();
   const router = useRouter();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -86,7 +76,6 @@ export default function LandingPage() {
 
   return (
     <div
-      ref={containerRef}
       className="min-h-screen bg-background text-foreground font-sans selection:bg-brand-subtle overflow-hidden relative"
     >
       {/* Immersive Grid Background */}
@@ -165,7 +154,9 @@ export default function LandingPage() {
 
         {/* Left Content */}
         <motion.div
-          style={{ y: heroY, opacity: heroOpacity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
           className="w-full lg:w-[45%] flex flex-col items-start z-30 pt-10 lg:pt-0"
         >
           <motion.div
@@ -228,18 +219,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Terminal Bottom Bar */}
-      <div className="fixed bottom-0 inset-x-0 h-8 border-t border-border bg-background/80 backdrop-blur-md z-50 flex items-center justify-between px-4 mono text-[10px] uppercase text-fg-secondary hidden sm:flex">
-        <div className="flex items-center gap-4">
-          <span className="text-foreground bg-border-secondary px-2 py-0.5">SECURE_ENV: READY</span>
-          <span>&gt;&gt;&gt;&gt;&gt;</span>
-          <span className="text-success">0 / 100%</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <span className="flex items-center gap-1"><Database className="w-3 h-3" /> VAULT_SYNC: STANDBY</span>
-          <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" /> PROTOCOL: v2.4.0</span>
-        </div>
-      </div>
+
 
       {/* Feature Grid */}
       <section id="features" className="relative z-20 py-32 px-6 lg:px-12 bg-background border-y border-border/50">
