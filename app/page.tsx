@@ -173,7 +173,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tighter text-foreground mb-2 leading-[0.9] whitespace-nowrap"
+            className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tighter text-foreground mb-2 leading-none whitespace-nowrap"
           >
             Absolute <br /> Security.
           </motion.h1>
@@ -181,7 +181,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-5xl md:text-7xl font-normal tracking-tighter text-gradient mt-2 mb-8 leading-[0.9]"
+            className="text-4xl sm:text-5xl md:text-7xl font-normal tracking-tighter text-gradient mt-2 mb-8 leading-none"
           >
             [Zero Knowledge.]
           </motion.h2>

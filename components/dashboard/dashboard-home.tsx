@@ -1,7 +1,8 @@
 "use client";
 
-import { LockKeyhole, FileText, ArrowRight, Activity, Database, GitBranch, ShieldCheck, Fingerprint, Globe, Server } from "lucide-react";
+import { LockKeyhole, FileText, ArrowRight, Activity, Database, GitBranch, ShieldCheck, Fingerprint, Globe, Server, Settings } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,6 +13,7 @@ type Module = {
     icon: React.ReactNode;
     badge: string;
     live: boolean;
+    href?: string;
 };
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -32,6 +34,15 @@ const MODULES: Module[] = [
         icon: <FileText className="w-5 h-5" strokeWidth={1.5} />,
         badge: "LIVE",
         live: true,
+    },
+    {
+        id: "settings",
+        label: "Global Settings",
+        description: "Manage your master password, export encrypted vault data, and more.",
+        icon: <Settings className="w-5 h-5" strokeWidth={1.5} />,
+        badge: "SECURE",
+        live: true,
+        href: "/settings",
     },
 ];
 
@@ -60,12 +71,23 @@ function ModuleCard({
     onNavigate: (id: string, label: string) => void;
     index: number;
 }) {
+    const router = useRouter();
+
+    const handleClick = () => {
+        if (!module.live) return;
+        if (module.href) {
+            router.push(module.href);
+        } else {
+            onNavigate(module.id, module.label);
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-            onClick={() => module.live && onNavigate(module.id, module.label)}
+            onClick={handleClick}
             className="group relative cursor-pointer flex items-center gap-5 p-5 border-b border-border/40 last:border-b-0 bg-transparent hover:bg-fg-primary/5 transition-colors duration-200 overflow-hidden"
         >
             {/* Corner accent */}
@@ -130,7 +152,7 @@ export function DashboardHome({
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="mb-12"
+                        className="mb-12 relative"
                     >
                         <p className="mono text-xs text-fg-secondary uppercase tracking-widest mb-4">
                             Welcome back, <span className="text-foreground">{displayName}</span>
