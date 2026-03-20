@@ -6,6 +6,7 @@ import { VaultService } from "@/services/vault.service";
 import { OTPGate } from "@/components/auth/otp-gate";
 import { KeyRound, Shield, LogOut, Eye, EyeOff, Check, AlertTriangle, Loader2, Download, Upload, FileText, Lock, X, Settings, Database, Server, User, Mail, Trash2, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { exportToJSON, exportToCSV, exportToEncryptedJSON } from "@/services/export.service";
 import { parseJSON, parseCSV, ImportResult } from "@/services/import.service";
 
@@ -14,7 +15,7 @@ export default function SettingsPage() {
 
     return (
         <div className="w-full min-h-[calc(100vh-80px)] text-foreground overflow-y-auto">
-            <div className="max-w-[1200px] mx-auto px-6 md:px-12 pt-12 lg:pt-20 pb-20">
+            <div className="max-w-[1200px] mx-auto px-6 md:px-12 pt-12 lg:pt-20 pb-20 mt-20">
 
                 {/* ─── HEADER ─── */}
                 <motion.div
@@ -25,8 +26,10 @@ export default function SettingsPage() {
                 >
                     <Settings className="absolute top-0 right-0 w-32 h-32 lg:w-48 lg:h-48 text-fg-muted opacity-5 -translate-y-1/4 translate-x-1/4 pointer-events-none" strokeWidth={0.5} />
 
-                    <p className="mono text-xs text-fg-secondary uppercase tracking-widest mb-4">
-                        System Preferences
+                    <p className="mono text-xs text-fg-secondary uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <Link href="/vault" className="hover:text-foreground transition-colors">Dashboard</Link>
+                        <span className="text-border">/</span>
+                        <span>System Preferences</span>
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-foreground uppercase leading-none">
                         Settings<span className="text-brand">.</span>
@@ -104,22 +107,40 @@ export default function SettingsPage() {
    Security Settings Section (OTP Toggles)
    ────────────────────────────────────────────────────────── */
 function SecuritySettingsSection() {
-    const { user, profile, supabaseClient } = useAuth();
+    const { user, profile, supabaseClient, refreshProfile } = useAuth();
     const [saving, setSaving] = useState(false);
-    const [savedMessage, setSavedMessage] = useState("");
+    const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
-    const otpOnLogin = profile?.security_settings?.require_otp_on_login ?? false;
-    const otpOnVault = profile?.security_settings?.require_otp_on_vault_unlock ?? false;
+    // Local state for instant toggle feedback — initialized from profile
+    const [otpOnLogin, setOtpOnLogin] = useState(false);
+    const [otpOnVault, setOtpOnVault] = useState(false);
 
-    const handleToggle = async (field: 'require_otp_on_login' | 'require_otp_on_vault_unlock', currentValue: boolean) => {
+    // Sync local state with profile when it loads/changes
+    useEffect(() => {
+        if (profile?.security_settings) {
+            setOtpOnLogin(profile.security_settings.require_otp_on_login ?? false);
+            setOtpOnVault(profile.security_settings.require_otp_on_vault_unlock ?? false);
+        }
+    }, [profile]);
+
+    const handleToggle = async (field: 'require_otp_on_login' | 'require_otp_on_vault_unlock') => {
         if (!user || !profile || saving) return;
+
+        // Toggle local state immediately for instant feedback
+        const newLoginValue = field === 'require_otp_on_login' ? !otpOnLogin : otpOnLogin;
+        const newVaultValue = field === 'require_otp_on_vault_unlock' ? !otpOnVault : otpOnVault;
+        
+        if (field === 'require_otp_on_login') setOtpOnLogin(newLoginValue);
+        if (field === 'require_otp_on_vault_unlock') setOtpOnVault(newVaultValue);
+
         setSaving(true);
-        setSavedMessage("");
+        setStatusMessage(null);
 
         try {
             const updatedSettings = {
                 ...profile.security_settings,
-                [field]: !currentValue,
+                require_otp_on_login: newLoginValue,
+                require_otp_on_vault_unlock: newVaultValue,
             };
 
             const { error } = await supabaseClient
@@ -129,15 +150,22 @@ function SecuritySettingsSection() {
                 .eq('user_id', user.id);
 
             if (error) {
-                setSavedMessage("Failed to update setting.");
+                // Revert on failure
+                if (field === 'require_otp_on_login') setOtpOnLogin(!newLoginValue);
+                if (field === 'require_otp_on_vault_unlock') setOtpOnVault(!newVaultValue);
+                setStatusMessage({ text: "Failed to update setting.", isError: true });
             } else {
-                // Update local profile in auth context by reloading
-                setSavedMessage("Setting updated. Refresh to apply.");
-                // Force page reload to pick up new settings from profile
-                window.location.reload();
+                // Refresh profile to sync in-memory state
+                await refreshProfile();
+                setStatusMessage({ text: "Setting saved successfully.", isError: false });
+                // Auto-clear success message
+                setTimeout(() => setStatusMessage(null), 3000);
             }
         } catch {
-            setSavedMessage("An unexpected error occurred.");
+            // Revert on error
+            if (field === 'require_otp_on_login') setOtpOnLogin(!otpOnLogin);
+            if (field === 'require_otp_on_vault_unlock') setOtpOnVault(!otpOnVault);
+            setStatusMessage({ text: "An unexpected error occurred.", isError: true });
         } finally {
             setSaving(false);
         }
@@ -167,7 +195,7 @@ function SecuritySettingsSection() {
                         </p>
                     </div>
                     <button
-                        onClick={() => handleToggle('require_otp_on_login', otpOnLogin)}
+                        onClick={() => handleToggle('require_otp_on_login')}
                         disabled={saving}
                         className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex-shrink-0 ${
                             otpOnLogin ? 'bg-success' : 'bg-foreground/20'
@@ -190,7 +218,7 @@ function SecuritySettingsSection() {
                         </p>
                     </div>
                     <button
-                        onClick={() => handleToggle('require_otp_on_vault_unlock', otpOnVault)}
+                        onClick={() => handleToggle('require_otp_on_vault_unlock')}
                         disabled={saving}
                         className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex-shrink-0 ${
                             otpOnVault ? 'bg-success' : 'bg-foreground/20'
@@ -210,8 +238,15 @@ function SecuritySettingsSection() {
                     </span>
                 </div>
 
-                {savedMessage && (
-                    <p className="mono text-[10px] text-fg-muted uppercase tracking-widest">{savedMessage}</p>
+                {statusMessage && (
+                    <div className={`flex items-center gap-2 p-3 border mono text-[10px] uppercase tracking-widest ${
+                        statusMessage.isError 
+                            ? 'bg-error/10 border-error/20 text-error' 
+                            : 'bg-success/10 border-success/20 text-success'
+                    }`}>
+                        {statusMessage.isError ? <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" /> : <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                        {statusMessage.text}
+                    </div>
                 )}
             </div>
         </section>

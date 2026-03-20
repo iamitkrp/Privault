@@ -144,7 +144,7 @@ export function OTPGate({ purpose, actionLabel, onVerified, onCancel, descriptio
                     <div className="flex items-center gap-2 p-2.5 bg-success/10 border border-success/20 text-success text-sm">
                         <Mail className="w-4 h-4 flex-shrink-0" />
                         <span className="mono text-xs">
-                            Verification code sent to <strong>{user?.email}</strong>
+                            Verification code sent to your registered email
                         </span>
                     </div>
 

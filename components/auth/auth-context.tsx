@@ -22,6 +22,8 @@ interface AuthContextType {
     storeLoginPasswordHash: (password: string) => void;
     /** SHA-256 hex hash of the login password (in-memory only, for comparison) */
     loginPasswordHash: string | null;
+    /** Re-fetch profile from DB to pick up changed settings */
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -186,11 +188,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoginPasswordHash(hash);
     };
 
+    const refreshProfile = async () => {
+        if (!user) return;
+        const result = await authService.getProfile(user.id);
+        if (result.success) {
+            setProfile(result.data);
+        }
+    };
+
     return (
         <AuthContext.Provider value={{
             user, profile, profileError, isLoading, signOut, authService, supabaseClient,
             otpVerified, verifyLoginOtp,
             storeLoginPasswordHash, loginPasswordHash,
+            refreshProfile,
         }}>
             {children}
         </AuthContext.Provider>
