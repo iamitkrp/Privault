@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
         // Send the OTP email via Resend
         const { error: emailError } = await resend.emails.send({
-            from: "Privault <onboarding@resend.dev>",
+            from: "Privault <noreply@privault.shop>",
             to: user.email!,
             subject: `${code} is your Privault verification code`,
             html: `
