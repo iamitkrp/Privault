@@ -236,11 +236,7 @@ export default function EncryptionPipeline() {
                 </AnimatePresence>
 
                 {/* Decorative corner brackets for SVG container */}
-                {/* Pulled inward and down to prevent the top edge from being covered by the sticky navbar */}
-                <path d="M 15 75 L 15 45 L 45 45" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 685 75 L 685 45 L 655 45" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 15 655 L 15 685 L 45 685" fill="none" stroke="#666" strokeWidth="2" />
-                <path d="M 685 655 L 685 685 L 655 685" fill="none" stroke="#666" strokeWidth="2" />
+                {/* Removed as requested */}
 
             </svg>
 
