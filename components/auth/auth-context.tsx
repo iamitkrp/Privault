@@ -29,6 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Guard so we never call setIsLoading(false) twice for the same event
     const loadingResolved = useRef(false);
+    // Track if profile has already been loaded to skip duplicate events
+    const profileLoaded = useRef(false);
 
     function resolveLoading() {
         if (!loadingResolved.current) {
@@ -56,6 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 // Cancel the fallback timer — we got a real event
                 clearTimeout(fallbackTimer);
+
+                // Skip redundant SIGNED_IN if INITIAL_SESSION already loaded the profile
+                if (event === "SIGNED_IN" && profileLoaded.current) {
+                    console.log("[Auth] Skipping redundant SIGNED_IN — profile already loaded.");
+                    resolveLoading();
+                    return;
+                }
 
                 if (session?.user) {
                     setUser(session.user);
@@ -104,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         try {
                             await Promise.race([fetchProfileOnce(), timeout]);
                             console.log("[Auth] Profile loaded successfully.");
+                            profileLoaded.current = true;
                             break; // Success — exit retry loop
                         } catch (err: any) {
                             console.warn(`[Auth] Attempt ${attempt} failed:`, err?.message);
@@ -137,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signOut = async () => {
         setIsLoading(true);
         loadingResolved.current = false;
+        profileLoaded.current = false;
         await authService.signOut();
         setUser(null);
         setProfile(null);
