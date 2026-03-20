@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { VaultNote } from "@/types";
 import { Check, Palette, BookOpen, Bold, Italic, Strikethrough, Code, List, ListTodo, Quote } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
+import { NoteAttachments } from "./note-attachments";
 
 // The premium elegant colors for white/glass mode
 const COLORS = [
@@ -196,6 +197,8 @@ export function NoteEditor({
                          content={content} 
                          onChange={setContent} 
                     />
+
+                    {note?.id && <NoteAttachments noteId={note.id} />}
                 </div>
             </div>
         </div>

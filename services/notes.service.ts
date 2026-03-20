@@ -202,4 +202,155 @@ export class NotesService {
             return { success: false, error: new Error("Unable to delete note.") };
         }
     }
+
+    // ==========================================
+    // PHASE-2: E2EE UNIVERSAL ATTACHMENTS 
+    // ==========================================
+
+    async uploadAttachment(userId: string, noteId: string, file: File): Promise<Result<{ id: string, name: string, size: number, type: string }>> {
+        try {
+            const key = this.getActiveKey();
+
+            // 1. Encrypt Metadata
+            const metadataPayload = JSON.stringify({
+                name: file.name,
+                size: file.size,
+                type: file.type
+            });
+            const { encryptedData: encryptedMetadata, iv: metadataIv } = await encryptData(metadataPayload, key);
+
+            // 2. Read File and Encrypt Payload
+            const buffer = await file.arrayBuffer();
+            // Convert buffer to base64 properly to encrypt it
+            const array = new Uint8Array(buffer);
+            let binary = '';
+            // Process in chunks to prevent max call stack
+            const chunkSize = 0x8000;
+            for (let i = 0; i < array.length; i += chunkSize) {
+                binary += String.fromCharCode.apply(null, array.subarray(i, i + chunkSize) as any as number[]);
+            }
+            const base64Data = btoa(binary);
+            
+            const { encryptedData: encryptedPayload, iv: payloadIv } = await encryptData(base64Data, key);
+
+            // 3. Upload to note_attachments table
+            const { data, error } = await (this.supabase as any)
+                .from('note_attachments')
+                .insert({
+                    user_id: userId,
+                    note_id: noteId,
+                    encrypted_metadata: encryptedMetadata,
+                    metadata_iv: metadataIv,
+                    encrypted_data: encryptedPayload,
+                    data_iv: payloadIv
+                })
+                .select('id')
+                .single();
+
+            if (error || !data) {
+                console.error("Attachment upload error", error);
+                return { success: false, error: new Error("Failed to upload secure attachment.") };
+            }
+
+            this.audit.logAction(userId, 'note_updated', 'note_attachment', data.id);
+
+            return { 
+                success: true, 
+                data: { id: data.id, name: file.name, size: file.size, type: file.type } 
+            };
+        } catch (e: any) {
+            console.error('Failed to upload attachment.', e);
+            return { success: false, error: new Error(e?.message || "Unable to upload secure attachment.") };
+        }
+    }
+
+    async getAttachmentMetadata(noteId: string): Promise<Result<{ id: string, name: string, size: number, type: string, created_at: string }[]>> {
+        try {
+            const key = this.getActiveKey();
+
+            const { data, error } : any = await (this.supabase as any)
+                .from('note_attachments')
+                .select('id, encrypted_metadata, metadata_iv, created_at')
+                .eq('note_id', noteId)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                return { success: false, error: new Error("Unable to fetch attachments metadata.") };
+            }
+
+            if (!data) return { success: true, data: [] };
+
+            const decryptedList = await Promise.all(data.map(async (row: any) => {
+                const decryptedStr = await decryptData(row.encrypted_metadata, row.metadata_iv, key);
+                const meta = JSON.parse(decryptedStr);
+                return {
+                    id: row.id,
+                    name: meta.name,
+                    size: meta.size,
+                    type: meta.type,
+                    created_at: row.created_at
+                };
+            }));
+
+            return { success: true, data: decryptedList };
+        } catch (e) {
+            console.error('Failed to get attachments.', e);
+            return { success: false, error: new Error("Unable to read attachments.") };
+        }
+    }
+
+    async downloadAttachment(id: string): Promise<Result<{ name: string, type: string, buffer: ArrayBuffer }>> {
+        try {
+            const key = this.getActiveKey();
+
+            const { data, error } : any = await (this.supabase as any)
+                .from('note_attachments')
+                .select('encrypted_metadata, metadata_iv, encrypted_data, data_iv')
+                .eq('id', id)
+                .single();
+
+            if (error || !data) {
+                return { success: false, error: new Error("Attachment not found.") };
+            }
+
+            // Decrypt Metadata to get filename and type
+            const metaStr = await decryptData(data.encrypted_metadata, data.metadata_iv, key);
+            const { name, type } = JSON.parse(metaStr);
+
+            // Decrypt Payload
+            const base64Data = await decryptData(data.encrypted_data, data.data_iv, key);
+            
+            // Convert Base64 back to ArrayBuffer
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            return { 
+                success: true, 
+                data: { name, type, buffer: bytes.buffer } 
+            };
+        } catch (e) {
+            console.error('Failed to decrypt attachment.', e);
+            return { success: false, error: new Error("Unable to decrypt attachment data.") };
+        }
+    }
+
+    async deleteAttachment(id: string): Promise<Result<void>> {
+        try {
+            const { error } = await (this.supabase as any)
+                .from('note_attachments')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                return { success: false, error: new Error("Unable to delete attachment.") };
+            }
+            return { success: true, data: undefined };
+        } catch (e) {
+            console.error('Failed to delete attachment.', e);
+            return { success: false, error: new Error("Unable to delete attachment.") };
+        }
+    }
 }
