@@ -1,0 +1,136 @@
+"use client";
+
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import Placeholder from '@tiptap/extension-placeholder'
+import Image from '@tiptap/extension-image'
+import Dropcursor from '@tiptap/extension-dropcursor'
+import Link from '@tiptap/extension-link'
+import { useEffect, useState, forwardRef, useImperativeHandle } from 'react'
+
+
+export interface EditorCommands {
+    toggleBold: () => void;
+    toggleItalic: () => void;
+    toggleStrike: () => void;
+    toggleCode: () => void;
+    toggleCodeBlock: () => void;
+    toggleBulletList: () => void;
+    toggleOrderedList: () => void;
+    toggleTaskList: () => void;
+    toggleBlockquote: () => void;
+    undo: () => void;
+    redo: () => void;
+    isActive: (name: string) => boolean;
+}
+
+export const RichEditor = forwardRef<EditorCommands | null, {
+     content: string;
+     onChange: (v: string) => void;
+}>(({ content, onChange }, ref) => {
+    const [isMounted, setIsMounted] = useState(false);
+    
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            TaskList,
+            TaskItem.configure({ nested: true }),
+            Image.configure({ inline: true }),
+            Dropcursor.configure({ color: 'var(--color-brand)', width: 3 }),
+            Link.configure({ openOnClick: false }),
+            Placeholder.configure({
+                placeholder: 'Start typing securely or drag & drop an image...',
+            }),
+        ],
+        content: content,
+        onUpdate: ({ editor }) => {
+            onChange(editor.getHTML());
+        },
+        editorProps: {
+            attributes: {
+                class: 'flex-1 focus:outline-none focus:ring-0 resize-none font-sans tiptap-editor w-full',
+            },
+            handleDrop: (view, event, _slice, moved) => {
+                if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+                    const file = event.dataTransfer.files[0];
+                    if (file.type.startsWith('image/')) {
+                        const imageNode = view.state.schema.nodes.image;
+                        if (!imageNode) return false;
+                        
+                        const reader = new FileReader();
+                        reader.onload = (readerEvent) => {
+                            const node = imageNode.create({
+                                src: readerEvent.target?.result
+                            });
+                            const transaction = view.state.tr.replaceSelectionWith(node);
+                            view.dispatch(transaction);
+                        };
+                        reader.readAsDataURL(file);
+                        return true; // handled
+                    }
+                }
+                return false;
+            },
+            handlePaste: (view, event, _slice) => {
+                if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
+                    const file = event.clipboardData.files[0];
+                    if (file.type.startsWith('image/')) {
+                        const imageNode = view.state.schema.nodes.image;
+                        if (!imageNode) return false;
+
+                        const reader = new FileReader();
+                        reader.onload = (readerEvent) => {
+                            const node = imageNode.create({
+                                src: readerEvent.target?.result
+                            });
+                            const transaction = view.state.tr.replaceSelectionWith(node);
+                            view.dispatch(transaction);
+                        };
+                        reader.readAsDataURL(file);
+                        return true; // handled
+                    }
+                }
+                return false;
+            }
+        },
+    });
+
+    useImperativeHandle(ref, () => {
+        if (!editor) return null as any;
+        return {
+            toggleBold: () => editor.chain().focus().toggleBold().run(),
+            toggleItalic: () => editor.chain().focus().toggleItalic().run(),
+            toggleStrike: () => editor.chain().focus().toggleStrike().run(),
+            toggleCode: () => editor.chain().focus().toggleCode().run(),
+            toggleCodeBlock: () => editor.chain().focus().toggleCodeBlock().run(),
+            toggleBulletList: () => editor.chain().focus().toggleBulletList().run(),
+            toggleOrderedList: () => editor.chain().focus().toggleOrderedList().run(),
+            toggleTaskList: () => editor.chain().focus().toggleTaskList().run(),
+            toggleBlockquote: () => editor.chain().focus().toggleBlockquote().run(),
+            undo: () => editor.chain().focus().undo().run(),
+            redo: () => editor.chain().focus().redo().run(),
+            isActive: (name: string) => editor.isActive(name),
+        };
+    }, [editor]);
+
+    useEffect(() => {
+        if (editor && isMounted && content !== editor.getHTML() && content && !editor.isFocused) {
+            editor.commands.setContent(content, { emitUpdate: false });
+        }
+    }, [content, editor, isMounted]);
+
+    if (!isMounted) return null;
+
+    return (
+        <div className="w-full flex-1 flex flex-col relative shrink-0">
+             <EditorContent editor={editor} className="w-full h-full flex flex-col flex-1 [&>.ProseMirror]:flex-1 [&>.ProseMirror]:min-h-[50vh] [&>.ProseMirror]:outline-none" />
+        </div>
+    );
+});
+RichEditor.displayName = "RichEditor";

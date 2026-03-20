@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { VaultNote } from "@/types";
-import { Check, Palette, BookOpen } from "lucide-react";
+import { Check, Palette, BookOpen, Bold, Italic, Strikethrough, Code, List, ListTodo, Quote } from "lucide-react";
+import { RichEditor, EditorCommands } from "./rich-editor";
 
 // The premium elegant colors for white/glass mode
 const COLORS = [
@@ -24,6 +25,14 @@ export function NoteEditor({
     const [content, setContent] = useState("");
     const [color, setColor] = useState("default");
     const [isSaving, setIsSaving] = useState(false);
+    const [updateTrigger, setUpdateTrigger] = useState(0); // Forces re-render for toolbar active states
+    const editorRef = useRef<EditorCommands | null>(null);
+
+    // Refresh toolbar active states every second or on manual input
+    useEffect(() => {
+        const interval = setInterval(() => setUpdateTrigger(prev => prev + 1), 500);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         if (note) {
@@ -71,16 +80,64 @@ export function NoteEditor({
                 />
             )}
 
-            {/* Simulated OneNote Ribbon Toolbar */}
+            {/* Simulated OneNote Ribbon Toolbar - Now Fully Actionable */}
             <div className="relative z-20 h-[52px] shrink-0 border-b border-border/20 bg-background flex items-center px-6 gap-2 overflow-x-auto no-scrollbar shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                <div className="flex bg-foreground/[0.03] p-1 rounded-lg border border-border/40">
-                    <span className="text-xs font-bold px-5 py-1.5 bg-background shadow-sm rounded-md text-foreground cursor-default shrink-0">Home</span>
-                    <span className="text-xs font-semibold px-5 py-1.5 hover:bg-background/50 rounded-md cursor-pointer transition-colors text-fg-secondary shrink-0">Insert</span>
-                    <span className="text-xs font-semibold px-5 py-1.5 hover:bg-background/50 rounded-md cursor-pointer transition-colors text-fg-secondary shrink-0">Draw</span>
-                    <span className="text-xs font-semibold px-5 py-1.5 hover:bg-background/50 rounded-md cursor-pointer transition-colors text-fg-secondary shrink-0">View</span>
+                {/* Formatting Tools */}
+                <div className="flex bg-foreground/[0.03] p-1 rounded-lg border border-border/40 gap-1" key={updateTrigger}>
+                    <button 
+                        onClick={() => editorRef.current?.toggleBold()} 
+                        title="Bold"
+                        className={`p-1.5 rounded-md transition-colors ${editorRef.current?.isActive('bold') ? 'bg-background shadow-sm text-foreground' : 'text-fg-secondary hover:bg-background/50 hover:text-foreground'}`}
+                    >
+                        <Bold className="w-4 h-4" />
+                    </button>
+                    <button 
+                        onClick={() => editorRef.current?.toggleItalic()} 
+                        title="Italic"
+                        className={`p-1.5 rounded-md transition-colors ${editorRef.current?.isActive('italic') ? 'bg-background shadow-sm text-foreground' : 'text-fg-secondary hover:bg-background/50 hover:text-foreground'}`}
+                    >
+                        <Italic className="w-4 h-4" />
+                    </button>
+                    <button 
+                        onClick={() => editorRef.current?.toggleStrike()} 
+                        title="Strikethrough"
+                        className={`p-1.5 rounded-md transition-colors hidden sm:block ${editorRef.current?.isActive('strike') ? 'bg-background shadow-sm text-foreground' : 'text-fg-secondary hover:bg-background/50 hover:text-foreground'}`}
+                    >
+                        <Strikethrough className="w-4 h-4" />
+                    </button>
+                    <div className="w-px h-4 bg-border/40 mx-1 self-center" />
+                    <button 
+                        onClick={() => editorRef.current?.toggleBulletList()} 
+                        title="Bullet List"
+                        className={`p-1.5 rounded-md transition-colors ${editorRef.current?.isActive('bulletList') ? 'bg-background shadow-sm text-foreground' : 'text-fg-secondary hover:bg-background/50 hover:text-foreground'}`}
+                    >
+                        <List className="w-4 h-4" />
+                    </button>
+                    <button 
+                        onClick={() => editorRef.current?.toggleTaskList()} 
+                        title="Checklist"
+                        className={`p-1.5 rounded-md transition-colors ${editorRef.current?.isActive('taskList') ? 'bg-background shadow-sm text-brand' : 'text-fg-secondary hover:bg-background/50 hover:text-foreground'}`}
+                    >
+                        <ListTodo className="w-4 h-4" />
+                    </button>
+                    <div className="w-px h-4 bg-border/40 mx-1 self-center" />
+                    <button 
+                        onClick={() => editorRef.current?.toggleBlockquote()} 
+                        title="Quote Block"
+                        className={`p-1.5 rounded-md transition-colors hidden sm:block ${editorRef.current?.isActive('blockquote') ? 'bg-background shadow-sm text-foreground' : 'text-fg-secondary hover:bg-background/50 hover:text-foreground'}`}
+                    >
+                        <Quote className="w-4 h-4" />
+                    </button>
+                    <button 
+                        onClick={() => editorRef.current?.toggleCodeBlock()} 
+                        title="Code Snippet"
+                        className={`p-1.5 rounded-md transition-colors hidden sm:block ${editorRef.current?.isActive('codeBlock') ? 'bg-background shadow-sm text-foreground' : 'text-fg-secondary hover:bg-background/50 hover:text-foreground'}`}
+                    >
+                        <Code className="w-4 h-4" />
+                    </button>
                 </div>
                 
-                <div className="w-px h-5 bg-border/40 mx-4 shrink-0" />
+                <div className="w-px h-5 bg-border/40 mx-3 shrink-0 hidden sm:block" />
                 
                 {/* Ribbon Color Picker */}
                 <div className="flex items-center gap-2 group relative cursor-pointer px-4 py-2 hover:bg-foreground/5 rounded-lg shrink-0 border border-transparent hover:border-border/30 transition-all">
@@ -134,11 +191,10 @@ export function NoteEditor({
                         })}
                     </div>
 
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Start typing securely here..."
-                        className="flex-1 w-full bg-transparent text-lg sm:text-xl text-fg-secondary placeholder-fg-muted/30 focus:outline-none focus:ring-0 border-none resize-none leading-relaxed font-sans"
+                    <RichEditor 
+                         ref={editorRef}
+                         content={content} 
+                         onChange={setContent} 
                     />
                 </div>
             </div>

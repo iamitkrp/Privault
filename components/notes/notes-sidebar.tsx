@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, LayoutDashboard, FolderArchive } from "lucide-react";
+import { useState } from "react";
 
 export function NotesSidebar({
     sections,
@@ -12,9 +13,19 @@ export function NotesSidebar({
     sections: string[];
     activeSection: string;
     onSelectSection: (s: string) => void;
-    onAddSection: () => void;
+    onAddSection: (name: string) => void;
     onBack?: () => void;
 }) {
+    const [isCreating, setIsCreating] = useState(false);
+    const [newSectionName, setNewSectionName] = useState("");
+
+    const handleCreateSubmit = () => {
+        if (newSectionName.trim()) {
+            onAddSection(newSectionName);
+        }
+        setIsCreating(false);
+        setNewSectionName("");
+    };
     // Premium pastel gradients for the notebook tabs
     const tabColors = [
         "bg-gradient-to-b from-red-400 to-red-600",
@@ -34,7 +45,7 @@ export function NotesSidebar({
                      <span className="font-bold text-foreground tracking-tight text-sm uppercase">Notebooks</span>
                  </div>
                  <button 
-                     onClick={onAddSection} 
+                     onClick={() => setIsCreating(true)} 
                      className="p-1.5 bg-background border border-border/50 shadow-sm rounded-md hover:bg-foreground/5 transition-all text-fg-secondary hover:text-foreground group"
                      title="New Notebook Section"
                  >
@@ -43,6 +54,27 @@ export function NotesSidebar({
              </div>
 
              <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5 no-scrollbar">
+                 {isCreating && (
+                     <div className="mb-3 px-1">
+                         <input 
+                             autoFocus
+                             type="text"
+                             value={newSectionName}
+                             onChange={e => setNewSectionName(e.target.value)}
+                             onKeyDown={e => {
+                                 if (e.key === 'Enter') handleCreateSubmit();
+                                 if (e.key === 'Escape') {
+                                     setIsCreating(false);
+                                     setNewSectionName("");
+                                 }
+                             }}
+                             onBlur={handleCreateSubmit}
+                             placeholder="Section name..."
+                             className="w-full bg-background border border-border/50 rounded-lg px-4 py-2 text-sm text-foreground focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/30 shadow-sm transition-all"
+                         />
+                     </div>
+                 )}
+
                  <div 
                      className={`flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
                          activeSection === 'All' 

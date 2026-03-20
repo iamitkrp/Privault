@@ -83,8 +83,7 @@ export function NotesCommandCenter({
         }
     };
 
-    const handleAddSection = () => {
-        const name = prompt("Enter new section name:");
+    const handleAddSection = (name: string) => {
         if (name && name.trim().length > 0) {
             // Because our sections are derived from note tags, creating a section requires creating an empty note with that tag
             setActiveSection(name.trim());

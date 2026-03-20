@@ -460,3 +460,121 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   TIPTAP RICH EDITOR STYLES
+   ============================================ */
+
+.tiptap-editor {
+    @apply text-lg sm:text-xl text-fg-secondary leading-relaxed font-sans w-full min-h-[50vh];
+}
+
+.tiptap-editor p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: var(--color-fg-muted);
+    opacity: 0.5;
+    pointer-events: none;
+    height: 0;
+}
+
+.tiptap-editor p {
+    margin-bottom: 0.75rem;
+}
+
+.tiptap-editor h1 {
+    @apply text-3xl font-bold text-foreground mt-8 mb-4 tracking-tight;
+}
+
+.tiptap-editor h2 {
+    @apply text-2xl font-bold text-foreground mt-6 mb-3 tracking-tight;
+}
+
+.tiptap-editor h3 {
+    @apply text-xl font-bold text-foreground mt-4 mb-2;
+}
+
+.tiptap-editor ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.tiptap-editor ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.tiptap-editor li {
+    margin-bottom: 0.25rem;
+}
+
+.tiptap-editor blockquote {
+    @apply border-l-4 border-brand/50 pl-4 py-1 my-4 bg-brand/5 rounded-r-lg italic text-fg-muted;
+}
+
+.tiptap-editor code {
+    @apply bg-foreground/10 text-brand px-1.5 py-0.5 rounded-md font-mono text-[0.9em];
+}
+
+.tiptap-editor pre {
+    @apply bg-[#1e1e1e] text-gray-200 p-4 rounded-xl my-4 overflow-x-auto font-mono text-sm border border-border/20 shadow-inner;
+}
+
+.tiptap-editor pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+ul[data-type="taskList"] li > label {
+    margin-right: 0.75rem;
+    margin-top: 0.25rem;
+    cursor: pointer;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+    @apply w-4 h-4 rounded appearance-none border border-border/60 bg-background/50 cursor-pointer transition-colors relative flex items-center justify-center shadow-sm;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+    @apply bg-brand border-brand font-bold;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
+    content: "✓";
+    @apply absolute text-[10px] text-background flex text-center -mt-px ml-[0.5px];
+}
+
+ul[data-type="taskList"] li > div {
+    flex: 1;
+}
+
+ul[data-type="taskList"] li[data-checked="true"] > div {
+    @apply line-through text-fg-muted opacity-80;
+}
+
+.tiptap-editor img {
+    @apply max-w-full h-auto rounded-xl my-6 shadow-md border border-border/30;
+}
+
+.tiptap-editor img.ProseMirror-selectednode {
+    @apply outline outline-4 outline-brand/60 outline-offset-2;
+}
+
+.tiptap-editor a {
+    @apply text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand transition-colors cursor-pointer;
+}
