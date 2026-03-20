@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { OTPService } from "@/services/otp.service";
-import { ShieldCheck, Loader2, AlertTriangle, Send, X, KeyRound } from "lucide-react";
+import { ShieldCheck, Loader2, AlertTriangle, Send, X, Mail } from "lucide-react";
 
 type OTPPurpose = "vault_access" | "vault_password_change" | "email_update" | "profile_delete";
 
@@ -21,14 +21,13 @@ interface OTPGateProps {
 
 /**
  * A reusable OTP Gate component.
- * Shows a "Send OTP" flow, then an input for the 6-digit code.
- * Calls `onVerified` when the code is successfully verified.
+ * Sends a 6-digit OTP to the user's email via Resend,
+ * then verifies the code against the database.
  */
 export function OTPGate({ purpose, actionLabel, onVerified, onCancel, description }: OTPGateProps) {
     const { user, supabaseClient } = useAuth();
     const [step, setStep] = useState<"idle" | "sent" | "verifying">("idle");
     const [otpCode, setOtpCode] = useState("");
-    const [devCode, setDevCode] = useState<string | null>(null);
     const [error, setError] = useState("");
     const [isSending, setIsSending] = useState(false);
     const [cooldown, setCooldown] = useState(false);
@@ -42,16 +41,32 @@ export function OTPGate({ purpose, actionLabel, onVerified, onCancel, descriptio
         setError("");
 
         try {
+            // 1. Create the OTP in the database (returns plaintext code)
             const result = await otpService.createOTP(user.id, purpose);
 
             if (!result.success) {
-                setError(result.error?.message || "Failed to send verification code.");
+                setError(result.error?.message || "Failed to create verification code.");
                 setIsSending(false);
                 return;
             }
 
-            // In dev/testing mode: show the code. In production, send via email.
-            setDevCode(result.data.code);
+            // 2. Send the code via email using the API route
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const emailRes = await fetch("/api/send-otp", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session?.access_token}`,
+                },
+                body: JSON.stringify({ code: result.data.code, purpose }),
+            });
+
+            if (!emailRes.ok) {
+                setError("Failed to send verification email. Please try again.");
+                setIsSending(false);
+                return;
+            }
+
             setStep("sent");
 
             // Cooldown to prevent spam
@@ -91,7 +106,6 @@ export function OTPGate({ purpose, actionLabel, onVerified, onCancel, descriptio
     const handleCancel = () => {
         setStep("idle");
         setOtpCode("");
-        setDevCode(null);
         setError("");
         onCancel?.();
     };
@@ -126,15 +140,13 @@ export function OTPGate({ purpose, actionLabel, onVerified, onCancel, descriptio
 
             {step !== "idle" && (
                 <div className="space-y-3 p-4 border border-border/40 bg-bg-secondary">
-                    {/* Dev: show code */}
-                    {devCode && (
-                        <div className="flex items-center gap-2 p-2.5 bg-success/10 border border-success/20 text-success text-sm">
-                            <KeyRound className="w-4 h-4 flex-shrink-0" />
-                            <span className="mono">
-                                Dev code: <strong className="tracking-widest text-base">{devCode}</strong>
-                            </span>
-                        </div>
-                    )}
+                    {/* Email sent confirmation */}
+                    <div className="flex items-center gap-2 p-2.5 bg-success/10 border border-success/20 text-success text-sm">
+                        <Mail className="w-4 h-4 flex-shrink-0" />
+                        <span className="mono text-xs">
+                            Verification code sent to <strong>{user?.email}</strong>
+                        </span>
+                    </div>
 
                     <div className="space-y-1.5">
                         <label className="mono text-[10px] text-fg-muted uppercase tracking-widest block font-bold">
