@@ -117,6 +117,10 @@ export interface UserProfile {
 export interface SecuritySettings {
     auto_lock_timeout_minutes: number;
     require_otp_after_logout: boolean;
+    /** Require OTP verification on every login */
+    require_otp_on_login: boolean;
+    /** Require OTP verification when unlocking the vault */
+    require_otp_on_vault_unlock: boolean;
 }
 
 /**
@@ -155,7 +159,7 @@ export interface OTPVerification {
     id: string;
     user_id: string;
     otp_code: string;
-    purpose: "vault_access" | "vault_password_change" | "email_update" | "profile_delete";
+    purpose: "login" | "vault_unlock" | "vault_access" | "vault_password_change" | "email_update" | "profile_delete";
     expires_at: string;
     is_used: boolean;
     created_at: string;

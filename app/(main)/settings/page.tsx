@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { VaultService } from "@/services/vault.service";
 import { OTPGate } from "@/components/auth/otp-gate";
-import { KeyRound, Shield, LogOut, Eye, EyeOff, Check, AlertTriangle, Loader2, Download, Upload, FileText, Lock, X, Settings, Database, Server, User, Mail, Trash2 } from "lucide-react";
+import { KeyRound, Shield, LogOut, Eye, EyeOff, Check, AlertTriangle, Loader2, Download, Upload, FileText, Lock, X, Settings, Database, Server, User, Mail, Trash2, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { exportToJSON, exportToCSV, exportToEncryptedJSON } from "@/services/export.service";
 import { parseJSON, parseCSV, ImportResult } from "@/services/import.service";
@@ -82,6 +82,7 @@ export default function SettingsPage() {
                 >
                     {/* Left Column */}
                     <div className="space-y-8">
+                        <SecuritySettingsSection />
                         <ChangeMasterPasswordSection />
                         <ChangeEmailSection />
                     </div>
@@ -96,6 +97,124 @@ export default function SettingsPage() {
 
             </div>
         </div>
+    );
+}
+
+/* ──────────────────────────────────────────────────────────
+   Security Settings Section (OTP Toggles)
+   ────────────────────────────────────────────────────────── */
+function SecuritySettingsSection() {
+    const { user, profile, supabaseClient } = useAuth();
+    const [saving, setSaving] = useState(false);
+    const [savedMessage, setSavedMessage] = useState("");
+
+    const otpOnLogin = profile?.security_settings?.require_otp_on_login ?? false;
+    const otpOnVault = profile?.security_settings?.require_otp_on_vault_unlock ?? false;
+
+    const handleToggle = async (field: 'require_otp_on_login' | 'require_otp_on_vault_unlock', currentValue: boolean) => {
+        if (!user || !profile || saving) return;
+        setSaving(true);
+        setSavedMessage("");
+
+        try {
+            const updatedSettings = {
+                ...profile.security_settings,
+                [field]: !currentValue,
+            };
+
+            const { error } = await supabaseClient
+                .from('profiles')
+                // @ts-expect-error Dynamic payload
+                .update({ security_settings: updatedSettings })
+                .eq('user_id', user.id);
+
+            if (error) {
+                setSavedMessage("Failed to update setting.");
+            } else {
+                // Update local profile in auth context by reloading
+                setSavedMessage("Setting updated. Refresh to apply.");
+                // Force page reload to pick up new settings from profile
+                window.location.reload();
+            }
+        } catch {
+            setSavedMessage("An unexpected error occurred.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <section className="glass border border-border/40 overflow-hidden">
+            <div className="p-5 border-b border-border/40 flex items-center gap-4 bg-background/20">
+                <div className="w-10 h-10 border border-border/50 bg-background/50 flex items-center justify-center text-fg-muted">
+                    <ShieldCheck className="w-5 h-5 text-success" />
+                </div>
+                <div>
+                    <h2 className="text-[13px] font-bold text-foreground mono uppercase tracking-widest">Security Settings</h2>
+                    <p className="mono text-[10px] text-fg-muted uppercase tracking-wider mt-1.5">Configure additional authentication layers.</p>
+                </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+                {/* OTP on Login Toggle */}
+                <div className="flex items-center justify-between p-4 bg-background/40 border border-border/40">
+                    <div className="flex-1 mr-4">
+                        <p className="mono text-[10px] text-foreground uppercase tracking-widest font-bold mb-1.5">
+                            OTP on Login
+                        </p>
+                        <p className="mono text-[10px] text-fg-muted uppercase tracking-wider leading-relaxed">
+                            Require a 6-digit email code every time you sign in.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => handleToggle('require_otp_on_login', otpOnLogin)}
+                        disabled={saving}
+                        className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex-shrink-0 ${
+                            otpOnLogin ? 'bg-success' : 'bg-foreground/20'
+                        } disabled:opacity-50`}
+                    >
+                        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-background shadow-md transition-transform duration-300 ${
+                            otpOnLogin ? 'translate-x-6' : 'translate-x-0.5'
+                        }`} />
+                    </button>
+                </div>
+
+                {/* OTP on Vault Unlock Toggle */}
+                <div className="flex items-center justify-between p-4 bg-background/40 border border-border/40">
+                    <div className="flex-1 mr-4">
+                        <p className="mono text-[10px] text-foreground uppercase tracking-widest font-bold mb-1.5">
+                            OTP on Vault Unlock
+                        </p>
+                        <p className="mono text-[10px] text-fg-muted uppercase tracking-wider leading-relaxed">
+                            Require an additional OTP step before unlocking the vault with your master password.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => handleToggle('require_otp_on_vault_unlock', otpOnVault)}
+                        disabled={saving}
+                        className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex-shrink-0 ${
+                            otpOnVault ? 'bg-success' : 'bg-foreground/20'
+                        } disabled:opacity-50`}
+                    >
+                        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-background shadow-md transition-transform duration-300 ${
+                            otpOnVault ? 'translate-x-6' : 'translate-x-0.5'
+                        }`} />
+                    </button>
+                </div>
+
+                {/* Info */}
+                <div className="flex items-start gap-2 p-3 bg-foreground/5 border border-border/30 text-fg-secondary text-sm">
+                    <Shield className="w-4 h-4 flex-shrink-0 mt-0.5 text-fg-muted" />
+                    <span className="mono text-[10px] uppercase tracking-wider leading-relaxed">
+                        OTP codes are sent to your registered email. Each code expires after 10 minutes.
+                    </span>
+                </div>
+
+                {savedMessage && (
+                    <p className="mono text-[10px] text-fg-muted uppercase tracking-widest">{savedMessage}</p>
+                )}
+            </div>
+        </section>
     );
 }
 

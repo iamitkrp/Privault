@@ -154,7 +154,9 @@ export class AuthService {
                 salt: salt,
                 security_settings: {
                     autoLockTimeout: 900000,
-                    requireOtp: false
+                    requireOtp: false,
+                    require_otp_on_login: true,
+                    require_otp_on_vault_unlock: false,
                 }
             });
 

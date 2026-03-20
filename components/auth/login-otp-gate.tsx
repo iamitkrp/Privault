@@ -13,10 +13,19 @@ import { motion } from "framer-motion";
  * This is in-memory only — refreshing the page or logging out resets it.
  */
 export function LoginOTPGate({ children }: { children: React.ReactNode }) {
-    const { user, otpVerified, verifyLoginOtp, signOut } = useAuth();
+    const { user, profile, otpVerified, verifyLoginOtp, signOut } = useAuth();
 
     // If no user or OTP already verified, render children normally
     if (!user || otpVerified) {
+        return <>{children}</>;
+    }
+
+    // Check if user has OTP on login enabled in their security settings
+    // Default to false for existing users who don't have the setting yet (opt-in)
+    const requireOtpOnLogin = profile?.security_settings?.require_otp_on_login ?? false;
+
+    // If OTP on login is disabled, skip the gate
+    if (!requireOtpOnLogin) {
         return <>{children}</>;
     }
 

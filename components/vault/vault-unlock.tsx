@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { passphraseManager } from "@/lib/crypto/passphrase";
 import { CRYPTO_CONFIG } from "@/constants";
-import { ChevronRight, Activity, Lock, Key, Terminal, AlertTriangle } from "lucide-react";
+import { ChevronRight, Activity, Lock, Key, Terminal, AlertTriangle, Shield } from "lucide-react";
 import { SecurityService } from "@/services/security.service";
 import { VaultService } from "@/services/vault.service";
+import { OTPGate } from "@/components/auth/otp-gate";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface VaultUnlockProps {
@@ -25,6 +26,10 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
     const [remainingSeconds, setRemainingSeconds] = useState(0);
     const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const [vaultOtpVerified, setVaultOtpVerified] = useState(false);
+
+    // Check if OTP on vault unlock is required
+    const requireOtpOnVaultUnlock = profile?.security_settings?.require_otp_on_vault_unlock ?? false;
 
 
     // Timer-driven lockout countdown: ticks every second and auto-clears when expired
@@ -348,6 +353,25 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                             </p>
                         </div>
 
+                        {/* OTP Gate (if required) */}
+                        {requireOtpOnVaultUnlock && !vaultOtpVerified ? (
+                            <div className="mt-2">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Shield className="w-4 h-4 text-success" />
+                                    <span className="mono text-[10px] uppercase tracking-widest text-fg-muted">
+                                        Step 1 of 2 — Identity Verification
+                                    </span>
+                                </div>
+                                <OTPGate
+                                    purpose="vault_unlock"
+                                    actionLabel="Send Verification Code"
+                                    description="Your security settings require OTP verification before unlocking the vault."
+                                    onVerified={() => setVaultOtpVerified(true)}
+                                />
+                            </div>
+                        ) : (
+                        <>
+
                         {/* Error/Sync Banner */}
                         <AnimatePresence>
                             {!profile && !profileError ? (
@@ -474,6 +498,8 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                 </span>
                             </button>
                         </form>
+                        </>
+                        )}
                     </div>
                 </div>
 

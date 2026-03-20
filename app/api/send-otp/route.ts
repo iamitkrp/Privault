@@ -12,6 +12,7 @@ const supabaseAdmin = createClient(
 
 const PURPOSE_LABELS: Record<string, string> = {
     login: "Login Verification",
+    vault_unlock: "Vault Unlock Verification",
     vault_access: "Export Vault Data",
     vault_password_change: "Change Master Password",
     email_update: "Change Email Address",
