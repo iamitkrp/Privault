@@ -11,6 +11,7 @@ import { DashboardHome } from "@/components/dashboard/dashboard-home";
 import { VaultCredential } from "@/types";
 import { LayoutDashboard, ChevronLeft } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { NotesCommandCenter } from "@/components/notes/notes-command-center";
 
 type ActiveTool = { id: string; label: string } | null;
 
@@ -60,6 +61,8 @@ export default function VaultPage() {
                                 onCredentialsLoad={setCredentials}
                                 onBack={goHome}
                             />
+                        ) : activeTool?.id === "notes" ? (
+                            <NotesCommandCenter onBack={goHome} />
                         ) : (
                             <div className="px-6 md:px-12 max-w-[1600px] mx-auto pt-4 md:pt-8 w-full">
                                 <button

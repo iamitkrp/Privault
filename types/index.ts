@@ -178,3 +178,41 @@ export interface PasswordHistoryEntry {
     change_reason: string | null;
     changed_at: string;
 }
+
+/**
+ * Encrypted note as stored in the database.
+ */
+export interface EncryptedNote {
+    id: string;
+    user_id: string;
+    encrypted_data: string;
+    iv: string;
+    color: string;
+    tags: string[];
+    is_pinned: boolean;
+    is_locked: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+/**
+ * Decrypted note — exists only in client memory.
+ */
+export interface DecryptedNote {
+    title: string;
+    content: string;
+}
+
+/**
+ * Full note combining decrypted data with metadata.
+ */
+export interface VaultNote {
+    id: string;
+    decrypted: DecryptedNote;
+    color: string;
+    tags: string[];
+    is_pinned: boolean;
+    is_locked: boolean;
+    created_at: string;
+    updated_at: string;
+}

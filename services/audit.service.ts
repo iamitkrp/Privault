@@ -10,7 +10,11 @@ export type AuditAction =
     | 'vault_locked'
     | 'master_password_changed'
     | 'data_exported'
-    | 'data_imported';
+    | 'data_imported'
+    | 'note_created'
+    | 'note_read'
+    | 'note_updated'
+    | 'note_deleted';
 
 /**
  * Audit logging service — records all significant vault actions
