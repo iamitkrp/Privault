@@ -103,7 +103,7 @@ export default function SettingsPage() {
    Change Master Password Section
    ────────────────────────────────────────────────────────── */
 function ChangeMasterPasswordSection() {
-    const { user, profile, supabaseClient } = useAuth();
+    const { user, profile, supabaseClient, loginPasswordHash } = useAuth();
     const [otpVerified, setOtpVerified] = useState(false);
 
     const [currentPassword, setCurrentPassword] = useState("");
@@ -137,6 +137,21 @@ function ChangeMasterPasswordSection() {
         setMessage("");
 
         try {
+            // Vault ≠ Login password enforcement
+            if (loginPasswordHash) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(newPassword);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const newPasswordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (newPasswordHash === loginPasswordHash) {
+                    setStatus("error");
+                    setMessage("Your vault master password must be different from your login password.");
+                    return;
+                }
+            }
+
             const vaultService = new VaultService(supabaseClient);
 
             const result = await vaultService.rotateMasterPassword(

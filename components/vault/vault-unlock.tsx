@@ -17,7 +17,7 @@ interface VaultUnlockProps {
 const BACKOFF_THRESHOLD = 5;
 
 export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
-    const { profile, profileError, user, supabaseClient } = useAuth();
+    const { profile, profileError, user, supabaseClient, loginPasswordHash } = useAuth();
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +91,23 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
         setError(null);
 
         try {
+            // Vault ≠ Login password enforcement:
+            // On first-time setup (no verification data), the user is choosing their vault password.
+            // Block if it matches their login password.
+            if (!profile.vault_verification_data && loginPasswordHash) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const vaultPasswordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (vaultPasswordHash === loginPasswordHash) {
+                    setError("Your vault master password must be different from your login password. Please choose a unique password for added security.");
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
             console.log("[VaultUnlock] Starting verifyOrSetupMasterPassword...");
             // Verify the master password, passing the user's stored KDF iterations
             const { isValid, newVerificationData } =

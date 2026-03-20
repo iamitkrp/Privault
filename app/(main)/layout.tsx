@@ -3,12 +3,14 @@ import { AnimatedLogo } from "@/components/ui/animated-logo";
 import { UserMenu } from "@/components/ui/user-menu";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SessionMonitor } from "@/components/auth/session-monitor";
+import { LoginOTPGate } from "@/components/auth/login-otp-gate";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
 
 export default function MainLayout({ children }: { children: ReactNode }) {
     return (
         <ProtectedRoute>
+            <LoginOTPGate>
             <div className="min-h-screen bg-transparent text-foreground flex flex-col relative overflow-hidden">
                 
                 {/* Grid background matching landing page */}
@@ -37,6 +39,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                     {children}
                 </div>
             </div>
+            </LoginOTPGate>
         </ProtectedRoute>
     );
 }

@@ -7,9 +7,10 @@ import { passphraseManager } from "@/lib/crypto/passphrase";
 
 interface VaultHealthProps {
     credentials: VaultCredential[];
+    onLock?: () => void;
 }
 
-export function VaultHealth({ credentials }: VaultHealthProps) {
+export function VaultHealth({ credentials, onLock }: VaultHealthProps) {
     const { signOut } = useAuth();
 
     // Analyze Vault Health
@@ -52,6 +53,7 @@ export function VaultHealth({ credentials }: VaultHealthProps) {
 
     const handleManualLock = () => {
         passphraseManager.lock();
+        onLock?.();
     };
 
     return (

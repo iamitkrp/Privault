@@ -14,15 +14,37 @@ interface AuthContextType {
     signOut: () => Promise<void>;
     authService: AuthService;
     supabaseClient: ReturnType<typeof createClient>;
+    /** Whether the user has completed post-login OTP verification (in-memory only) */
+    otpVerified: boolean;
+    /** Mark post-login OTP as verified */
+    verifyLoginOtp: () => void;
+    /** Store a quick hash of the login password for vault≠login enforcement (in-memory only) */
+    storeLoginPasswordHash: (password: string) => void;
+    /** SHA-256 hex hash of the login password (in-memory only, for comparison) */
+    loginPasswordHash: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Derive a quick SHA-256 hex hash of a string.
+ * Used client-side only for comparing login vs vault passwords.
+ */
+async function quickHash(input: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [profileError, setProfileError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [otpVerified, setOtpVerified] = useState(false);
+    const [loginPasswordHash, setLoginPasswordHash] = useState<string | null>(null);
 
     const [supabaseClient] = useState(() => createClient());
     const [authService] = useState(() => new AuthService(supabaseClient));
@@ -151,12 +173,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await authService.signOut();
         setUser(null);
         setProfile(null);
+        setOtpVerified(false);
+        setLoginPasswordHash(null);
         setIsLoading(false);
         loadingResolved.current = true;
     };
 
+    const verifyLoginOtp = () => setOtpVerified(true);
+
+    const storeLoginPasswordHash = async (password: string) => {
+        const hash = await quickHash(password);
+        setLoginPasswordHash(hash);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, profile, profileError, isLoading, signOut, authService, supabaseClient }}>
+        <AuthContext.Provider value={{
+            user, profile, profileError, isLoading, signOut, authService, supabaseClient,
+            otpVerified, verifyLoginOtp,
+            storeLoginPasswordHash, loginPasswordHash,
+        }}>
             {children}
         </AuthContext.Provider>
     );

@@ -192,7 +192,7 @@ function VaultCommandCenter({
                         transition={{ duration: 0.6, delay: 0.3 }}
                         className="w-full lg:w-[380px] xl:w-[420px] shrink-0 px-6 md:px-8 py-8"
                     >
-                        <VaultHealth credentials={credentials} />
+                        <VaultHealth credentials={credentials} onLock={onBack} />
                     </motion.div>
                 </div>
             </div>

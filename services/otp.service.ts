@@ -44,7 +44,7 @@ export class OTPService {
      */
     async createOTP(
         userId: string,
-        purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete'
+        purpose: 'login' | 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete'
     ): Promise<Result<{ code: string; expiresAt: string }>> {
         try {
             // Invalidate any existing unused OTPs for this user+purpose
@@ -91,7 +91,7 @@ export class OTPService {
     async verifyOTP(
         userId: string,
         code: string,
-        purpose: 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete'
+        purpose: 'login' | 'vault_access' | 'vault_password_change' | 'email_update' | 'profile_delete'
     ): Promise<Result<{ verified: boolean }>> {
         try {
             const hashedCode = this.hashOtpCode(code);

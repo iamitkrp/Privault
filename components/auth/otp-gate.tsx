@@ -5,7 +5,7 @@ import { useAuth } from "@/components/auth/auth-context";
 import { OTPService } from "@/services/otp.service";
 import { ShieldCheck, Loader2, AlertTriangle, Send, X, Mail } from "lucide-react";
 
-type OTPPurpose = "vault_access" | "vault_password_change" | "email_update" | "profile_delete";
+type OTPPurpose = "login" | "vault_access" | "vault_password_change" | "email_update" | "profile_delete";
 
 interface OTPGateProps {
     purpose: OTPPurpose;

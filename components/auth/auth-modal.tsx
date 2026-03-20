@@ -16,7 +16,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }: AuthModalProps) {
-    const { user, authService, supabaseClient } = useAuth();
+    const { user, authService, supabaseClient, storeLoginPasswordHash } = useAuth();
     const router = useRouter();
 
     const [mode, setMode] = useState<"login" | "signup">(initialMode);
@@ -80,6 +80,8 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
             setError(result.error.message);
             setIsLoading(false);
         } else {
+            // Store the login password hash in-memory for vault≠login enforcement
+            storeLoginPasswordHash(password);
             setPassword("");
 
             // Fire-and-forget: track the successful login without blocking the UI
