@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { VaultNote } from "@/types";
-import { motion } from "framer-motion";
-import { X, Check, Palette } from "lucide-react";
+import { Check, Palette, BookOpen } from "lucide-react";
 
 // The premium elegant colors for white/glass mode
 const COLORS = [
@@ -17,123 +16,132 @@ const COLORS = [
 export function NoteEditor({
     note,
     onSave,
-    onClose
 }: {
-    note?: VaultNote;
+    note: VaultNote | null;
     onSave: (data: { title: string, content: string, color: string, id?: string }) => void;
-    onClose: () => void;
 }) {
-    const [title, setTitle] = useState(note?.decrypted?.title || "");
-    const [content, setContent] = useState(note?.decrypted?.content || "");
-    const [color, setColor] = useState(note?.color || "default");
-    const contentRef = useRef<HTMLTextAreaElement>(null);
-    
-    const handleSave = () => {
-        if (!title.trim() && !content.trim()) return;
-        onSave({ title, content, color, id: note?.id });
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+    const [color, setColor] = useState("default");
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (note) {
+            setTitle(note.decrypted?.title || "");
+            setContent(note.decrypted?.content || "");
+            setColor(note.color || "default");
+        } else {
+            setTitle("");
+            setContent("");
+            setColor("default");
+        }
+        setIsSaving(false);
+    }, [note]);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        await onSave({ title, content, color, id: note?.id });
+        setIsSaving(false);
     };
 
-    // Auto-resize textarea seamlessly
-    useEffect(() => {
-        if (contentRef.current) {
-            contentRef.current.style.height = 'auto';
-            contentRef.current.style.height = contentRef.current.scrollHeight + 'px';
-        }
-    }, [content]);
+    if (!note) {
+        return (
+            <div className="flex-1 flex flex-col h-full bg-background items-center justify-center text-fg-muted font-sans p-8 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-background via-bg-secondary to-background opacity-50 pointer-events-none" />
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-28 h-28 mb-8 rounded-[2rem] bg-foreground/[0.03] border border-border/50 flex items-center justify-center shadow-inner group transition-all duration-700 hover:bg-foreground/[0.05]">
+                        <BookOpen className="w-12 h-12 text-foreground/20 group-hover:scale-110 group-hover:text-foreground/40 transition-all duration-500" />
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">Your Secure Canvas</h2>
+                    <p className="mt-4 text-sm max-w-sm text-fg-secondary leading-relaxed">
+                        Select an existing page from the left to view it here, or create a brand new page to start securely capturing your thoughts.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-background/60 backdrop-blur-md"
-        >
-            <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
-            
-            <motion.div
-                initial={{ scale: 0.98, opacity: 0, y: 15 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.98, opacity: 0, y: 15 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-2xl bg-bg-secondary/90 backdrop-blur-3xl border border-border/50 shadow-2xl z-10 flex flex-col max-h-[85vh] overflow-hidden"
-            >
-                {/* Subtle environmental color tint */}
-                {color !== 'default' && (
-                    <div 
-                        className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply dark:mix-blend-screen transition-colors duration-500" 
-                        style={{ backgroundColor: color }}
-                    />
-                )}
+        <div className="flex-1 flex flex-col h-full bg-background relative z-10 overflow-hidden">
+            {/* Environment tint based on selected color */}
+            {color !== 'default' && (
+                <div 
+                    className="absolute inset-0 opacity-[0.15] pointer-events-none transition-colors duration-500" 
+                    style={{ backgroundColor: color }}
+                />
+            )}
 
-                {/* Header Row */}
-                <div className="px-8 flex items-start justify-between relative z-10 pt-8 pb-4">
+            {/* Simulated OneNote Ribbon Toolbar */}
+            <div className="relative z-20 h-[52px] shrink-0 border-b border-border/20 bg-background flex items-center px-6 gap-2 overflow-x-auto no-scrollbar shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+                <div className="flex bg-foreground/[0.03] p-1 rounded-lg border border-border/40">
+                    <span className="text-xs font-bold px-5 py-1.5 bg-background shadow-sm rounded-md text-foreground cursor-default shrink-0">Home</span>
+                    <span className="text-xs font-semibold px-5 py-1.5 hover:bg-background/50 rounded-md cursor-pointer transition-colors text-fg-secondary shrink-0">Insert</span>
+                    <span className="text-xs font-semibold px-5 py-1.5 hover:bg-background/50 rounded-md cursor-pointer transition-colors text-fg-secondary shrink-0">Draw</span>
+                    <span className="text-xs font-semibold px-5 py-1.5 hover:bg-background/50 rounded-md cursor-pointer transition-colors text-fg-secondary shrink-0">View</span>
+                </div>
+                
+                <div className="w-px h-5 bg-border/40 mx-4 shrink-0" />
+                
+                {/* Ribbon Color Picker */}
+                <div className="flex items-center gap-2 group relative cursor-pointer px-4 py-2 hover:bg-foreground/5 rounded-lg shrink-0 border border-transparent hover:border-border/30 transition-all">
+                    <Palette className="w-4 h-4 text-fg-secondary group-hover:text-foreground transition-colors" />
+                    <span className="text-xs font-semibold text-fg-secondary group-hover:text-foreground transition-colors hidden sm:inline">Color</span>
+                    <div className="absolute top-[110%] left-0 mt-1 bg-background border border-border/60 shadow-2xl rounded-xl p-3 flex gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top scale-95 group-hover:scale-100">
+                        {COLORS.map(c => (
+                            <button
+                                key={c.id}
+                                onClick={() => setColor(c.value)}
+                                className={`w-7 h-7 rounded-full border border-border/30 transition-all ${color === c.value ? 'scale-110 shadow-md ring-2 ring-foreground/20 ring-offset-2 ring-offset-background' : 'hover:scale-110 hover:shadow-sm'}`}
+                                style={{ backgroundColor: c.id === 'default' ? 'var(--color-bg-secondary)' : c.css }}
+                                title={c.label}
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex-1" />
+                
+                <button 
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="group relative mono text-[10px] tracking-widest uppercase bg-foreground text-background px-6 py-2 rounded-md font-bold flex items-center gap-2 hover:opacity-90 transition-all whitespace-nowrap shrink-0 overflow-hidden shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                >
+                    <div className="absolute inset-0 w-1/4 bg-white/20 skew-x-12 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                    <Check className="w-3.5 h-3.5" />
+                    {isSaving ? 'Encrypting...' : 'Secure Save'}
+                </button>
+            </div>
+
+            {/* Note Editor Canvas Area */}
+            <div className="flex-1 overflow-y-auto px-6 sm:px-12 md:px-24 py-12 relative z-10 w-full flex flex-col no-scrollbar">
+                <div className="max-w-[800px] w-full mx-auto flex flex-col flex-1">
                     <input 
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Untitled Note"
-                        className="w-full bg-transparent text-3xl sm:text-4xl font-bold text-foreground placeholder-fg-muted/30 focus:outline-none tracking-tight font-sans border-none ring-0 outline-none"
+                        placeholder="Untitled Page"
+                        className="w-full bg-transparent text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground placeholder-fg-muted/30 focus:outline-none tracking-tight font-sans border-none ring-0 outline-none pb-3 border-b-2 border-transparent hover:border-border/20 focus:border-border/40 transition-colors"
                     />
-                    <button 
-                        onClick={onClose} 
-                        className="ml-4 p-2 text-fg-muted hover:text-foreground hover:bg-foreground/5 transition-all rounded-full shrink-0 mt-1"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-
-                {/* Content Area */}
-                <div className="px-8 py-2 flex-1 overflow-y-auto relative z-10">
-                    <textarea
-                        ref={contentRef}
-                        autoFocus
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Start typing your secure note here..."
-                        className="w-full min-h-[40vh] bg-transparent text-lg text-fg-secondary placeholder-fg-muted/40 focus:outline-none focus:ring-0 border-none resize-none leading-relaxed font-sans"
-                    />
-                </div>
-
-                {/* Premium Footer with mono tracking typography */}
-                <div className="px-8 py-5 border-t border-border/20 flex flex-col sm:flex-row sm:items-center justify-between gap-6 mt-4 relative z-10 bg-background/50 backdrop-blur-md">
                     
-                    {/* Minimal Color Swatches */}
-                    <div className="flex items-center gap-4">
-                        <Palette className="w-3.5 h-3.5 text-fg-muted opacity-60" />
-                        <div className="flex gap-2.5">
-                            {COLORS.map(c => (
-                                <button
-                                    key={c.id}
-                                    title={c.label}
-                                    onClick={() => setColor(c.value)}
-                                    className={`w-4 h-4 rounded-full transition-all duration-300 relative ${color === c.value ? 'scale-125 shadow-sm' : 'hover:scale-110 opacity-60 hover:opacity-100'}`}
-                                    style={{ 
-                                        backgroundColor: c.id === 'default' ? 'transparent' : c.css,
-                                        border: c.id === 'default' 
-                                            ? '1px dashed var(--color-fg-muted)' 
-                                            : `1px solid ${color === c.value ? 'rgba(0,0,0,0.1)' : 'transparent'}`
-                                    }}
-                                >
-                                    {color === c.value && (
-                                        <div className="absolute inset-0 rounded-full border border-foreground/10" />
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+                    <div className="mt-3 text-sm text-fg-muted pb-8 mb-6 border-b border-border/10 font-sans tracking-wide">
+                        {new Date(note.updated_at).toLocaleString(undefined, { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric', 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        })}
                     </div>
 
-                    <button 
-                        onClick={handleSave}
-                        disabled={!title.trim() && !content.trim()}
-                        className="group flex items-center justify-center gap-2 bg-foreground hover:opacity-90 disabled:opacity-30 disabled:hover:opacity-30 transition-all duration-300 px-7 py-3 shadow-[0_4px_15px_rgba(0,0,0,0.05)]"
-                    >
-                        <span className="mono text-[10px] font-bold text-background uppercase tracking-widest flex items-center gap-2">
-                            <Check className="w-3.5 h-3.5" />
-                            {note ? 'Save Changes' : 'Secure Save'}
-                        </span>
-                    </button>
+                    <textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="Start typing securely here..."
+                        className="flex-1 w-full bg-transparent text-lg sm:text-xl text-fg-secondary placeholder-fg-muted/30 focus:outline-none focus:ring-0 border-none resize-none leading-relaxed font-sans"
+                    />
                 </div>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 }

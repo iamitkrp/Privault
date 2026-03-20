@@ -1,54 +1,90 @@
 "use client";
 
-import { Lightbulb, Bell, Tag, Edit3, Archive, Trash2, LayoutDashboard } from "lucide-react";
+import { Plus, LayoutDashboard, FolderArchive } from "lucide-react";
 
-interface SidebarItem {
-    id: string;
-    icon: React.ReactNode;
-    label: string;
-    isActive?: boolean;
-}
-
-const NAV_ITEMS: SidebarItem[] = [
-    { id: "notes", icon: <Lightbulb className="w-5 h-5" />, label: "Notes", isActive: true },
-    { id: "reminders", icon: <Bell className="w-5 h-5" />, label: "Reminders" },
-    { id: "l1", icon: <Tag className="w-5 h-5" />, label: "Personal" },
-    { id: "l2", icon: <Tag className="w-5 h-5" />, label: "Work" },
-    { id: "edit_labels", icon: <Edit3 className="w-5 h-5" />, label: "Edit labels" },
-    { id: "archive", icon: <Archive className="w-5 h-5" />, label: "Archive" },
-    { id: "trash", icon: <Trash2 className="w-5 h-5" />, label: "Trash" },
-];
-
-export function NotesSidebar({ onBack }: { onBack?: () => void }) {
+export function NotesSidebar({
+    sections,
+    activeSection,
+    onSelectSection,
+    onAddSection,
+    onBack
+}: {
+    sections: string[];
+    activeSection: string;
+    onSelectSection: (s: string) => void;
+    onAddSection: () => void;
+    onBack?: () => void;
+}) {
+    // Premium pastel gradients for the notebook tabs
+    const tabColors = [
+        "bg-gradient-to-b from-red-400 to-red-600",
+        "bg-gradient-to-b from-blue-400 to-blue-600",
+        "bg-gradient-to-b from-emerald-400 to-emerald-600",
+        "bg-gradient-to-b from-amber-400 to-amber-600",
+        "bg-gradient-to-b from-purple-400 to-purple-600",
+        "bg-gradient-to-b from-orange-400 to-orange-600"
+    ];
+    
     return (
-        <div className="w-[280px] shrink-0 h-full py-4 flex flex-col hidden md:flex border-r border-border/20 bg-background">
-            <button 
-                onClick={onBack}
-                className="flex items-center gap-4 px-6 py-3 mx-2 mb-6 text-fg-muted hover:bg-foreground/5 hover:text-foreground rounded-lg transition-colors mono text-xs uppercase tracking-widest"
-            >
-                <LayoutDashboard className="w-4 h-4" />
-                Back to Dashboard
-            </button>
+        <div className="w-[260px] shrink-0 h-full flex flex-col border-r border-border/20 bg-foreground/[0.02] relative shadow-[inset_-1px_0_0_rgba(0,0,0,0.05)] dark:shadow-none">
+             {/* Prominent Header */}
+             <div className="h-16 flex items-center justify-between px-6 border-b border-border/10 shrink-0 bg-transparent">
+                 <div className="flex items-center gap-2">
+                     <FolderArchive className="w-4 h-4 text-brand" />
+                     <span className="font-bold text-foreground tracking-tight text-sm uppercase">Notebooks</span>
+                 </div>
+                 <button 
+                     onClick={onAddSection} 
+                     className="p-1.5 bg-background border border-border/50 shadow-sm rounded-md hover:bg-foreground/5 transition-all text-fg-secondary hover:text-foreground group"
+                     title="New Notebook Section"
+                 >
+                     <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                 </button>
+             </div>
 
-            {NAV_ITEMS.map((item) => (
-                <button
-                    key={item.id}
-                    className={`flex items-center gap-6 px-6 py-3 transition-colors ${
-                        item.isActive 
-                            ? "bg-foreground/10 text-foreground rounded-r-full font-semibold" 
-                            : "text-fg-secondary hover:bg-foreground/5 hover:text-foreground rounded-r-full font-medium"
-                    }`}
-                    style={{
-                        marginRight: '12px',
-                        marginTop: item.id === "archive" ? 'auto' : (item.id === "edit_labels" || item.id === "l1") ? '8px' : '0'
-                    }}
-                >
-                    <div className={item.isActive ? "text-foreground" : "text-fg-muted"}>
-                        {item.icon}
-                    </div>
-                    <span className="text-sm tracking-wide">{item.label}</span>
-                </button>
-            ))}
+             <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5 no-scrollbar">
+                 <div 
+                     className={`flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                         activeSection === 'All' 
+                             ? 'bg-background shadow-md border border-border/40 font-bold text-foreground origin-left scale-100' 
+                             : 'hover:bg-foreground/5 text-fg-secondary border border-transparent hover:border-border/20 scale-[0.98]'
+                     }`}
+                     onClick={() => onSelectSection('All')}
+                 >
+                      All Sections
+                 </div>
+
+                 <div className="my-4 border-b border-border/10 mx-2" />
+
+                 {sections.map((s, i) => (
+                      <div 
+                           key={s} 
+                           className={`relative flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 group overflow-hidden ${
+                               activeSection === s 
+                                   ? 'bg-background shadow-md border border-border/40 font-bold text-foreground origin-left scale-100' 
+                                   : 'hover:bg-foreground/5 text-fg-secondary border border-transparent hover:border-border/20 scale-[0.98]'
+                           }`}
+                           onClick={() => onSelectSection(s)}
+                      >
+                           {/* The OneNote signature colored left border tab, upgraded to a shiny gradient pill */}
+                           <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-1.5 ${tabColors[i % tabColors.length]} rounded-r-md opacity-100 shadow-[0_0_10px_rgba(0,0,0,0.1)]`} />
+                           <span className="truncate pl-1">{s}</span>
+                      </div>
+                 ))}
+             </div>
+
+             {/* Footer Returns */}
+             <div className="p-4 border-t border-border/10 shrink-0 bg-transparent">
+                 {onBack && (
+                     <button 
+                         onClick={onBack} 
+                         className="flex w-full items-center justify-center gap-2 px-4 py-3 bg-background border border-border/50 shadow-sm hover:shadow hover:border-foreground/20 rounded-xl text-fg-secondary hover:text-foreground transition-all uppercase tracking-widest text-[10px] font-bold"
+                     >
+                         <LayoutDashboard className="w-3.5 h-3.5" />
+                         Vault Dashboard
+                     </button>
+                 )}
+             </div>
         </div>
     );
 }

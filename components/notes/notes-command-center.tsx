@@ -4,12 +4,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { NotesService } from "@/services/notes.service";
 import { VaultNote } from "@/types";
-import { RefreshCw } from "lucide-react";
-import { NotesGrid } from "./notes-grid";
+import { NotesList } from "./notes-grid"; // Repurposed into NotesList
 import { NoteEditor } from "./note-editor";
 import { NotesSidebar } from "./notes-sidebar";
-import { NoteCreator } from "./note-creator";
-import { AnimatePresence } from "framer-motion";
 
 export function NotesCommandCenter({
     onBack,
@@ -18,20 +15,19 @@ export function NotesCommandCenter({
 }) {
     const { user, supabaseClient } = useAuth();
     const [notes, setNotes] = useState<VaultNote[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [editingNote, setEditingNote] = useState<VaultNote | null>(null);
-    const [isCreating, setIsCreating] = useState(false);
+    
+    // 3-Pane Navigation States
+    const [activeSection, setActiveSection] = useState<string>("All");
+    const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
 
     const notesService = new NotesService(supabaseClient);
 
     const loadNotes = async () => {
         if (!user) return;
-        setLoading(true);
         const result = await notesService.getNotes();
         if (result.success) {
             setNotes(result.data);
         }
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -39,14 +35,28 @@ export function NotesCommandCenter({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
+    // Derived Sections
+    // Fallback: If no tags exist on a note, map it under "Uncategorized". We filter by tags[0] for MVP section tracking.
+    const uniqueSections = Array.from(
+        new Set(notes.map(n => n.tags && n.tags.length > 0 ? n.tags[0] : "All Notes"))
+    ).filter(tag => tag !== "All" && tag !== "All Notes" && tag !== undefined) as string[];
+
+    // Filtered Notes
+    const filteredNotes = activeSection === "All" 
+        ? notes 
+        : notes.filter(n => (n.tags && n.tags.length > 0 ? n.tags[0] : "All Notes") === activeSection);
+
+    const activeNote = notes.find(n => n.id === activeNoteId) || null;
+
     const handleSaveNote = async (data: { title: string, content: string, color: string, id?: string }) => {
         if (!user) return;
         
+        let tagsToSave = activeSection !== 'All' ? [activeSection] : [];
         if (data.id) {
             const result = await notesService.updateNote(
                 data.id, 
                 { title: data.title, content: data.content }, 
-                { color: data.color }
+                { color: data.color, tags: tagsToSave }
             );
             if (result.success) {
                 setNotes(prev => prev.map(n => n.id === result.data!.id ? result.data! : n));
@@ -55,68 +65,65 @@ export function NotesCommandCenter({
             const result = await notesService.addNote(
                 user.id, 
                 { title: data.title, content: data.content }, 
-                { color: data.color }
+                { color: data.color, tags: tagsToSave }
             );
             if (result.success) {
                 setNotes(prev => [result.data!, ...prev]);
+                setActiveNoteId(result.data!.id);
             }
         }
-        setEditingNote(null);
-        setIsCreating(false);
     };
 
     const handleDeleteNote = async (id: string) => {
-        if (!confirm("Are you sure you want to securely delete this note?")) return;
+        if (!confirm("Are you sure you want to securely delete this page?")) return;
         const result = await notesService.deleteNote(id);
         if (result.success) {
             setNotes(prev => prev.filter(n => n.id !== id));
+            if (activeNoteId === id) setActiveNoteId(null);
         }
+    };
+
+    const handleAddSection = () => {
+        const name = prompt("Enter new section name:");
+        if (name && name.trim().length > 0) {
+            // Because our sections are derived from note tags, creating a section requires creating an empty note with that tag
+            setActiveSection(name.trim());
+            setActiveNoteId(null);
+        }
+    };
+
+    const handleAddNote = () => {
+        setActiveNoteId(null);
+        // By setting activeNoteId to a dummy 'new' it mounts the editor empty
+        // For our flow right now, triggering an empty state triggers NoteEditor to "create a new page" mode
+        setTimeout(() => setActiveNoteId('new'), 10);
     };
 
     return (
         <div className="w-full flex h-[calc(100vh-80px)] bg-background text-foreground overflow-hidden">
-            {/* Left Sidebar */}
-            <NotesSidebar onBack={onBack} />
+            {/* Left Sidebar (Sections Pane) */}
+            <NotesSidebar 
+                 sections={uniqueSections}
+                 activeSection={activeSection}
+                 onSelectSection={(s) => { setActiveSection(s); setActiveNoteId(null); }}
+                 onAddSection={handleAddSection}
+                 onBack={onBack}
+            />
 
-            {/* Grid & Creator Area */}
-            <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8 w-full">
-                <div className="max-w-[800px] mx-auto w-full flex flex-col items-center">
-                    
-                    {/* Inline Creator Trigger */}
-                    <div className="w-full max-w-[600px] mb-12">
-                        <NoteCreator onClick={() => setIsCreating(true)} />
-                    </div>
-                    
-                    {/* Notes Grid Display */}
-                    <div className="w-full">
-                        {loading ? (
-                            <div className="flex justify-center py-20">
-                                <RefreshCw className="w-6 h-6 animate-spin text-fg-muted" />
-                            </div>
-                        ) : (
-                            <NotesGrid 
-                                notes={notes} 
-                                onEdit={(note: VaultNote) => setEditingNote(note)}
-                                onDelete={handleDeleteNote}
-                            />
-                        )}
-                    </div>
+            {/* Middle List (Pages Pane) */}
+            <NotesList 
+                 notes={filteredNotes} 
+                 activeNoteId={activeNoteId}
+                 onSelectNote={(note: VaultNote) => setActiveNoteId(note.id)}
+                 onAddNote={handleAddNote}
+                 onDeleteNote={handleDeleteNote}
+            />
 
-                </div>
-            </div>
-
-            <AnimatePresence>
-                {(isCreating || editingNote) && (
-                    <NoteEditor
-                        note={editingNote || undefined}
-                        onSave={handleSaveNote}
-                        onClose={() => {
-                            setEditingNote(null);
-                            setIsCreating(false);
-                        }}
-                    />
-                )}
-            </AnimatePresence>
+            {/* Right Editor Pane */}
+            <NoteEditor
+                 note={activeNoteId === 'new' ? ({ id: '', decrypted: { title: '', content: '' }, color: 'default', updated_at: new Date().toISOString() } as VaultNote) : activeNote}
+                 onSave={handleSaveNote}
+            />
         </div>
     );
 }
