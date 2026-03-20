@@ -20,6 +20,7 @@ export function NotesCommandCenter({
     const [notes, setNotes] = useState<VaultNote[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingNote, setEditingNote] = useState<VaultNote | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
 
     const notesService = new NotesService(supabaseClient);
 
@@ -61,6 +62,7 @@ export function NotesCommandCenter({
             }
         }
         setEditingNote(null);
+        setIsCreating(false);
     };
 
     const handleDeleteNote = async (id: string) => {
@@ -80,9 +82,9 @@ export function NotesCommandCenter({
             <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8 w-full">
                 <div className="max-w-[800px] mx-auto w-full flex flex-col items-center">
                     
-                    {/* Inline Creator */}
+                    {/* Inline Creator Trigger */}
                     <div className="w-full max-w-[600px] mb-12">
-                        <NoteCreator onSave={handleSaveNote} />
+                        <NoteCreator onClick={() => setIsCreating(true)} />
                     </div>
                     
                     {/* Notes Grid Display */}
@@ -104,11 +106,14 @@ export function NotesCommandCenter({
             </div>
 
             <AnimatePresence>
-                {editingNote && (
+                {(isCreating || editingNote) && (
                     <NoteEditor
-                        note={editingNote}
+                        note={editingNote || undefined}
                         onSave={handleSaveNote}
-                        onClose={() => setEditingNote(null)}
+                        onClose={() => {
+                            setEditingNote(null);
+                            setIsCreating(false);
+                        }}
                     />
                 )}
             </AnimatePresence>
