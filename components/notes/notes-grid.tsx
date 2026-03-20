@@ -4,6 +4,14 @@ import { VaultNote } from "@/types";
 import { Trash2, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 
+const COLORS = [
+    { id: 'default', value: 'default', css: 'transparent', label: 'Default' },
+    { id: 'red', value: 'red', css: 'rgba(239,68,68,0.1)', label: 'Red' },
+    { id: 'blue', value: 'blue', css: 'rgba(59,130,246,0.1)', label: 'Blue' },
+    { id: 'green', value: 'green', css: 'rgba(16,185,129,0.1)', label: 'Green' },
+    { id: 'yellow', value: 'yellow', css: 'rgba(245,158,11,0.1)', label: 'Yellow' }
+];
+
 export function NotesGrid({
     notes,
     onEdit,
@@ -38,22 +46,31 @@ export function NotesGrid({
 
     return (
         <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-            {notes.map((note, index) => (
+            {notes.map((note, index) => {
+                const legacyColors: Record<string, string> = {
+                    '#5c2b29': 'red', '#1e3a5f': 'blue', '#2b593f': 'green', '#635d19': 'yellow',
+                    '#fee2e2': 'red', '#dbeafe': 'blue', '#d1fae5': 'green', '#fef3c7': 'yellow'
+                };
+                // Fallback mapper for any older notes saved with hex codes
+                const mappedColorValue = legacyColors[note.color] || note.color;
+                const selectedColorCss = COLORS.find(c => c.value === mappedColorValue)?.css || note.color;
+
+                return (
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     key={note.id}
                     onClick={() => onEdit(note)}
-                    className="break-inside-avoid relative group border border-border/40 glass p-6 hover:border-foreground/30 transition-all cursor-pointer overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:shadow-xl"
+                    className="break-inside-avoid relative group border border-border/40 bg-bg-secondary p-6 hover:border-foreground/30 transition-all cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg"
                 >
-                    {/* Background color tint if not default */}
-                    {note.color !== 'default' && (
-                        <div className="absolute inset-0 opacity-10" style={{ backgroundColor: note.color }}></div>
+                    {/* Background color tint */}
+                    {mappedColorValue !== 'default' && (
+                        <div className="absolute inset-0 pointer-events-none transition-colors duration-300" style={{ backgroundColor: selectedColorCss }}></div>
                     )}
                     
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
-                        <button onClick={(e) => { e.stopPropagation(); onDelete(note.id); }} className="p-1.5 bg-background/80 glass hover:bg-error/20 text-fg-muted hover:text-error transition-colors rounded">
+                        <button onClick={(e) => { e.stopPropagation(); onDelete(note.id); }} className="p-1.5 bg-background border border-border/50 hover:bg-error/10 text-fg-muted hover:text-error transition-colors rounded-md">
                             <Trash2 className="w-3.5 h-3.5" />
                         </button>
                     </div>
@@ -67,7 +84,8 @@ export function NotesGrid({
                         </div>
                     </div>
                 </motion.div>
-            ))}
+                );
+            })}
         </div>
     );
 }

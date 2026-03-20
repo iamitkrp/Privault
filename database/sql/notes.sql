@@ -27,12 +27,7 @@ CREATE POLICY "Users can update their own notes." ON notes
 CREATE POLICY "Users can delete their own notes." ON notes
     FOR DELETE USING (auth.uid() = user_id);
 
--- Check if moddatetime extension exists and create trigger
--- Ensure the moddatetime function exists (should be created in schema.sql)
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'handle_notes_updated_at') THEN
-        CREATE TRIGGER handle_notes_updated_at BEFORE UPDATE ON notes
-            FOR EACH ROW EXECUTE PROCEDURE moddatetime (updated_at);
-    END IF;
-END $$;
+-- Apply updated_at trigger
+DROP TRIGGER IF EXISTS trg_notes_updated_at ON notes;
+CREATE TRIGGER trg_notes_updated_at BEFORE UPDATE ON notes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
