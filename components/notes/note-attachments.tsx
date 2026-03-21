@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Paperclip, Download, Trash2, Loader2, FileIcon, FileText } from "lucide-react";
+import { Paperclip, Download, Trash2, Loader2, FileText } from "lucide-react";
 import { NotesService } from "@/services/notes.service";
 import { createClient } from "@/lib/supabase/client";
 

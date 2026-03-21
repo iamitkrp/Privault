@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, LayoutDashboard, FolderArchive } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export function NotesSidebar({
@@ -8,115 +8,104 @@ export function NotesSidebar({
     activeSection,
     onSelectSection,
     onAddSection,
-    onBack
 }: {
     sections: string[];
     activeSection: string;
-    onSelectSection: (s: string) => void;
+    onSelectSection: (section: string) => void;
     onAddSection: (name: string) => void;
     onBack?: () => void;
 }) {
-    const [isCreating, setIsCreating] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
     const [newSectionName, setNewSectionName] = useState("");
 
-    const handleCreateSubmit = () => {
-        if (newSectionName.trim()) {
-            onAddSection(newSectionName);
-        }
-        setIsCreating(false);
+    const handleAdd = (e: React.FormEvent) => {
+        e.preventDefault();
+        onAddSection(newSectionName);
         setNewSectionName("");
+        setIsAdding(false);
     };
-    // Premium pastel gradients for the notebook tabs
-    const tabColors = [
-        "bg-gradient-to-b from-red-400 to-red-600",
-        "bg-gradient-to-b from-blue-400 to-blue-600",
-        "bg-gradient-to-b from-emerald-400 to-emerald-600",
-        "bg-gradient-to-b from-amber-400 to-amber-600",
-        "bg-gradient-to-b from-purple-400 to-purple-600",
-        "bg-gradient-to-b from-orange-400 to-orange-600"
-    ];
-    
+
     return (
-        <div className="w-[260px] shrink-0 h-full flex flex-col border-r border-border/20 bg-foreground/[0.02] relative shadow-[inset_-1px_0_0_rgba(0,0,0,0.05)] dark:shadow-none">
-             {/* Prominent Header */}
-             <div className="h-16 flex items-center justify-between px-6 border-b border-border/10 shrink-0 bg-transparent">
-                 <div className="flex items-center gap-2">
-                     <FolderArchive className="w-4 h-4 text-brand" />
-                     <span className="font-bold text-foreground tracking-tight text-sm uppercase">Notebooks</span>
-                 </div>
-                 <button 
-                     onClick={() => setIsCreating(true)} 
-                     className="p-1.5 bg-background border border-border/50 shadow-sm rounded-md hover:bg-foreground/5 transition-all text-fg-secondary hover:text-foreground group"
-                     title="New Notebook Section"
-                 >
-                     <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                 </button>
-             </div>
+        <section className="w-64 bg-[#111318] border-r border-[#1d2025] flex flex-col h-full relative z-20 shrink-0">
+            {/* Header */}
+            <div className="h-16 flex items-center px-6 border-b border-[#1d2025] shrink-0 bg-[#0c0e12]">
+                <span className="font-label text-xs font-bold tracking-widest text-[#aaabb0] uppercase">// SECTIONS</span>
+            </div>
 
-             <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5 no-scrollbar">
-                 {isCreating && (
-                     <div className="mb-3 px-1">
-                         <input 
-                             autoFocus
-                             type="text"
-                             value={newSectionName}
-                             onChange={e => setNewSectionName(e.target.value)}
-                             onKeyDown={e => {
-                                 if (e.key === 'Enter') handleCreateSubmit();
-                                 if (e.key === 'Escape') {
-                                     setIsCreating(false);
-                                     setNewSectionName("");
-                                 }
-                             }}
-                             onBlur={handleCreateSubmit}
-                             placeholder="Section name..."
-                             className="w-full bg-background border border-border/50 rounded-lg px-4 py-2 text-sm text-foreground focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/30 shadow-sm transition-all"
-                         />
-                     </div>
-                 )}
+            <div className="flex-1 overflow-y-auto no-scrollbar py-2">
+                
+                {/* All Sections Item */}
+                <div 
+                    onClick={() => onSelectSection("All")}
+                    className={`px-6 py-4 cursor-pointer transition-colors group ${activeSection === "All" ? 'bg-[#1d2025] border-l-2 border-[#48e4ff]' : 'border-b border-[#1d2025] hover:bg-[#1d2025]'}`}
+                >
+                    <div className="flex justify-between items-center mb-1">
+                        <span className={`font-headline font-medium text-sm ${activeSection === "All" ? 'text-[#48e4ff]' : 'text-[#f6f6fc]/70 group-hover:text-[#f6f6fc]'}`}>All Sections</span>
+                    </div>
+                    {activeSection === "All" && (
+                        <div className="w-full h-1 bg-[#46484d]/30 mt-2">
+                            <div className="w-full h-full bg-[#48e4ff]/50"></div>
+                        </div>
+                    )}
+                </div>
 
-                 <div 
-                     className={`flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
-                         activeSection === 'All' 
-                             ? 'bg-background shadow-md border border-border/40 font-bold text-foreground origin-left scale-100' 
-                             : 'hover:bg-foreground/5 text-fg-secondary border border-transparent hover:border-border/20 scale-[0.98]'
-                     }`}
-                     onClick={() => onSelectSection('All')}
-                 >
-                      All Sections
-                 </div>
+                {/* Derived Sections */}
+                {sections.map(section => (
+                    <div 
+                        key={section}
+                        onClick={() => onSelectSection(section)}
+                        className={`px-6 py-4 cursor-pointer transition-colors group ${activeSection === section ? 'bg-[#1d2025] border-l-2 border-[#48e4ff]' : 'border-b border-[#1d2025] hover:bg-[#1d2025]'}`}
+                    >
+                        <div className="flex justify-between items-center mb-1">
+                            <span className={`font-headline font-medium text-sm ${activeSection === section ? 'text-[#48e4ff]' : 'text-[#f6f6fc]/70 group-hover:text-[#f6f6fc]'}`}>{section}</span>
+                        </div>
+                        {activeSection === section && (
+                            <div className="w-full h-1 bg-[#46484d]/30 mt-2">
+                                <div className="w-3/4 h-full bg-[#48e4ff]/50"></div>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
 
-                 <div className="my-4 border-b border-border/10 mx-2" />
-
-                 {sections.map((s, i) => (
-                      <div 
-                           key={s} 
-                           className={`relative flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 group overflow-hidden ${
-                               activeSection === s 
-                                   ? 'bg-background shadow-md border border-border/40 font-bold text-foreground origin-left scale-100' 
-                                   : 'hover:bg-foreground/5 text-fg-secondary border border-transparent hover:border-border/20 scale-[0.98]'
-                           }`}
-                           onClick={() => onSelectSection(s)}
-                      >
-                           {/* The OneNote signature colored left border tab, upgraded to a shiny gradient pill */}
-                           <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-1.5 ${tabColors[i % tabColors.length]} rounded-r-md opacity-100 shadow-[0_0_10px_rgba(0,0,0,0.1)]`} />
-                           <span className="truncate pl-1">{s}</span>
-                      </div>
-                 ))}
-             </div>
-
-             {/* Footer Returns */}
-             <div className="p-4 border-t border-border/10 shrink-0 bg-transparent">
-                 {onBack && (
-                     <button 
-                         onClick={onBack} 
-                         className="flex w-full items-center justify-center gap-2 px-4 py-3 bg-background border border-border/50 shadow-sm hover:shadow hover:border-foreground/20 rounded-xl text-fg-secondary hover:text-foreground transition-all uppercase tracking-widest text-[10px] font-bold"
-                     >
-                         <LayoutDashboard className="w-3.5 h-3.5" />
-                         Vault Dashboard
-                     </button>
-                 )}
-             </div>
-        </div>
+            {/* Add Section Action Area */}
+            <div className="p-4 bg-[#111318] border-t border-[#1d2025] shrink-0">
+                {isAdding ? (
+                    <form onSubmit={handleAdd} className="flex flex-col gap-2">
+                        <input
+                            type="text"
+                            value={newSectionName}
+                            onChange={(e) => setNewSectionName(e.target.value)}
+                            placeholder="Section Name..."
+                            className="bg-[#0c0e12] border border-[#1d2025] text-[#f6f6fc] text-[10px] font-mono p-2 outline-none focus:border-[#48e4ff] transition-colors uppercase tracking-widest"
+                            autoFocus
+                        />
+                        <div className="flex gap-2">
+                            <button 
+                                type="submit" 
+                                className="flex-1 bg-[#48e4ff]/20 text-[#48e4ff] font-label font-bold text-[10px] uppercase py-2 border border-[#48e4ff]/30 hover:bg-[#48e4ff]/30 transition-colors tracking-widest cursor-pointer"
+                            >
+                                CREATE
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => setIsAdding(false)}
+                                className="flex-1 bg-transparent text-[#aaabb0] font-label font-bold text-[10px] uppercase py-2 border border-[#46484d] hover:text-[#f6f6fc] hover:border-[#aaabb0] transition-colors tracking-widest cursor-pointer"
+                            >
+                                CANCEL
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <button 
+                        onClick={() => setIsAdding(true)}
+                        className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-[#46484d] text-[#aaabb0] hover:text-[#48e4ff] hover:border-[#48e4ff]/50 transition-all text-[10px] font-label uppercase tracking-widest cursor-pointer"
+                    >
+                        <Plus className="w-3.5 h-3.5" /> 
+                        Add Section
+                    </button>
+                )}
+            </div>
+        </section>
     );
 }
