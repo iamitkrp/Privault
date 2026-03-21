@@ -8,6 +8,11 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Image from '@tiptap/extension-image'
 import Dropcursor from '@tiptap/extension-dropcursor'
 import Link from '@tiptap/extension-link'
+import TextAlign from '@tiptap/extension-text-align'
+import Underline from '@tiptap/extension-underline'
+import Highlight from '@tiptap/extension-highlight'
+import { Color } from '@tiptap/extension-color'
+import { TextStyle } from '@tiptap/extension-text-style'
 import { useEffect, useState, forwardRef, useImperativeHandle } from 'react'
 
 
@@ -23,7 +28,11 @@ export interface EditorCommands {
     toggleBlockquote: () => void;
     undo: () => void;
     redo: () => void;
-    isActive: (name: string) => boolean;
+    isActive: (nameOrAttributes: string | object, attributes?: any) => boolean;
+    toggleUnderline: () => void;
+    setTextAlign: (alignment: string) => void;
+    toggleHighlight: () => void;
+    toggleHeading: (level: 1 | 2 | 3) => void;
 }
 
 export const RichEditor = forwardRef<EditorCommands | null, {
@@ -37,6 +46,7 @@ export const RichEditor = forwardRef<EditorCommands | null, {
     }, []);
 
     const editor = useEditor({
+        immediatelyRender: false,
         extensions: [
             StarterKit,
             TaskList,
@@ -44,6 +54,16 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             Image.configure({ inline: true }),
             Dropcursor.configure({ color: 'var(--color-brand)', width: 3 }),
             Link.configure({ openOnClick: false }),
+            Underline,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+                defaultAlignment: 'left',
+            }),
+            Highlight.configure({
+                multicolor: true,
+            }),
+            TextStyle,
+            Color,
             Placeholder.configure({
                 placeholder: 'Start typing securely or drag & drop an image...',
             }),
@@ -115,7 +135,11 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             toggleBlockquote: () => editor.chain().focus().toggleBlockquote().run(),
             undo: () => editor.chain().focus().undo().run(),
             redo: () => editor.chain().focus().redo().run(),
-            isActive: (name: string) => editor.isActive(name),
+            toggleUnderline: () => editor.chain().focus().toggleUnderline().run(),
+            setTextAlign: (alignment: string) => editor.chain().focus().setTextAlign(alignment).run(),
+            toggleHighlight: () => editor.chain().focus().toggleHighlight().run(),
+            toggleHeading: (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run(),
+            isActive: (name: string, attributes?: any) => editor.isActive(name, attributes),
         };
     }, [editor]);
 

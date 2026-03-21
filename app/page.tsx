@@ -67,11 +67,7 @@ export default function LandingPage() {
     }
   };
 
-  const handleLoginClick = (e: React.MouseEvent) => {
-      e.preventDefault();
-      setAuthMode("login");
-      setIsAuthModalOpen(true);
-  };
+
 
   return (
     <div
