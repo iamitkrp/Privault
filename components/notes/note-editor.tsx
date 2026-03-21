@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { VaultNote } from "@/types";
-import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X } from "lucide-react";
+import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
 import { NoteAttachments } from "./note-attachments";
 const TEMPLATES = [
@@ -29,6 +30,30 @@ const TEMPLATES = [
         name: 'Daily Journal',
         description: 'Reflect on your day, learnings, achievements, and tomorrow\'s goals.',
         html: `<h2>Daily Journal</h2><h3>What did I accomplish today?</h3><p></p><h3>What did I learn?</h3><p></p><h3>What are my goals for tomorrow?</h3><p></p>`
+    },
+    {
+        id: 'weekly',
+        name: 'Weekly Planner',
+        description: 'Plan out your week, key objectives, and day-by-day focus areas.',
+        html: `<h2>Weekly Planner</h2><h3>Objectives</h3><ul><li><p></p></li></ul><h3>Monday</h3><p></p><h3>Tuesday</h3><p></p><h3>Wednesday</h3><p></p><h3>Thursday</h3><p></p><h3>Friday</h3><p></p>`
+    },
+    {
+        id: 'habit',
+        name: 'Habit Tracker',
+        description: 'Track your daily routines and build positive habits.',
+        html: `<h2>Weekly Habit Tracker</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>Morning Workout</p></li><li data-type="taskItem" data-checked="false"><p>Read 10 pages</p></li><li data-type="taskItem" data-checked="false"><p>Drink 2L Water</p></li></ul>`
+    },
+    {
+        id: 'reading',
+        name: 'Reading Notes',
+        description: 'Capture key insights, specific quotes, and actionable takeaways from books or articles.',
+        html: `<h2>Reading Notes</h2><p><strong>Title:</strong> </p><p><strong>Author:</strong> </p><h3>Summary</h3><p></p><h3>Key Quotes</h3><blockquote><p></p></blockquote><h3>Actionable Takeaways</h3><ul><li><p></p></li></ul>`
+    },
+    {
+        id: 'crm',
+        name: 'Contact Log',
+        description: 'Keep track of important conversations, client details, and clear follow-ups.',
+        html: `<h2>Contact Log</h2><p><strong>Name:</strong> </p><p><strong>Company/Role:</strong> </p><h3>Last Interaction</h3><p></p><h3>Notes</h3><p></p><h3>Follow-up Action</h3><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>Send email regarding...</p></li></ul>`
     }
 ];
 
@@ -44,10 +69,13 @@ export function NoteEditor({
     const [isLocked, setIsLocked] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+    const [mounted, setMounted] = useState(false);
     const [updateTrigger, setUpdateTrigger] = useState(0); 
     const editorRef = useRef<EditorCommands | null>(null);
 
     useEffect(() => {
+        setMounted(true);
         const interval = setInterval(() => setUpdateTrigger(prev => prev + 1), 500);
         return () => clearInterval(interval);
     }, []);
@@ -231,38 +259,70 @@ export function NoteEditor({
             </div>
 
             {/* Template Pop-up Modal */}
-            {showTemplateModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-background border border-border shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col slide-in-bottom">
-                        <div className="px-6 py-5 border-b border-border flex items-center justify-between">
-                            <h3 className="text-xs font-bold tracking-widest text-foreground uppercase mono">Select a Template</h3>
-                            <button onClick={() => setShowTemplateModal(false)} className="text-fg-secondary hover:text-foreground transition-colors p-1 rounded-sm hover:bg-foreground/5">
+            {mounted && showTemplateModal && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-background border border-border shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col slide-in-bottom">
+                        <div className="px-6 py-4 border-b border-border flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                            <h3 className="text-xs font-bold tracking-widest text-foreground uppercase mono shrink-0">Select Template</h3>
+                            <div className="flex-1 max-w-md w-full sm:mx-4 relative">
+                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search by name or keyword..."
+                                    value={templateSearchQuery}
+                                    onChange={(e) => setTemplateSearchQuery(e.target.value)}
+                                    className="w-full bg-foreground/5 border border-transparent focus:border-border rounded-md pl-9 pr-4 py-2 text-sm text-foreground placeholder-fg-muted outline-none transition-all"
+                                />
+                            </div>
+                            <button onClick={() => setShowTemplateModal(false)} className="absolute right-6 top-4 sm:static text-fg-secondary hover:text-foreground transition-colors p-1.5 rounded-sm hover:bg-foreground/5 shrink-0">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4 bg-foreground/[0.02] max-h-[70vh]">
-                            {TEMPLATES.map((template) => (
-                                <button 
-                                    key={template.id}
-                                    onClick={() => {
-                                        if (editorRef.current) {
-                                            editorRef.current.setContent(template.html);
-                                            setContent(template.html);
-                                        }
-                                        setShowTemplateModal(false);
-                                    }}
-                                    className="flex flex-col text-left p-6 bg-background border border-border hover:border-foreground/30 hover:shadow-md transition-all group"
-                                >
-                                    <div className="w-10 h-10 rounded-sm bg-foreground/5 border border-border flex items-center justify-center mb-5 group-hover:bg-foreground group-hover:text-background transition-colors">
-                                        <LayoutTemplate className="w-4 h-4" />
-                                    </div>
-                                    <span className="font-bold text-foreground mb-2 tracking-tight text-lg">{template.name}</span>
-                                    <span className="text-sm text-fg-secondary leading-relaxed">{template.description}</span>
-                                </button>
-                            ))}
+                        <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-foreground/[0.02] max-h-[70vh]">
+                            {TEMPLATES.filter(t => 
+                                t.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) || 
+                                t.description.toLowerCase().includes(templateSearchQuery.toLowerCase())
+                            ).length > 0 ? (
+                                TEMPLATES.filter(t => 
+                                    t.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) || 
+                                    t.description.toLowerCase().includes(templateSearchQuery.toLowerCase())
+                                ).map((template) => (
+                                    <button 
+                                        key={template.id}
+                                        onClick={() => {
+                                            if (editorRef.current) {
+                                                editorRef.current.setContent(template.html);
+                                                setContent(template.html);
+                                            }
+                                            setShowTemplateModal(false);
+                                            setTemplateSearchQuery("");
+                                        }}
+                                        className="flex flex-col text-left p-6 bg-background border border-border/50 hover:border-foreground/30 hover:shadow-md transition-all group rounded-lg"
+                                    >
+                                        <div className="w-10 h-10 rounded-sm bg-foreground/5 border border-border flex items-center justify-center mb-5 group-hover:bg-foreground group-hover:text-background transition-colors shrink-0">
+                                            <LayoutTemplate className="w-4 h-4" />
+                                        </div>
+                                        <span className="font-bold text-foreground mb-2 tracking-tight">{template.name}</span>
+                                        <span className="text-sm text-fg-secondary leading-relaxed line-clamp-3">{template.description}</span>
+                                    </button>
+                                ))
+                            ) : (
+                                <div className="col-span-full py-16 text-center flex flex-col items-center">
+                                    <LayoutTemplate className="w-10 h-10 text-fg-muted/50 mb-4" />
+                                    <h4 className="text-foreground font-bold mb-1">No templates found</h4>
+                                    <p className="text-fg-secondary text-sm">Try adjusting your search terms.</p>
+                                    <button 
+                                        onClick={() => setTemplateSearchQuery("")}
+                                        className="mt-4 text-xs font-bold uppercase tracking-widest text-brand hover:text-brand/80"
+                                    >
+                                        Clear Search
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
