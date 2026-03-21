@@ -2,16 +2,35 @@
 
 import { useState, useEffect, useRef } from "react";
 import { VaultNote } from "@/types";
-import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Clock, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate } from "lucide-react";
+import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
 import { NoteAttachments } from "./note-attachments";
-
-const TEMPLATES: Record<string, string> = {
-    todo: `<h2>To-Do List</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>New Task 1</p></li><li data-type="taskItem" data-checked="false"><p>New Task 2</p></li></ul>`,
-    meeting: `<h2>Meeting Notes</h2><p><strong>Date:</strong> </p><p><strong>Attendees:</strong> </p><h3>Agenda</h3><ul><li><p></p></li></ul><h3>Action Items</h3><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p></p></li></ul>`,
-    project: `<h2>Project Plan</h2><h3>Overview</h3><p></p><h3>Goals</h3><ul><li><p></p></li></ul><h3>Timeline</h3><p></p>`,
-    journal: `<h2>Daily Journal</h2><h3>What did I accomplish today?</h3><p></p><h3>What did I learn?</h3><p></p><h3>What are my goals for tomorrow?</h3><p></p>`
-};
+const TEMPLATES = [
+    {
+        id: 'todo',
+        name: 'To-Do List',
+        description: 'A simple checklist to track your tasks and prioritize daily activities.',
+        html: `<h2>To-Do List</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>New Task 1</p></li><li data-type="taskItem" data-checked="false"><p>New Task 2</p></li></ul>`
+    },
+    {
+        id: 'meeting',
+        name: 'Meeting Notes',
+        description: 'Structure for capturing meeting agendas, attendees, and action items.',
+        html: `<h2>Meeting Notes</h2><p><strong>Date:</strong> </p><p><strong>Attendees:</strong> </p><h3>Agenda</h3><ul><li><p></p></li></ul><h3>Action Items</h3><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p></p></li></ul>`
+    },
+    {
+        id: 'project',
+        name: 'Project Plan',
+        description: 'Outline your project goals, detailed overview, and timeline expectations.',
+        html: `<h2>Project Plan</h2><h3>Overview</h3><p></p><h3>Goals</h3><ul><li><p></p></li></ul><h3>Timeline</h3><p></p>`
+    },
+    {
+        id: 'journal',
+        name: 'Daily Journal',
+        description: 'Reflect on your day, learnings, achievements, and tomorrow\'s goals.',
+        html: `<h2>Daily Journal</h2><h3>What did I accomplish today?</h3><p></p><h3>What did I learn?</h3><p></p><h3>What are my goals for tomorrow?</h3><p></p>`
+    }
+];
 
 export function NoteEditor({
     note,
@@ -24,6 +43,7 @@ export function NoteEditor({
     const [content, setContent] = useState("");
     const [isLocked, setIsLocked] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
     const [updateTrigger, setUpdateTrigger] = useState(0); 
     const editorRef = useRef<EditorCommands | null>(null);
 
@@ -136,30 +156,9 @@ export function NoteEditor({
                         
                         <div className="w-px h-4 bg-border mx-1 hidden md:block" />
 
-                        <div className="relative hidden md:flex items-center group">
-                            <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none text-fg-secondary group-hover:text-foreground">
-                                <LayoutTemplate className="w-3.5 h-3.5" />
-                            </div>
-                            <select 
-                                className="appearance-none bg-transparent text-fg-secondary hover:text-foreground hover:bg-foreground/5 cursor-pointer text-[11px] font-bold uppercase tracking-widest pl-8 pr-4 py-1.5 rounded-sm outline-none transition-colors border-none"
-                                value=""
-                                onChange={(e) => {
-                                    if (e.target.value && editorRef.current) {
-                                        const html = TEMPLATES[e.target.value];
-                                        if (html) {
-                                            editorRef.current.setContent(html);
-                                            setContent(html);
-                                        }
-                                    }
-                                }}
-                            >
-                                <option value="" disabled hidden>Templates</option>
-                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="todo">To-Do List</option>
-                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="meeting">Meeting Notes</option>
-                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="project">Project Plan</option>
-                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="journal">Daily Journal</option>
-                            </select>
-                        </div>
+                        <button onClick={() => setShowTemplateModal(true)} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors text-fg-secondary hover:text-foreground hover:bg-foreground/5`} title="Templates">
+                            <LayoutTemplate className="w-3.5 h-3.5" />
+                        </button>
                     </div>
                 </div>
             </header>
@@ -169,25 +168,19 @@ export function NoteEditor({
                 <div className="max-w-[800px] w-full mx-auto flex flex-col flex-1 pb-32">
                     
                     {/* Metadata Header */}
-                    <div className="mb-12 border-b-2 border-border/50 pb-8">
+                    <div className="mb-12 border-b-[1.5px] border-border pb-8">
                         <input 
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Untitled Note"
-                            className="w-full bg-transparent text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-foreground placeholder-fg-muted/50 border-none ring-0 outline-none"
+                            className="w-full bg-transparent text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6 text-foreground placeholder-fg-muted/50 border-none ring-0 outline-none"
                         />
                         <div className="flex flex-wrap items-center gap-6 text-fg-secondary">
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-3.5 h-3.5" />
-                                <span className="mono text-xs uppercase tracking-widest">
-                                    {new Date(note.updated_at || Date.now()).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-3.5 h-3.5" />
-                                <span className="mono text-xs uppercase tracking-widest">
-                                    {new Date(note.updated_at || Date.now()).toLocaleTimeString('en-US', { hour12: false })}
+                                <span className="mono text-[11px] uppercase tracking-widest">
+                                    {new Date(note.updated_at || Date.now()).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
                                 </span>
                             </div>
                             <div className="flex gap-2">
@@ -205,7 +198,7 @@ export function NoteEditor({
                         </div>
                     </div>
 
-                    <div className="space-y-8 mono text-sm text-foreground/90 leading-relaxed">
+                    <div className="space-y-8 text-[15px] sm:text-base text-foreground/90 leading-relaxed font-sans pb-12">
                         <RichEditor 
                             ref={editorRef}
                             content={content} 
@@ -213,7 +206,7 @@ export function NoteEditor({
                         />
                     </div>
 
-                    {note?.id && <div className="mt-8"><NoteAttachments noteId={note.id} /></div>}
+                    {note?.id && <div className="mt-8 border-t border-border pt-8"><NoteAttachments noteId={note.id} /></div>}
                 </div>
             </div>
 
@@ -236,6 +229,41 @@ export function NoteEditor({
                     {isSaving ? 'Saving...' : <><Check className="w-4 h-4" /> Save</>}
                 </button>
             </div>
+
+            {/* Template Pop-up Modal */}
+            {showTemplateModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-background border border-border shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col slide-in-bottom">
+                        <div className="px-6 py-5 border-b border-border flex items-center justify-between">
+                            <h3 className="text-xs font-bold tracking-widest text-foreground uppercase mono">Select a Template</h3>
+                            <button onClick={() => setShowTemplateModal(false)} className="text-fg-secondary hover:text-foreground transition-colors p-1 rounded-sm hover:bg-foreground/5">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4 bg-foreground/[0.02] max-h-[70vh]">
+                            {TEMPLATES.map((template) => (
+                                <button 
+                                    key={template.id}
+                                    onClick={() => {
+                                        if (editorRef.current) {
+                                            editorRef.current.setContent(template.html);
+                                            setContent(template.html);
+                                        }
+                                        setShowTemplateModal(false);
+                                    }}
+                                    className="flex flex-col text-left p-6 bg-background border border-border hover:border-foreground/30 hover:shadow-md transition-all group"
+                                >
+                                    <div className="w-10 h-10 rounded-sm bg-foreground/5 border border-border flex items-center justify-center mb-5 group-hover:bg-foreground group-hover:text-background transition-colors">
+                                        <LayoutTemplate className="w-4 h-4" />
+                                    </div>
+                                    <span className="font-bold text-foreground mb-2 tracking-tight text-lg">{template.name}</span>
+                                    <span className="text-sm text-fg-secondary leading-relaxed">{template.description}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
