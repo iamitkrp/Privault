@@ -33,6 +33,7 @@ export interface EditorCommands {
     setTextAlign: (alignment: string) => void;
     toggleHighlight: () => void;
     toggleHeading: (level: 1 | 2 | 3) => void;
+    setContent: (html: string) => void;
 }
 
 export const RichEditor = forwardRef<EditorCommands | null, {
@@ -139,6 +140,7 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             setTextAlign: (alignment: string) => editor.chain().focus().setTextAlign(alignment).run(),
             toggleHighlight: () => editor.chain().focus().toggleHighlight().run(),
             toggleHeading: (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run(),
+            setContent: (html: string) => editor.commands.setContent(html),
             isActive: (name: string, attributes?: any) => editor.isActive(name, attributes),
         };
     }, [editor]);

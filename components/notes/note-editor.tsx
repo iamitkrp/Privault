@@ -2,9 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { VaultNote } from "@/types";
-import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Clock, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code } from "lucide-react";
+import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Clock, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
 import { NoteAttachments } from "./note-attachments";
+
+const TEMPLATES: Record<string, string> = {
+    todo: `<h2>To-Do List</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>New Task 1</p></li><li data-type="taskItem" data-checked="false"><p>New Task 2</p></li></ul>`,
+    meeting: `<h2>Meeting Notes</h2><p><strong>Date:</strong> </p><p><strong>Attendees:</strong> </p><h3>Agenda</h3><ul><li><p></p></li></ul><h3>Action Items</h3><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p></p></li></ul>`,
+    project: `<h2>Project Plan</h2><h3>Overview</h3><p></p><h3>Goals</h3><ul><li><p></p></li></ul><h3>Timeline</h3><p></p>`,
+    journal: `<h2>Daily Journal</h2><h3>What did I accomplish today?</h3><p></p><h3>What did I learn?</h3><p></p><h3>What are my goals for tomorrow?</h3><p></p>`
+};
 
 export function NoteEditor({
     note,
@@ -126,6 +133,33 @@ export function NoteEditor({
                         <button onClick={() => editorRef.current?.toggleCodeBlock()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden lg:flex ${editorRef.current?.isActive('codeBlock') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Code Block">
                             <Code className="w-3.5 h-3.5" />
                         </button>
+                        
+                        <div className="w-px h-4 bg-border mx-1 hidden md:block" />
+
+                        <div className="relative hidden md:flex items-center group">
+                            <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none text-fg-secondary group-hover:text-foreground">
+                                <LayoutTemplate className="w-3.5 h-3.5" />
+                            </div>
+                            <select 
+                                className="appearance-none bg-transparent text-fg-secondary hover:text-foreground hover:bg-foreground/5 cursor-pointer text-[11px] font-bold uppercase tracking-widest pl-8 pr-4 py-1.5 rounded-sm outline-none transition-colors border-none"
+                                value=""
+                                onChange={(e) => {
+                                    if (e.target.value && editorRef.current) {
+                                        const html = TEMPLATES[e.target.value];
+                                        if (html) {
+                                            editorRef.current.setContent(html);
+                                            setContent(html);
+                                        }
+                                    }
+                                }}
+                            >
+                                <option value="" disabled hidden>Templates</option>
+                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="todo">To-Do List</option>
+                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="meeting">Meeting Notes</option>
+                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="project">Project Plan</option>
+                                <option className="text-foreground bg-background lowercase normal-case text-sm font-normal" value="journal">Daily Journal</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </header>
