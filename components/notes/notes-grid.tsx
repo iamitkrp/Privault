@@ -42,83 +42,94 @@ export function NotesList({
     }
 
     return (
-        <section className="w-72 bg-background/30 backdrop-blur-sm border-r border-border flex flex-col shrink-0 relative z-10 glass transition-all">
-             {/* Pane Header */}
-             <div className="h-16 flex items-center justify-between px-6 border-b border-border shrink-0">
-                 <span className="text-[10px] font-bold tracking-widest text-fg-muted uppercase">Pages</span>
-                 <button onClick={() => setIsCollapsed(true)} className="p-1 hover:bg-foreground/5 rounded text-fg-muted hover:text-foreground transition-colors -mr-2">
-                    <ChevronLeft className="w-4 h-4" />
-                 </button>
-             </div>
+        <main className="w-96 bg-background/30 backdrop-blur-xl border-x border-border/50 flex flex-col relative z-30 transition-all shrink-0">
+            {/* Header */}
+            <div className="p-6 pb-2">
+                <div className="flex flex-row items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        {/* Collapse button for mobile/responsive can go here, using it to collapse the pane */}
+                        <button onClick={() => setIsCollapsed(true)} className="p-1 hover:bg-foreground/10 text-fg-secondary hover:text-foreground rounded transition-colors -ml-2">
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <h1 className="text-2xl font-black tracking-tight text-foreground uppercase">Notes</h1>
+                    </div>
+                    <button onClick={onAddNote} className="bg-foreground/10 text-brand px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-foreground/15 transition-all outline outline-1 outline-border/50">
+                        <Plus className="w-4 h-4" /> Create New
+                    </button>
+                </div>
 
-             <div className="flex-1 overflow-y-auto no-scrollbar">
-                 {notes.length === 0 && (
+                {/* Tabs */}
+                <div className="flex gap-6 mb-4">
+                    <button className="text-sm font-bold text-foreground border-b-2 border-brand pb-2">All</button>
+                    <button className="text-sm font-medium text-fg-secondary pb-2 hover:text-foreground transition-colors">Reminder</button>
+                </div>
+            </div>
+
+            {/* Notes List Scroll Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                {notes.length === 0 && (
                      <div className="flex flex-col items-center justify-center p-8 text-center opacity-60 mt-10">
-                         <div className="w-12 h-12 flex items-center justify-center mb-4 text-fg-muted">
+                         <div className="w-12 h-12 flex items-center justify-center mb-4 text-fg-secondary">
                              <Search className="w-6 h-6" />
                          </div>
                          <h3 className="text-[10px] font-bold tracking-widest text-fg-secondary uppercase mb-1">No Pages Found</h3>
                      </div>
-                 )}
-                 {notes.map(note => {
-                     const isSelected = activeNoteId === note.id;
-                     const isLocked = note.is_locked && !unlockedNotes.includes(note.id);
-                     
-                     // Format date like Stitch design: 2024.05.12 - 09:42
-                     const dateStr = new Date(note.updated_at).toLocaleString('en-US', {
-                         year: 'numeric', month: '2-digit', day: '2-digit',
-                         hour: '2-digit', minute: '2-digit', hour12: false
-                     });
-                     // M/D/YYYY, HH:MM
-                     const [dPart, tPart] = dateStr.split(', ');
-                     const [m, d, y] = (dPart || "01/01/2024").split('/');
-                     const finalDate = `${y}.${m}.${d} - ${tPart}`;
+                )}
+                
+                {notes.map(note => {
+                    const isSelected = activeNoteId === note.id;
+                    const isLocked = note.is_locked && !unlockedNotes.includes(note.id);
+                    
+                    const dateObj = new Date(note.updated_at);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
-                     return (
-                         <div 
-                             key={note.id}
-                             className={`group relative p-6 border-b border-border/50 cursor-pointer transition-all ${
-                                 isSelected 
-                                     ? 'bg-foreground/5 border-r-2 border-foreground' 
-                                     : 'hover:bg-foreground/5'
-                             }`}
-                             onClick={() => onSelectNote(note)}
-                         >
-                             <div className={`text-[10px] mono mb-2 uppercase tracking-widest ${isSelected ? 'text-foreground' : 'text-fg-muted'}`}>
-                                 {finalDate}
-                             </div>
-                             
-                             <div className="flex items-start justify-between gap-2 mb-2">
-                                 <h3 className={`leading-tight flex items-center gap-1.5 ${isSelected ? 'text-foreground font-semibold' : 'text-foreground/80 font-medium'}`}>
-                                     {isLocked && <Lock className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-foreground' : 'text-fg-secondary'}`} />}
-                                     {isLocked ? "Secure Note" : (note.decrypted?.title || "Untitled")}
-                                 </h3>
-                                 
-                                 <button 
-                                     onClick={(e) => { e.stopPropagation(); onDeleteNote(note.id); }}
-                                     className="p-1 opacity-0 group-hover:opacity-100 hover:text-rose-400 text-fg-secondary transition-all shrink-0 -mt-1 -mr-1"
-                                 >
-                                     <Trash2 className="w-3.5 h-3.5" />
-                                 </button>
-                             </div>
-                             
-                             <p className={`text-xs line-clamp-2 leading-relaxed ${isSelected ? 'text-fg-secondary' : 'text-fg-muted'}`}>
-                                 {isLocked ? "Encryption algorithm active. Decrypt to view contents." : ((note.decrypted?.content || "").replace(/<[^>]*>?/gm, '') || "No content...")}
-                             </p>
-                         </div>
-                     );
-                 })}
-             </div>
+                    return (
+                        <div 
+                            key={note.id}
+                            className={`group p-4 rounded-2xl transition-all cursor-pointer relative ${
+                                isSelected 
+                                    ? 'bg-foreground/5 shadow-sm border border-border/60 ring-1 ring-brand/10' 
+                                    : 'hover:bg-foreground/[0.03] border border-transparent'
+                            }`}
+                            onClick={() => onSelectNote(note)}
+                        >
+                            <div className="flex items-start justify-between mb-2">
+                                <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-[70%]">
+                                    {(note.tags && note.tags.length > 0 ? note.tags : ['Untitled']).map((tag) => (
+                                        <span key={tag} className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase whitespace-nowrap border border-border/50 shadow-sm ${isSelected ? 'bg-brand/10 text-brand' : 'bg-foreground/10 text-foreground'}`}>
+                                            {tag}
+                                        </span>
+                                    ))}
+                                    {isLocked && (
+                                        <span className="px-2 py-0.5 bg-red-900/20 text-red-500 border border-red-500/20 text-[10px] font-bold rounded-full uppercase whitespace-nowrap flex items-center gap-1 shadow-sm">
+                                            <Lock className="w-2.5 h-2.5" /> Secure
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-[10px] font-medium text-fg-muted whitespace-nowrap shrink-0">{formattedDate}</span>
+                            </div>
 
-             {/* Bottom Action Area matching Stitch */}
-             <div className="p-4 bg-background/50 shrink-0 border-t border-border">
-                <button 
-                    onClick={onAddNote}
-                    className="w-full flex items-center justify-center gap-2 py-3 border border-border text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-all text-[10px] font-bold uppercase tracking-widest cursor-pointer group"
-                >
-                    <Plus className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" /> New Page
-                </button>
-             </div>
-        </section>
+                            <div className="flex justify-between items-start">
+                                <h3 className={`text-sm font-bold mb-1 truncate flex-1 pr-4 ${isSelected ? 'text-foreground' : 'text-fg-secondary group-hover:text-foreground transition-colors'}`}>
+                                    {isLocked ? "Encryption Active" : (note.decrypted?.title || "Untitled")}
+                                </h3>
+                                
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); onDeleteNote(note.id); }}
+                                    className="p-1.5 opacity-0 group-hover:opacity-100 hover:text-red-500 text-fg-muted hover:bg-background transition-all shrink-0 bg-background/50 border border-border shadow-sm rounded-full -mt-1 -mr-1"
+                                    title="Delete Note"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <p className="text-xs text-fg-muted leading-relaxed line-clamp-2">
+                                {isLocked ? "Decrypt to view contents." : ((note.decrypted?.content || "").replace(/<[^>]*>?/gm, '') || "No content...")}
+                            </p>
+                        </div>
+                    );
+                })}
+            </div>
+        </main>
     );
 }

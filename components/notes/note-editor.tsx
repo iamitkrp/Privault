@@ -101,13 +101,13 @@ export function NoteEditor({
 
     if (!note) {
         return (
-            <div className="flex-1 flex flex-col h-full bg-background items-center justify-center text-fg-muted p-8 text-center relative overflow-hidden glass">
+            <div className="flex-1 flex flex-col h-full liquid-bg glass items-center justify-center text-fg-secondary p-8 text-center relative overflow-hidden z-20 border-l border-border/50">
                 <div className="relative z-10 flex flex-col items-center">
-                    <div className="w-24 h-24 mb-8 bg-foreground/5 flex items-center justify-center transition-all duration-700 rounded-full border border-border">
-                        <BookOpen className="w-10 h-10 text-fg-secondary" />
+                    <div className="w-24 h-24 mb-8 bg-background/50 flex items-center justify-center transition-all duration-700 rounded-full border border-border/50 text-foreground shadow-glow">
+                        <BookOpen className="w-10 h-10" />
                     </div>
                     <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Ready</h2>
-                    <p className="mt-4 text-xs mono text-fg-secondary max-w-sm uppercase tracking-widest">
+                    <p className="mt-4 text-xs text-fg-secondary max-w-sm tracking-widest uppercase">
                         Select a note or create a new one to begin.
                     </p>
                 </div>
@@ -116,117 +116,102 @@ export function NoteEditor({
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-background relative z-10 overflow-hidden">
-            {/* Editing Toolbar */}
-            <header className="h-16 flex items-center border-b border-border shrink-0 bg-background/50 backdrop-blur-md px-10">
-                <div className="flex-1 flex justify-center items-center overflow-x-auto no-scrollbar" key={updateTrigger}>
-                    <div className="flex items-center gap-0.5">
-                        <button onClick={() => editorRef.current?.undo()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors text-fg-secondary hover:text-foreground hover:bg-foreground/5`} title="Undo">
-                            <Undo2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.redo()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors text-fg-secondary hover:text-foreground hover:bg-foreground/5`} title="Redo">
-                            <Redo2 className="w-3.5 h-3.5" />
-                        </button>
-                        
-                        <div className="w-px h-4 bg-border mx-1" />
-
-                        <button onClick={() => editorRef.current?.toggleHeading(1)} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors ${editorRef.current?.isActive('heading', { level: 1 }) ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Heading 1">
-                            <Heading1 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleHeading(2)} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors ${editorRef.current?.isActive('heading', { level: 2 }) ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Heading 2">
-                            <Heading2 className="w-3.5 h-3.5" />
-                        </button>
-
-                        <div className="w-px h-4 bg-border mx-1" />
-
-                        <button onClick={() => editorRef.current?.toggleBold()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors ${editorRef.current?.isActive('bold') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Bold">
-                            <Bold className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleItalic()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors ${editorRef.current?.isActive('italic') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Italic">
-                            <Italic className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleUnderline()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors ${editorRef.current?.isActive('underline') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Underline">
-                            <UnderlineIcon className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleStrike()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors ${editorRef.current?.isActive('strike') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Strikethrough">
-                            <Strikethrough className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleHighlight()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors ${editorRef.current?.isActive('highlight') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Highlight">
-                            <Highlighter className="w-3.5 h-3.5" />
-                        </button>
-                        
-                        <div className="w-px h-4 bg-border mx-1 hidden sm:block" />
-                        
-                        <button onClick={() => editorRef.current?.setTextAlign('left')} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'left' }) ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Align Left">
-                            <AlignLeft className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.setTextAlign('center')} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'center' }) ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Align Center">
-                            <AlignCenter className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.setTextAlign('right')} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'right' }) ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Align Right">
-                            <AlignRight className="w-3.5 h-3.5" />
-                        </button>
-
-                        <div className="w-px h-4 bg-border mx-1 hidden sm:block" />
-                        
-                        <button onClick={() => editorRef.current?.toggleBulletList()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden sm:flex ${editorRef.current?.isActive('bulletList') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Bullet List">
-                            <List className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleTaskList()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden sm:flex ${editorRef.current?.isActive('taskList') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Task List">
-                            <ListTodo className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleBlockquote()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden lg:flex ${editorRef.current?.isActive('blockquote') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Quote">
-                            <Quote className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => editorRef.current?.toggleCodeBlock()} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors hidden lg:flex ${editorRef.current?.isActive('codeBlock') ? 'bg-foreground/10 text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`} title="Code Block">
-                            <Code className="w-3.5 h-3.5" />
-                        </button>
-                        
-                        <div className="w-px h-4 bg-border mx-1 hidden md:block" />
-
-                        <button onClick={() => setShowTemplateModal(true)} className={`w-7 h-7 flex shrink-0 items-center justify-center rounded-sm transition-colors text-fg-secondary hover:text-foreground hover:bg-foreground/5`} title="Templates">
-                            <LayoutTemplate className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
-                </div>
+        <div className="flex-1 flex flex-col h-full bg-background/40 backdrop-blur-3xl relative z-20 overflow-hidden font-sans border-l border-border/50 shadow-2xl">
+            {/* Utility Header */}
+            <header className="h-14 flex items-center justify-between px-8 border-b border-border/50 bg-background/40 shrink-0">
+                 <div className="flex items-center gap-2">
+                     <span className="text-xs font-bold text-fg-secondary uppercase tracking-widest tracking-tight">Editor</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                     <button onClick={() => setShowTemplateModal(true)} className="px-3 py-1.5 rounded-full text-xs font-bold text-fg-secondary hover:bg-foreground/10 hover:text-foreground transition-colors flex items-center gap-1">
+                         <LayoutTemplate className="w-3.5 h-3.5" /> Templates
+                     </button>
+                 </div>
             </header>
 
+            {/* Rich Text Toolbar */}
+            <div className="px-8 py-3 border-b border-border/50 bg-background/20 flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar" key={updateTrigger}>
+                <button onClick={() => editorRef.current?.undo()} className={`p-1.5 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50`} title="Undo">
+                    <Undo2 className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.redo()} className={`p-1.5 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50`} title="Redo">
+                    <Redo2 className="w-4 h-4" />
+                </button>
+                
+                <div className="w-px h-4 bg-outline-variant/30 mx-2" />
+
+                <button onClick={() => editorRef.current?.toggleHeading(1)} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('heading', { level: 1 }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Heading 1">
+                    <Heading1 className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleHeading(2)} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('heading', { level: 2 }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Heading 2">
+                    <Heading2 className="w-4 h-4" />
+                </button>
+
+                <div className="w-px h-4 bg-outline-variant/30 mx-2" />
+
+                <button onClick={() => editorRef.current?.toggleBold()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('bold') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Bold">
+                    <Bold className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleItalic()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('italic') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Italic">
+                    <Italic className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleUnderline()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('underline') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Underline">
+                    <UnderlineIcon className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleStrike()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('strike') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Strikethrough">
+                    <Strikethrough className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleHighlight()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('highlight') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Highlight">
+                    <Highlighter className="w-4 h-4" />
+                </button>
+                
+                <div className="w-px h-4 bg-outline-variant/30 mx-2 hidden sm:block" />
+                
+                <button onClick={() => editorRef.current?.setTextAlign('left')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'left' }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Align Left">
+                    <AlignLeft className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.setTextAlign('center')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'center' }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Align Center">
+                    <AlignCenter className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.setTextAlign('right')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'right' }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Align Right">
+                    <AlignRight className="w-4 h-4" />
+                </button>
+
+                <div className="w-px h-4 bg-outline-variant/30 mx-2 hidden sm:block" />
+                
+                <button onClick={() => editorRef.current?.toggleBulletList()} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive('bulletList') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Bullet List">
+                    <List className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleTaskList()} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive('taskList') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Task List">
+                    <ListTodo className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleBlockquote()} className={`p-1.5 rounded transition-colors hidden lg:flex ${editorRef.current?.isActive('blockquote') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Quote">
+                    <Quote className="w-4 h-4" />
+                </button>
+                <button onClick={() => editorRef.current?.toggleCodeBlock()} className={`p-1.5 rounded transition-colors hidden lg:flex ${editorRef.current?.isActive('codeBlock') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Code Block">
+                    <Code className="w-4 h-4" />
+                </button>
+            </div>
+
             {/* Note Editor Canvas Area */}
-            <div className="flex-1 overflow-y-auto px-6 sm:px-12 md:px-24 py-12 relative z-10 w-full flex flex-col no-scrollbar">
-                <div className="max-w-[800px] w-full mx-auto flex flex-col flex-1 pb-32">
+            <div className="flex-1 overflow-y-auto px-6 sm:px-10 py-12 relative z-10 w-full flex flex-col no-scrollbar">
+                <div className="w-full flex flex-col flex-1 pb-32">
                     
                     {/* Metadata Header */}
-                    <div className="mb-12 border-b-[1.5px] border-border pb-8">
+                    <div className="mb-8">
                         <input 
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Untitled Note"
-                            className="w-full bg-transparent text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6 text-foreground placeholder-fg-muted/50 border-none ring-0 outline-none"
+                            className="w-full bg-transparent text-5xl font-black tracking-tight mb-2 text-foreground placeholder:text-fg-muted/30 leading-tight focus:outline-none focus:ring-0 focus:border-transparent outline-none border-none border-0 ring-0 shadow-none appearance-none"
+                            style={{ WebkitAppearance: 'none', boxShadow: 'none', border: 'none', outline: 'none' }}
                         />
-                        <div className="flex flex-wrap items-center gap-6 text-fg-secondary">
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-3.5 h-3.5" />
-                                <span className="mono text-[11px] uppercase tracking-widest">
-                                    {new Date(note.updated_at || Date.now()).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
-                                </span>
-                            </div>
-                            <div className="flex gap-2">
-                                {(note.tags || []).map((t: string) => (
-                                    <span key={t} className="px-2 py-0.5 bg-foreground/5 text-foreground mono text-[10px] uppercase border border-border">
-                                        {t}
-                                    </span>
-                                ))}
-                                {isLocked && (
-                                    <span className="px-2 py-0.5 bg-rose-500/10 text-rose-400 mono text-[10px] border border-rose-500/20 uppercase">
-                                        Confidential
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                        {/* Thin dynamic separator line */}
+                        <div className="w-16 h-1 mt-4 rounded-full bg-brand/50 shadow-glow"></div>
                     </div>
 
-                    <div className="space-y-8 text-[15px] sm:text-base text-foreground/90 leading-relaxed font-sans pb-12">
+                    <div className="text-lg text-foreground/90 leading-relaxed flex-1">
                         <RichEditor 
                             ref={editorRef}
                             content={content} 
@@ -234,29 +219,46 @@ export function NoteEditor({
                         />
                     </div>
 
-                    {note?.id && <div className="mt-8 border-t border-border pt-8"><NoteAttachments noteId={note.id} /></div>}
+                    {note?.id && <div className="mt-8 border-t glass-border pt-8"><NoteAttachments noteId={note.id} /></div>}
                 </div>
             </div>
 
-            {/* Floating Actions Overlay (Lock/Save) */}
-            <div className="absolute bottom-8 right-8 flex items-center gap-2 z-20">
-                <button 
-                    onClick={() => setIsLocked(!isLocked)}
-                    className={`flex items-center shrink-0 gap-2 px-4 py-3 border bg-background/80 backdrop-blur-md transition-all shadow-sm ${isLocked ? 'text-rose-400 border-rose-500/20' : 'border-border text-fg-secondary hover:text-foreground'}`}
-                    title={isLocked ? "Unlock Note" : "Lock Note behind OTP"}
-                >
-                    {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-                    <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">{isLocked ? "Locked" : "Unlocked"}</span>
-                </button>
-                
-                <button 
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="bg-foreground text-background px-6 py-3 font-bold text-xs tracking-widest hover:opacity-90 transition-all uppercase flex items-center gap-2 disabled:opacity-50 shadow-sm"
-                >
-                    {isSaving ? 'Saving...' : <><Check className="w-4 h-4" /> Save</>}
-                </button>
-            </div>
+            {/* Editor Footer */}
+            <footer className="h-12 px-8 border-t border-border/50 bg-background/40 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-4 text-xs font-medium text-fg-secondary">
+                    <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" /> 
+                        {new Date(note?.updated_at || Date.now()).toLocaleDateString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                    <span className="flex items-center gap-1">
+                        {isSaving ? "Saving..." : "Saved"}
+                    </span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button 
+                        onClick={() => setIsLocked(!isLocked)}
+                        className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase flex items-center gap-1 transition-all border ${isLocked ? 'bg-error/10 text-error border-error/20' : 'bg-secondary/5 text-secondary border-transparent hover:bg-secondary/10'}`}
+                        title={isLocked ? "Unlock Note" : "Lock Note behind OTP"}
+                    >
+                        {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                        {isLocked ? "Locked" : "Unlocked"}
+                    </button>
+                    {(note?.tags || []).slice(0, 2).map((t: string) => (
+                        <span key={t} className="px-2.5 py-0.5 bg-foreground/10 text-foreground text-[10px] font-bold rounded-full uppercase border border-border">
+                            {t}
+                        </span>
+                    ))}
+                    
+                    <button 
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="ml-2 bg-foreground text-background px-4 py-1.5 rounded-full font-bold text-xs flex items-center gap-1 hover:brightness-110 shadow-sm transition-all active:scale-95 disabled:opacity-50 uppercase tracking-widest"
+                    >
+                        {isSaving ? 'Saving' : <><Check className="w-3.5 h-3.5" /> Save</>}
+                    </button>
+                </div>
+            </footer>
 
             {/* Template Pop-up Modal */}
             {mounted && showTemplateModal && createPortal(

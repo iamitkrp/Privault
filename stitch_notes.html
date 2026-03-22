@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumina Notes - Premium Workspace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-container": "#e0dfe4",
+                        "on-background": "#1a1c1f",
+                        "on-surface-variant": "#414755",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2e3034",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#1a1c1f",
+                        "surface-dim": "#d9dade",
+                        "surface-bright": "#f9f9fe",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "secondary-fixed": "#e3e2e7",
+                        "tertiary-fixed-dim": "#ffb595",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-secondary-container": "#626267",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#adc6ff",
+                        "outline-variant": "#c1c6d7",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#ededf2",
+                        "secondary": "#5d5e63",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#c6c6cb",
+                        "on-primary": "#ffffff",
+                        "primary": "#0058bc",
+                        "inverse-on-surface": "#f0f0f5",
+                        "surface-tint": "#005bc1",
+                        "outline": "#717786",
+                        "tertiary": "#9e3d00",
+                        "surface-container-high": "#e8e8ed",
+                        "on-primary-fixed": "#001a41",
+                        "surface-variant": "#e2e2e7",
+                        "primary-container": "#0070eb",
+                        "on-secondary-fixed": "#1a1b1f",
+                        "inverse-primary": "#adc6ff",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#d8e2ff",
+                        "on-primary-container": "#fefcff",
+                        "on-secondary-fixed-variant": "#46464b",
+                        "surface": "#f9f9fe",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-container": "#c64f00",
+                        "on-primary-fixed-variant": "#004493",
+                        "surface-container-highest": "#e2e2e7",
+                        "background": "#f9f9fe",
+                        "surface-container-low": "#f3f3f8"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { 
+            backdrop-filter: blur(40px);
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .glass-border {
+            border: 1px solid rgba(193, 198, 215, 0.2);
+        }
+        .liquid-bg {
+            background: radial-gradient(at 0% 0%, #f9f9fe 0%, transparent 50%),
+                        radial-gradient(at 100% 0%, #d8e2ff 0%, transparent 50%),
+                        radial-gradient(at 100% 100%, #f3f3f8 0%, transparent 50%),
+                        radial-gradient(at 0% 100%, #ffffff 0%, transparent 50%);
+            background-size: 100% 100%;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden liquid-bg min-h-screen">
+<div class="flex h-screen w-full">
+<!-- LEFT SIDEBAR: Navigation -->
+<aside class="w-64 glass-panel glass-border flex flex-col z-40">
+<!-- Header Section -->
+<div class="flex items-center justify-between p-6">
+<div class="flex items-center gap-2">
+<span class="text-xl font-black tracking-tighter text-slate-900">Note</span>
+</div>
+<div class="flex gap-2">
+<button class="p-1 hover:bg-slate-200/50 rounded transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="p-1 hover:bg-slate-200/50 rounded transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Search & Action -->
+<div class="px-4 space-y-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-2 pl-10 text-sm focus:ring-1 focus:ring-primary/20 placeholder:text-on-surface-variant/50" placeholder="Search..." type="text"/>
+</div>
+<button class="w-full py-2.5 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-full flex items-center justify-center gap-2 font-semibold text-sm shadow-lg shadow-primary/10 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="upload">upload</span>
+                    Upload
+                </button>
+</div>
+<!-- Navigation Sections -->
+<nav class="flex-1 overflow-y-auto px-4 mt-6 space-y-6">
+<!-- Quick Links -->
+<div>
+<h3 class="text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest px-2 mb-2">Quick Links</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium bg-white/80 shadow-sm text-blue-600 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="description">description</span> All Notes
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="push_pin">push_pin</span> Pinned
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="task_alt">task_alt</span> Task
+                        </a>
+</div>
+</div>
+<!-- Notes Categories -->
+<div>
+<h3 class="text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-widest px-2 mb-2">Notes</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="sticky_note_2">sticky_note_2</span> Sticky Notes
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="note">note</span> Notes
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="star">star</span> Starred
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="group">group</span> Shared with me
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="archive">archive</span> Archive
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="book">book</span> Notebooks
+                        </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-slate-200/40 transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="label">label</span> Label
+                        </a>
+</div>
+</div>
+</nav>
+<!-- User Footer -->
+<div class="p-4 glass-border border-t">
+<div class="flex items-center gap-3 px-2 py-2 hover:bg-slate-200/40 rounded-xl cursor-pointer transition-all">
+<div class="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="Close up professional headshot of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtLBNqgMhCeAY11fPMY2hAEWXpEADacnqPclCGB5z6FCvdoifTrrpDCdaGlVF6CqronF9ENYk93GGbWEcskYRFYkrF5zIb9niUHYSQfLjisJlJX9dj7mOtHSIuTmoMa4uwEtgmbKUKAEgJEpMs37blbqZtF_NPWwlIgk89qB0iMpW-1XkBu8myOh3ggSgL_wGIJygihqkJRoOWYM0db1PwE59cTpge1tqLi4t_tNZoKo6OS4Mx5RLXLAp392dTMQcV_0eklWVVPQk"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-on-surface truncate">Alex Rivers</p>
+<p class="text-xs text-on-surface-variant truncate">Pro Plan</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings">settings</span>
+</div>
+</div>
+</aside>
+<!-- MIDDLE COLUMN: Notes List -->
+<main class="w-96 glass-panel glass-border border-x flex flex-col relative z-30">
+<div class="p-6 pb-2">
+<div class="flex items-center justify-between mb-6">
+<h1 class="text-2xl font-black tracking-tight">Notes</h1>
+<button class="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span> Create New
+                    </button>
+</div>
+<!-- Tabs -->
+<div class="flex gap-6 mb-4">
+<button class="text-sm font-bold text-on-surface border-b-2 border-primary pb-2">All</button>
+<button class="text-sm font-medium text-on-surface-variant pb-2 hover:text-on-surface transition-colors">Reminder</button>
+</div>
+</div>
+<!-- Notes List Scroll Area -->
+<div class="flex-1 overflow-y-auto p-4 space-y-3">
+<!-- Active Note Card -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-primary/10 ring-1 ring-primary/5 transition-all">
+<div class="flex items-start justify-between mb-2">
+<div class="flex gap-2">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed text-[10px] font-bold rounded-full uppercase">Project</span>
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold rounded-full uppercase">Week 1</span>
+</div>
+<span class="text-[10px] font-medium text-on-surface-variant/60">20 Dec</span>
+</div>
+<h3 class="text-sm font-bold text-on-surface mb-1">Brainstorming Session Highlights</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed line-clamp-2">The focus was on identifying key pain points in the current workflow and proposing actionable insights...</p>
+<div class="mt-3 h-24 rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Abstract colorful office brainstorming sketches" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHlrFMxJHJlAhTd3xW9DROtltAtxgNq-xF_bh4fRw-AUgdwnPqVqGVU7_Iwl73Hk47umk1sT_Nf5GsDvSqVip_NWchAdbBeRMUyaZJcsr0DoS-4Doc1oz-RysoTUnp-wqE8BEmgWiew5fpbTYQkckX0W8ZcecnX4C3ebUYytH9SytmNhhHnecZtlcRZNYeTb04mBf167bGYeGoO513HVvOgtaIXUA0sMRDXfUYPf1XecRdPFNAzSqJ0CxOOhA6qwvleVT2T7LPI2s"/>
+</div>
+</div>
+<!-- Note Card 2 -->
+<div class="p-4 rounded-2xl hover:bg-white/50 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-2">
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase">Personal</span>
+<span class="text-[10px] font-medium text-on-surface-variant/60">18 Dec</span>
+</div>
+<h3 class="text-sm font-bold text-on-surface mb-1">Weekly Grocery &amp; Meal Plan</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed line-clamp-2">Need to pick up fresh produce from the local market. Focus on high protein recipes this week...</p>
+</div>
+<!-- Note Card 3 -->
+<div class="p-4 rounded-2xl hover:bg-white/50 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-2">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed text-[10px] font-bold rounded-full uppercase">Project</span>
+<span class="text-[10px] font-medium text-on-surface-variant/60">15 Dec</span>
+</div>
+<h3 class="text-sm font-bold text-on-surface mb-1">Q4 Strategy Deck Notes</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed line-clamp-2">Refining the value proposition for the upcoming board meeting. Emphasize growth metrics...</p>
+<div class="mt-3 h-24 rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Close up of digital analytics dashboard data" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGiEMMeCFpJPSAhPd4pICZjEPEgnAPzW3iu_6N9Fo2WsgHhL6nPaI23WjtpiHzrIZUi9jwLrY9miSx2yqASzg-9QB6FAFTKD7hB2wi3TFg7pTPcfUTmIM5lgXCGenkoIhevMdCl3KUsq8t26txIRyq1gU7sPWf5W1KuP6YXRvL8R79osqAJMGb4GEO3lknAHA44oS92rg2z3X4HcZyD0QgTC3GH8YYFf0JWDPzZHxMJgeCBmrNRSZYhxKDdNc5z035J2uJrIW_eHA"/>
+</div>
+</div>
+</div>
+</main>
+<!-- RIGHT COLUMN: Editor -->
+<div class="flex-1 bg-white/40 flex flex-col z-20">
+<!-- Utility Header -->
+<header class="h-14 flex items-center justify-between px-8 border-b glass-border bg-white/60 backdrop-blur-md">
+</header>
+<!-- Rich Text Toolbar -->
+<div class="px-8 py-3 border-b glass-border bg-white/40 flex items-center gap-1">
+<select class="bg-transparent border-none text-sm font-medium focus:ring-0 cursor-pointer">
+<option>Normal text</option>
+<option>Heading 1</option>
+</select>
+<div class="h-4 w-[1px] bg-outline-variant/30 mx-2"></div>
+<button class="p-1.5 rounded hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="format_bold">format_bold</span>
+</button>
+<button class="p-1.5 rounded hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="format_italic">format_italic</span>
+</button>
+<button class="p-1.5 rounded hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="format_underlined">format_underlined</span>
+</button>
+<button class="p-1.5 rounded hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="format_list_bulleted">format_list_bulleted</span>
+</button>
+<button class="p-1.5 rounded hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="format_list_numbered">format_list_numbered</span>
+</button>
+<div class="h-4 w-[1px] bg-outline-variant/30 mx-2"></div>
+<button class="p-1.5 rounded hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="link">link</span>
+</button>
+<button class="p-1.5 rounded hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="image">image</span>
+</button>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto px-12 py-10 max-w-4xl mx-auto w-full">
+<h2 class="text-4xl font-extrabold tracking-tight text-on-background mb-6 leading-tight">Streamline Your Workflow with Actionable Insights</h2>
+<div class="space-y-6 text-body-lg text-on-surface leading-relaxed">
+<p>In today's fast-paced environment, the ability to turn raw information into meaningful output is crucial. Our recent <a class="text-primary underline decoration-primary/30 underline-offset-4 font-medium" href="#">brainstorming session</a> highlighted the need for a more integrated approach to note-taking and task management.</p>
+<div class="p-6 bg-surface-container-low rounded-3xl space-y-4">
+<h4 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="checklist">checklist</span>
+                            Priority Tasks
+                        </h4>
+<div class="space-y-2">
+<div class="flex items-center gap-4 p-3 bg-white/60 rounded-xl hover:bg-white transition-all group">
+<span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-primary transition-colors cursor-pointer" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<span class="flex-1 text-sm font-medium">Research task automation tools</span>
+<span class="text-[11px] font-bold text-on-surface-variant/40 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="calendar_month">calendar_month</span> Tomorrow
+                                </span>
+</div>
+<div class="flex items-center gap-4 p-3 bg-white/60 rounded-xl hover:bg-white transition-all group">
+<span class="material-symbols-outlined text-primary" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span class="flex-1 text-sm font-medium line-through text-on-surface-variant/60">Dummy 101 - Project Briefing</span>
+<span class="text-[11px] font-bold text-on-surface-variant/40 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="calendar_month">calendar_month</span> Completed
+                                </span>
+</div>
+<div class="flex items-center gap-4 p-3 bg-white/60 rounded-xl hover:bg-white transition-all group">
+<span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-primary transition-colors cursor-pointer" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<span class="flex-1 text-sm font-medium">Test 123 - Mobile UX Prototype</span>
+<span class="text-[11px] font-bold text-on-surface-variant/40 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="calendar_month">calendar_month</span> 24 Dec
+                                </span>
+</div>
+</div>
+</div>
+<p>Moving forward, we will focus on these core pillars: <span class="font-bold">transparency, efficiency, and scalability.</span> Each note should not just be a record but a catalyst for the next step in our project lifecycle.</p>
+</div>
+</div>
+<!-- Editor Footer -->
+<footer class="h-12 px-8 border-t glass-border bg-white/60 flex items-center justify-between">
+<div class="flex items-center gap-4 text-xs font-medium text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm" data-icon="event">event</span> 20 Dec, 9:00 AM</span>
+<span class="w-1 h-1 rounded-full bg-slate-300"></span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span> Last edit 2m ago</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 bg-primary/5 text-primary text-[10px] font-bold rounded-full uppercase">Project</span>
+<span class="px-2.5 py-0.5 bg-secondary/5 text-secondary text-[10px] font-bold rounded-full uppercase">Personal</span>
+<span class="px-2.5 py-0.5 bg-tertiary/5 text-tertiary text-[10px] font-bold rounded-full uppercase">Week 1</span>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

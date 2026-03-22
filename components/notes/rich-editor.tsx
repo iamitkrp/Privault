@@ -75,7 +75,7 @@ export const RichEditor = forwardRef<EditorCommands | null, {
         },
         editorProps: {
             attributes: {
-                class: 'flex-1 focus:outline-none focus:ring-0 resize-none font-sans tiptap-editor w-full',
+                class: 'flex-1 focus:outline-none focus:ring-0 resize-none font-sans tiptap-editor w-full border-0 !border-none !outline-none shadow-none focus:border-transparent focus:shadow-none bg-transparent',
             },
             handleDrop: (view, event, _slice, moved) => {
                 if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
@@ -155,7 +155,7 @@ export const RichEditor = forwardRef<EditorCommands | null, {
 
     return (
         <div className="w-full flex-1 flex flex-col relative shrink-0">
-             <EditorContent editor={editor} className="w-full h-full flex flex-col flex-1 [&>.ProseMirror]:flex-1 [&>.ProseMirror]:min-h-[50vh] [&>.ProseMirror]:outline-none" />
+             <EditorContent editor={editor} className="w-full h-full flex flex-col flex-1 [&>.ProseMirror]:flex-1 [&>.ProseMirror]:min-h-[50vh] [&>.ProseMirror]:outline-none [&>.ProseMirror]:border-none [&>.ProseMirror]:shadow-none [&>.ProseMirror]:ring-0 [&>.ProseMirror]:bg-transparent" />
         </div>
     );
 });

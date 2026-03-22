@@ -7,7 +7,7 @@ import { VaultNote } from "@/types";
 import { NotesList } from "./notes-grid"; // Repurposed into NotesList
 import { NoteEditor } from "./note-editor";
 import { OTPGate } from "@/components/auth/otp-gate";
-import { Lock, FolderOpen, Settings, Archive, Terminal, Lock as LockIcon } from "lucide-react";
+import { Lock } from "lucide-react";
 import { NotesSidebar } from "./notes-sidebar";
 
 export function NotesCommandCenter({
@@ -149,58 +149,16 @@ export function NotesCommandCenter({
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex h-screen w-full bg-background text-foreground overflow-hidden font-sans">
-            <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background/90" />
-            </div>
-
-            {/* Pane 1: Global Navigation Sidebar */}
-            <aside className="relative z-10 flex flex-col h-full py-8 bg-background/50 backdrop-blur-md border-r border-border w-64 shrink-0">
-                <div className="px-6 mb-8">
-                    <div className="text-sm font-bold tracking-widest uppercase text-foreground mb-1">Session Active</div>
-                    <div className="text-xs mono text-fg-muted uppercase tracking-wider">{user?.email?.split('@')[0] || "USER_01"}</div>
-                </div>
-                
-                <nav className="flex-1 px-4 space-y-2">
-                    <button className="w-full flex items-center gap-3 px-4 py-3 bg-foreground/5 text-foreground border-l-2 border-foreground text-xs uppercase tracking-widest transition-all glass">
-                        <FolderOpen className="w-4 h-4" />
-                        Notebooks
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-fg-secondary hover:bg-foreground/5 hover:text-foreground text-xs uppercase tracking-widest transition-colors rounded-sm">
-                        <Settings className="w-4 h-4" />
-                        Settings
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-fg-secondary hover:bg-foreground/5 hover:text-foreground text-xs uppercase tracking-widest transition-colors rounded-sm">
-                        <Archive className="w-4 h-4" />
-                        Archive
-                    </button>
-                </nav>
-
-                <div className="px-4 mb-6">
-                    <button onClick={onBack} className="w-full bg-foreground text-background py-3 font-bold text-xs tracking-widest hover:opacity-90 transition-opacity uppercase">
-                        Back to Vault
-                    </button>
-                </div>
-
-                <div className="px-4 pt-4 border-t border-border space-y-1">
-                    <button className="w-full flex items-center gap-3 px-4 py-2 text-fg-muted hover:bg-foreground/5 hover:text-foreground text-[10px] uppercase tracking-wider transition-all rounded-sm">
-                        <Terminal className="w-4 h-4" />
-                        Activity Log
-                    </button>
-                    <button onClick={onBack} className="w-full flex items-center gap-3 px-4 py-2 text-fg-muted hover:bg-foreground/5 hover:text-foreground text-[10px] uppercase tracking-wider transition-all rounded-sm">
-                        <LockIcon className="w-4 h-4" />
-                        Lock Vault
-                    </button>
-                </div>
-            </aside>
-
-            {/* Pane 2: Hierarchy & Navigation Pane */}
+        <div className="fixed inset-0 z-[100] flex h-screen w-full bg-background text-foreground overflow-hidden liquid-bg glass font-sans">
+            {/* Left Sidebar: Navigation & Hierarchy */}
             <NotesSidebar 
                  sections={uniqueSections}
                  activeSection={activeSection}
                  onSelectSection={(s) => { setActiveSection(s); setActiveNoteId(null); }}
                  onAddSection={handleAddSection}
                  onRenameSection={handleRenameSection}
+                 onBack={onBack}
+                 user={user}
             />
 
             {/* Pane 3: Pages Pane */}
