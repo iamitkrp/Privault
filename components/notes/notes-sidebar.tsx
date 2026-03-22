@@ -57,14 +57,14 @@ export function NotesSidebar({
             {/* Header Section */}
             <div className="flex items-center justify-between p-6">
                 <div className="flex items-center gap-2">
+                    {onBack && (
+                        <button onClick={onBack} title="Back to Vault" className="p-1.5 bg-background/50 border border-border/50 hover:bg-foreground/10 text-fg-secondary hover:text-foreground rounded-md transition-colors">
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                    )}
                     <span className="text-xl font-black tracking-tighter text-foreground uppercase">Privault</span>
                 </div>
                 <div className="flex gap-2 text-fg-secondary">
-                    {onBack && (
-                        <button onClick={onBack} title="Back to Vault" className="p-1 hover:bg-foreground/10 hover:text-foreground rounded transition-colors">
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-                    )}
                     <button onClick={() => setIsCollapsed(true)} title="Collapse sidebar" className="p-1 hover:bg-foreground/10 hover:text-foreground rounded transition-colors -mr-2">
                         <ChevronLeft className="w-5 h-5" />
                     </button>
