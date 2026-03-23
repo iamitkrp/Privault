@@ -142,61 +142,87 @@ export function NotesSidebar({
                     <div className="space-y-1">
                         {sections.map(section => (
                             <div key={section} className="relative group/edit">
-                                {editingSection === section ? (
-                                    <form onSubmit={handleFinishEdit} className="w-full">
-                                        <input 
-                                            type="text"
-                                            value={editingName}
-                                            onChange={(e) => setEditingName(e.target.value)}
-                                            onBlur={() => handleFinishEdit()}
-                                            autoFocus
-                                            className="w-full px-3 py-2 rounded-xl bg-foreground/5 text-sm font-medium text-foreground outline-none border border-brand/30 focus:border-brand/60 transition-colors"
-                                        />
-                                    </form>
-                                ) : (
-                                    <button 
-                                        onClick={() => onSelectSection(section)}
-                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === section ? 'bg-foreground/10 shadow-sm text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`}
-                                    >
-                                        <div className="flex items-center gap-3 truncate">
-                                            <Book className="w-5 h-5 shrink-0" /> <span className="truncate">{section}</span>
+                                <button 
+                                    onClick={() => onSelectSection(section)}
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === section ? 'bg-foreground/10 shadow-sm text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`}
+                                >
+                                    <div className="flex items-center gap-3 truncate">
+                                        <Book className="w-5 h-5 shrink-0" /> <span className="truncate">{section}</span>
+                                    </div>
+                                    {onRenameSection && (
+                                        <div 
+                                            onClick={(e) => { e.stopPropagation(); setEditingSection(section); setEditingName(section); }} 
+                                            className="opacity-0 group-hover/edit:opacity-100 text-fg-secondary hover:text-brand transition-all -my-1 p-1 shrink-0 bg-background/50 border border-border/50 rounded"
+                                        >
+                                            <Edit2 className="w-3.5 h-3.5" />
                                         </div>
-                                        {onRenameSection && (
-                                            <div 
-                                                onClick={(e) => { e.stopPropagation(); setEditingSection(section); setEditingName(section); }} 
-                                                className="opacity-0 group-hover/edit:opacity-100 text-fg-secondary hover:text-brand transition-all -my-1 p-1 shrink-0 bg-background/50 border border-border/50 rounded"
-                                            >
-                                                <Edit2 className="w-3.5 h-3.5" />
-                                            </div>
-                                        )}
-                                    </button>
+                                    )}
+                                </button>
+                                
+                                {editingSection === section && (
+                                    <>
+                                        <div className="fixed inset-0 z-40" onClick={() => handleFinishEdit()} />
+                                        <div className="absolute top-0 left-0 w-full z-50 bg-background border border-border/40 rounded-2xl shadow-lg px-3.5 py-3 transform origin-top">
+                                            <form onSubmit={handleFinishEdit} className="flex flex-col gap-3 relative z-50">
+                                                <div className="flex items-center gap-2.5">
+                                                    <Edit2 className="w-3.5 h-3.5 text-fg-muted/70 shrink-0" />
+                                                    <input 
+                                                        type="text"
+                                                        value={editingName}
+                                                        onChange={(e) => setEditingName(e.target.value)}
+                                                        onKeyDown={(e) => { if (e.key === 'Escape') setEditingSection(null); }}
+                                                        autoFocus
+                                                        placeholder="Rename category..."
+                                                        className="flex-1 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-fg-muted/50"
+                                                    />
+                                                </div>
+                                                <div className="h-px bg-border/30" />
+                                                <div className="flex justify-end gap-1.5">
+                                                    <button type="button" onClick={() => setEditingSection(null)} className="px-3 py-1 rounded-full text-[11px] font-semibold text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-colors">Cancel</button>
+                                                    <button type="submit" disabled={!editingName.trim()} className="px-3 py-1 rounded-full text-[11px] font-bold bg-foreground text-background hover:brightness-110 disabled:opacity-40 transition-all">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         ))}
 
                         {/* Add Section */}
-                        {isAdding ? (
-                            <form onSubmit={handleAdd} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-foreground/10 shadow-sm">
-                                <Book className="w-5 h-5 text-foreground shrink-0" />
-                                <input
-                                    type="text"
-                                    value={newSectionName}
-                                    onChange={(e) => setNewSectionName(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Escape') { setIsAdding(false); setNewSectionName(""); } }}
-                                    onBlur={() => { if (!newSectionName.trim()) { setIsAdding(false); setNewSectionName(""); } }}
-                                    placeholder="Type name, Enter to add"
-                                    className="flex-1 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-fg-muted/60"
-                                    autoFocus
-                                />
-                            </form>
-                        ) : (
+                        <div className="relative">
                             <button 
                                 onClick={() => setIsAdding(true)}
                                 className="w-full flex items-center gap-3 px-3 py-2 mt-2 rounded-xl text-sm font-medium text-fg-muted hover:text-foreground hover:bg-foreground/5 transition-all"
                             >
                                 <Plus className="w-5 h-5" /> Add Category
                             </button>
-                        )}
+                            {isAdding && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => { setIsAdding(false); setNewSectionName(""); }} />
+                                    <div className="absolute top-0 left-0 w-full z-50 bg-background border border-border/40 rounded-2xl shadow-lg px-3.5 py-3 transform origin-top">
+                                        <form onSubmit={handleAdd} className="flex flex-col gap-3 relative z-50">
+                                            <div className="flex items-center gap-2.5">
+                                                <Plus className="w-3.5 h-3.5 text-fg-muted/70 shrink-0" />
+                                                <input
+                                                    type="text"
+                                                    value={newSectionName}
+                                                    onChange={(e) => setNewSectionName(e.target.value)}
+                                                    onKeyDown={(e) => { if (e.key === 'Escape') { setIsAdding(false); setNewSectionName(""); } }}
+                                                    placeholder="New category..."
+                                                    className="flex-1 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-fg-muted/50"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                            <div className="h-px bg-border/30" />
+                                            <div className="flex justify-end gap-1.5">
+                                                <button type="button" onClick={() => { setIsAdding(false); setNewSectionName(""); }} className="px-3 py-1 rounded-full text-[11px] font-semibold text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-colors">Cancel</button>
+                                                <button type="submit" disabled={!newSectionName.trim()} className="px-3 py-1 rounded-full text-[11px] font-bold bg-foreground text-background hover:brightness-110 disabled:opacity-40 transition-all">Add</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                         
                         <button 
                             onClick={() => onSelectSection("Starred")}

@@ -217,6 +217,13 @@ a {
   border-radius: var(--radius-sm);
 }
 
+/* Remove focus ring from text inputs — they use their own subtle indicators */
+input[type="text"]:focus-visible,
+input[type="search"]:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
 /* ---- Selection ---- */
 ::selection {
   background: var(--brand-primary-muted);
