@@ -13,7 +13,7 @@ import Underline from '@tiptap/extension-underline'
 import Highlight from '@tiptap/extension-highlight'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
-import { useEffect, useState, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useState, forwardRef, useImperativeHandle, useCallback } from 'react'
 
 
 export interface EditorCommands {
@@ -28,7 +28,7 @@ export interface EditorCommands {
     toggleBlockquote: () => void;
     undo: () => void;
     redo: () => void;
-    isActive: (nameOrAttributes: string | object, attributes?: any) => boolean;
+    isActive: (nameOrAttributes: string | Record<string, unknown>, attributes?: Record<string, unknown>) => boolean;
     toggleUnderline: () => void;
     setTextAlign: (alignment: string) => void;
     toggleHighlight: () => void;
@@ -39,12 +39,17 @@ export interface EditorCommands {
 export const RichEditor = forwardRef<EditorCommands | null, {
      content: string;
      onChange: (v: string) => void;
-}>(({ content, onChange }, ref) => {
+     onActiveStatesChange?: () => void;
+}>(({ content, onChange, onActiveStatesChange }, ref) => {
     const [isMounted, setIsMounted] = useState(false);
     
     useEffect(() => {
         setIsMounted(true);
     }, []);
+
+    const handleTransaction = useCallback(() => {
+        onActiveStatesChange?.();
+    }, [onActiveStatesChange]);
 
     const editor = useEditor({
         immediatelyRender: false,
@@ -73,6 +78,8 @@ export const RichEditor = forwardRef<EditorCommands | null, {
         onUpdate: ({ editor }) => {
             onChange(editor.getHTML());
         },
+        onTransaction: handleTransaction,
+        onSelectionUpdate: handleTransaction,
         editorProps: {
             attributes: {
                 class: 'flex-1 focus:outline-none focus:ring-0 resize-none font-sans tiptap-editor w-full border-0 !border-none !outline-none shadow-none focus:border-transparent focus:shadow-none bg-transparent',
@@ -123,7 +130,7 @@ export const RichEditor = forwardRef<EditorCommands | null, {
     });
 
     useImperativeHandle(ref, () => {
-        if (!editor) return null as any;
+        if (!editor) return null as unknown as EditorCommands;
         return {
             toggleBold: () => editor.chain().focus().toggleBold().run(),
             toggleItalic: () => editor.chain().focus().toggleItalic().run(),
@@ -141,7 +148,12 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             toggleHighlight: () => editor.chain().focus().toggleHighlight().run(),
             toggleHeading: (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run(),
             setContent: (html: string) => editor.commands.setContent(html),
-            isActive: (name: string, attributes?: any) => editor.isActive(name, attributes),
+            isActive: (name: string | Record<string, unknown>, attributes?: Record<string, unknown>) => {
+                if (typeof name === 'object') {
+                    return editor.isActive(name as Record<string, unknown>);
+                }
+                return editor.isActive(name, attributes);
+            },
         };
     }, [editor]);
 

@@ -20,7 +20,9 @@ export function NotesCommandCenter({
     
     // States
     const [activeSection, setActiveSection] = useState<string>("All");
+    const [searchQuery, setSearchQuery] = useState("");
     const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+    const [newNoteKey, setNewNoteKey] = useState(0);
     const [unlockedNotes, setUnlockedNotes] = useState<string[]>([]);
 
     const [addedSections, setAddedSections] = useState<string[]>([]);
@@ -50,10 +52,37 @@ export function NotesCommandCenter({
         ])
     ).filter(tag => tag !== "All" && tag !== "All Notes" && tag !== undefined) as string[];
 
-    // Filtered Notes
-    const filteredNotes = activeSection === "All" 
-        ? notes 
-        : notes.filter(n => (n.tags && n.tags.length > 0 ? n.tags[0] : "Untitled") === activeSection);
+    // Filtered Notes based on active section
+    const sectionFilteredNotes = (() => {
+        switch (activeSection) {
+            case "All":
+                return notes;
+            case "Pinned":
+                return notes.filter(n => n.is_pinned);
+            case "Task":
+                return notes.filter(n => 
+                    (n.decrypted?.content || "").includes('data-type="taskList"') ||
+                    (n.tags || []).includes("Task")
+                );
+            case "Starred":
+                return notes.filter(n => (n.tags || []).includes("Starred"));
+            case "Shared with me":
+                return notes.filter(n => (n.tags || []).includes("Shared with me"));
+            case "Archive":
+                return notes.filter(n => (n.tags || []).includes("Archive"));
+            default:
+                // Custom category — match any tag
+                return notes.filter(n => (n.tags || []).includes(activeSection));
+        }
+    })();
+
+    const filteredNotes = sectionFilteredNotes.filter(n => {
+        if (!searchQuery) return true;
+        const query = searchQuery.toLowerCase();
+        const titleMatch = (n.decrypted?.title || "").toLowerCase().includes(query);
+        const contentMatch = (n.decrypted?.content || "").replace(/<[^>]*>?/gm, '').toLowerCase().includes(query);
+        return titleMatch || contentMatch;
+    });
 
     const activeNote = notes.find(n => n.id === activeNoteId) || {
         id: '',
@@ -64,10 +93,13 @@ export function NotesCommandCenter({
     } as VaultNote;
     const isNoteLocked = activeNote?.is_locked && !unlockedNotes.includes(activeNote.id);
 
-    const handleSaveNote = async (data: { title: string, content: string, color: string, is_locked?: boolean, id?: string }) => {
+    const handleSaveNote = async (data: { title: string, content: string, color: string, is_locked?: boolean, id?: string, tags?: string[] }) => {
         if (!user) return;
         
-        let tagsToSave = activeSection !== 'All' ? [activeSection] : [];
+        // Use tags from editor if provided, otherwise fall back to activeSection
+        const tagsToSave = (data.tags && data.tags.length > 0)
+            ? data.tags
+            : (activeSection !== 'All' ? [activeSection] : []);
         const finalTitle = data.title.trim() ? data.title : "Untitled Note";
 
         if (data.id && data.id !== 'new') {
@@ -144,12 +176,23 @@ export function NotesCommandCenter({
         }
     };
 
-    const handleAddNote = () => {
-        setActiveNoteId(null);
+    const handleAddNote = async () => {
+        if (!user) return;
+        const tags = activeSection !== 'All' ? [activeSection] : [];
+        const result = await notesService.addNote(
+            user.id,
+            { title: "Untitled Note", content: "" },
+            { color: "default", tags, is_locked: false }
+        );
+        if (result.success && result.data) {
+            setNotes(prev => [result.data!, ...prev]);
+            setActiveNoteId(result.data.id);
+            setNewNoteKey(k => k + 1);
+        }
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex h-screen w-full bg-background text-foreground overflow-hidden liquid-bg glass font-sans">
+        <div className="fixed inset-0 z-[100] flex h-screen w-full bg-background text-foreground overflow-hidden font-sans">
             {/* Left Sidebar: Navigation & Hierarchy */}
             <NotesSidebar 
                  sections={uniqueSections}
@@ -159,12 +202,15 @@ export function NotesCommandCenter({
                  onRenameSection={handleRenameSection}
                  onBack={onBack}
                  user={user}
+                 searchQuery={searchQuery}
+                 onSearchChange={setSearchQuery}
             />
 
             {/* Pane 3: Pages Pane */}
             <NotesList 
                  notes={filteredNotes} 
                  activeNoteId={activeNoteId}
+                 activeSection={activeSection}
                  unlockedNotes={unlockedNotes}
                  onSelectNote={(note: VaultNote) => setActiveNoteId(note.id)}
                  onAddNote={handleAddNote}
@@ -204,6 +250,7 @@ export function NotesCommandCenter({
                 </div>
             ) : (
                 <NoteEditor
+                     key={`${activeNoteId || 'new'}-${newNoteKey}`}
                      note={activeNote}
                      onSave={handleSaveNote}
                 />

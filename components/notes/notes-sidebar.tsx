@@ -2,6 +2,7 @@
 
 import { Plus, ChevronLeft, ChevronRight, Edit2, Search, Upload, FileText, Pin, CheckCircle, Star, Users, Book, Settings, Archive } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 
 export function NotesSidebar({
@@ -12,6 +13,8 @@ export function NotesSidebar({
     onRenameSection,
     onBack,
     user,
+    searchQuery,
+    onSearchChange,
 }: {
     sections: string[];
     activeSection: string;
@@ -20,7 +23,10 @@ export function NotesSidebar({
     onRenameSection?: (oldName: string, newName: string) => void;
     onBack?: () => void;
     user?: User | null;
+    searchQuery?: string;
+    onSearchChange?: (q: string) => void;
 }) {
+    const router = useRouter();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [newSectionName, setNewSectionName] = useState("");
@@ -44,7 +50,7 @@ export function NotesSidebar({
 
     if (isCollapsed) {
         return (
-            <aside className="w-16 bg-background/20 backdrop-blur-2xl border-r border-border/50 flex flex-col z-40 items-center py-6 transition-all shrink-0">
+            <aside className="w-16 bg-background/80 backdrop-blur-sm border-r border-border/50 flex flex-col z-40 items-center py-6 transition-all shrink-0">
                 <button onClick={() => setIsCollapsed(false)} className="p-2 hover:bg-foreground/10 rounded transition-colors mb-6 text-fg-secondary hover:text-foreground">
                     <ChevronRight className="w-5 h-5" />
                 </button>
@@ -53,7 +59,7 @@ export function NotesSidebar({
     }
 
     return (
-        <aside className="w-64 bg-background/20 backdrop-blur-2xl border-r border-border/50 flex flex-col z-40 shrink-0 transition-all">
+        <aside className="w-64 bg-background/80 backdrop-blur-sm border-r border-border/50 flex flex-col z-40 shrink-0 transition-all">
             {/* Header Section */}
             <div className="flex items-center justify-between p-6">
                 <div className="flex items-center gap-2">
@@ -75,10 +81,28 @@ export function NotesSidebar({
             <div className="px-4 space-y-4">
                 <div className="relative group">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-secondary w-4 h-4" />
-                    <input className="w-full bg-background/40 border-none rounded-xl py-2 pl-10 text-sm focus:ring-1 focus:ring-brand/40 placeholder:text-fg-muted text-foreground outline-none" placeholder="Search..." type="text"/>
+                    <input 
+                        value={searchQuery || ""}
+                        onChange={(e) => onSearchChange?.(e.target.value)}
+                        className="w-full bg-background/40 border-none rounded-xl py-2 pl-10 text-sm focus:ring-1 focus:ring-brand/40 placeholder:text-fg-muted text-foreground outline-none" 
+                        placeholder="Search..." 
+                        type="text"
+                    />
                 </div>
                 <button 
-                    onClick={() => onSelectSection(activeSection)}
+                    onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.multiple = false;
+                        input.accept = ".txt,.md";
+                        // Simulate an upload action by just opening standard OS dialog
+                        input.click();
+                        input.onchange = async (e: any) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                                alert("Upload feature connecting to secure API is coming soon!");
+                            }
+                        };
+                    }}
                     className="w-full py-2.5 px-4 bg-foreground text-background rounded-xl flex items-center justify-center gap-2 font-bold text-sm shadow-md active:scale-95 transition-all outline outline-1 outline-border uppercase tracking-widest hover:brightness-110"
                 >
                     <Upload className="w-4 h-4" /> Upload
@@ -97,10 +121,16 @@ export function NotesSidebar({
                         >
                             <FileText className="w-5 h-5" /> All Notes
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-all">
+                        <button 
+                            onClick={() => onSelectSection("Pinned")} 
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === "Pinned" ? 'bg-foreground/10 shadow-sm text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`}
+                        >
                             <Pin className="w-5 h-5" /> Pinned
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-all">
+                        <button 
+                            onClick={() => onSelectSection("Task")} 
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === "Task" ? 'bg-foreground/10 shadow-sm text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`}
+                        >
                             <CheckCircle className="w-5 h-5" /> Task
                         </button>
                     </div>
@@ -113,14 +143,14 @@ export function NotesSidebar({
                         {sections.map(section => (
                             <div key={section} className="relative group/edit">
                                 {editingSection === section ? (
-                                    <form onSubmit={handleFinishEdit} className="px-3 py-2 rounded-xl bg-background/50 border border-border/50 w-full mb-1">
+                                    <form onSubmit={handleFinishEdit} className="w-full">
                                         <input 
                                             type="text"
                                             value={editingName}
                                             onChange={(e) => setEditingName(e.target.value)}
                                             onBlur={() => handleFinishEdit()}
                                             autoFocus
-                                            className="bg-transparent text-sm font-medium w-full text-brand outline-none"
+                                            className="w-full px-3 py-2 rounded-xl bg-foreground/5 text-sm font-medium text-foreground outline-none border border-brand/30 focus:border-brand/60 transition-colors"
                                         />
                                     </form>
                                 ) : (
@@ -146,36 +176,44 @@ export function NotesSidebar({
 
                         {/* Add Section */}
                         {isAdding ? (
-                            <form onSubmit={handleAdd} className="flex flex-col gap-2 mt-2 px-3 py-2 rounded-xl bg-background border border-border/50">
+                            <form onSubmit={handleAdd} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-foreground/10 shadow-sm">
+                                <Book className="w-5 h-5 text-foreground shrink-0" />
                                 <input
                                     type="text"
                                     value={newSectionName}
                                     onChange={(e) => setNewSectionName(e.target.value)}
-                                    placeholder="Section Name..."
-                                    className="bg-transparent text-sm font-medium w-full outline-none text-brand"
+                                    onKeyDown={(e) => { if (e.key === 'Escape') { setIsAdding(false); setNewSectionName(""); } }}
+                                    onBlur={() => { if (!newSectionName.trim()) { setIsAdding(false); setNewSectionName(""); } }}
+                                    placeholder="Type name, Enter to add"
+                                    className="flex-1 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-fg-muted/60"
                                     autoFocus
                                 />
-                                <div className="flex gap-2">
-                                    <button type="submit" className="flex-1 bg-foreground text-background text-[10px] font-bold rounded py-1.5 uppercase hover:opacity-90">Add</button>
-                                    <button type="button" onClick={() => setIsAdding(false)} className="flex-1 bg-background text-fg-secondary hover:text-foreground text-[10px] font-bold rounded py-1.5 uppercase border border-border/50">Cancel</button>
-                                </div>
                             </form>
                         ) : (
                             <button 
                                 onClick={() => setIsAdding(true)}
-                                className="w-full flex items-center justify-center gap-3 px-3 py-2.5 mt-4 rounded-xl text-[10px] tracking-widest font-bold uppercase text-brand hover:bg-brand/5 border border-dashed border-border transition-all"
+                                className="w-full flex items-center gap-3 px-3 py-2 mt-2 rounded-xl text-sm font-medium text-fg-muted hover:text-foreground hover:bg-foreground/5 transition-all"
                             >
-                                <Plus className="w-4 h-4" /> Add Category
+                                <Plus className="w-5 h-5" /> Add Category
                             </button>
                         )}
                         
-                        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-all">
+                        <button 
+                            onClick={() => onSelectSection("Starred")}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === "Starred" ? 'bg-foreground/10 shadow-sm text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`}
+                        >
                             <Star className="w-5 h-5" /> Starred
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-all">
+                        <button 
+                            onClick={() => onSelectSection("Shared with me")}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === "Shared with me" ? 'bg-foreground/10 shadow-sm text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`}
+                        >
                             <Users className="w-5 h-5" /> Shared with me
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-all">
+                        <button 
+                            onClick={() => onSelectSection("Archive")}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === "Archive" ? 'bg-foreground/10 shadow-sm text-foreground' : 'text-fg-secondary hover:text-foreground hover:bg-foreground/5'}`}
+                        >
                             <Archive className="w-5 h-5" /> Archive
                         </button>
                     </div>
@@ -192,7 +230,9 @@ export function NotesSidebar({
                         <p className="text-sm font-bold text-foreground truncate">{user?.email?.split('@')[0] || "Alex Rivers"}</p>
                         <p className="text-xs text-brand truncate uppercase tracking-widest font-bold mt-0.5">Pro User</p>
                     </div>
-                    <Settings className="text-fg-secondary hover:text-foreground transition-colors w-5 h-5" />
+                    <button onClick={(e) => { e.stopPropagation(); router.push('/settings'); }} title="Settings" className="p-1 hover:bg-foreground/10 rounded-md transition-colors">
+                        <Settings className="text-fg-secondary hover:text-foreground transition-colors w-5 h-5" />
+                    </button>
                 </div>
             </div>
         </aside>

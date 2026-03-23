@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { VaultNote } from "@/types";
-import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search } from "lucide-react";
+import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search, Tag } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
 import { NoteAttachments } from "./note-attachments";
 const TEMPLATES = [
@@ -62,22 +62,29 @@ export function NoteEditor({
     onSave,
 }: {
     note: VaultNote | null;
-    onSave: (data: { title: string, content: string, color: string, is_locked?: boolean, id?: string }) => void;
+    onSave: (data: { title: string, content: string, color: string, is_locked?: boolean, id?: string, tags?: string[] }) => void;
 }) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
+    const [tags, setTags] = useState<string[]>([]);
+    const [editingTag, setEditingTag] = useState(false);
+    const [tagInput, setTagInput] = useState("");
     const [isLocked, setIsLocked] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [showTemplateModal, setShowTemplateModal] = useState(false);
     const [templateSearchQuery, setTemplateSearchQuery] = useState("");
     const [mounted, setMounted] = useState(false);
-    const [updateTrigger, setUpdateTrigger] = useState(0); 
+    const [, setToolbarTick] = useState(0);
     const editorRef = useRef<EditorCommands | null>(null);
+    const titleRef = useRef<HTMLInputElement>(null);
+
+    // Event-driven toolbar refresh — only updates when editor state actually changes
+    const handleActiveStatesChange = useCallback(() => {
+        setToolbarTick(t => t + 1);
+    }, []);
 
     useEffect(() => {
         setMounted(true);
-        const interval = setInterval(() => setUpdateTrigger(prev => prev + 1), 500);
-        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -85,17 +92,23 @@ export function NoteEditor({
             setTitle(note.decrypted?.title || "");
             setContent(note.decrypted?.content || "");
             setIsLocked(note.is_locked || false);
+            setTags(note.tags || []);
         } else {
             setTitle("");
             setContent("");
             setIsLocked(false);
+            setTags([]);
         }
         setIsSaving(false);
+        // Auto-focus title for new/empty notes
+        if (note && (!note.decrypted?.content || note.decrypted.content === "")) {
+            setTimeout(() => titleRef.current?.focus(), 100);
+        }
     }, [note]);
 
     const handleSave = async () => {
         setIsSaving(true);
-        await onSave({ title, content, color: "default", is_locked: isLocked, id: note?.id });
+        await onSave({ title, content, color: "default", is_locked: isLocked, id: note?.id, tags });
         setIsSaving(false);
     };
 
@@ -116,7 +129,7 @@ export function NoteEditor({
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-background/40 backdrop-blur-3xl relative z-20 overflow-hidden font-sans border-l border-border/50 shadow-2xl">
+        <div className="flex-1 flex flex-col h-full bg-background/40 backdrop-blur-xl relative z-20 overflow-hidden font-sans border-l border-border/50 shadow-2xl">
             {/* Utility Header */}
             <header className="h-14 flex items-center justify-between px-8 border-b border-border/50 bg-background/40 shrink-0">
                  <div className="flex items-center gap-2">
@@ -130,7 +143,7 @@ export function NoteEditor({
             </header>
 
             {/* Rich Text Toolbar */}
-            <div className="px-8 py-3 border-b border-border/50 bg-background/20 flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar" key={updateTrigger}>
+            <div className="px-8 py-3 border-b border-border/50 bg-background/20 flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
                 <button onClick={() => editorRef.current?.undo()} className={`p-1.5 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50`} title="Undo">
                     <Undo2 className="w-4 h-4" />
                 </button>
@@ -200,6 +213,7 @@ export function NoteEditor({
                     {/* Metadata Header */}
                     <div className="mb-8">
                         <input 
+                            ref={titleRef}
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
@@ -215,7 +229,8 @@ export function NoteEditor({
                         <RichEditor 
                             ref={editorRef}
                             content={content} 
-                            onChange={setContent} 
+                            onChange={setContent}
+                            onActiveStatesChange={handleActiveStatesChange}
                         />
                     </div>
 
@@ -244,11 +259,40 @@ export function NoteEditor({
                         {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
                         {isLocked ? "Locked" : "Unlocked"}
                     </button>
-                    {(note?.tags || []).slice(0, 2).map((t: string) => (
-                        <span key={t} className="px-2.5 py-0.5 bg-foreground/10 text-foreground text-[10px] font-bold rounded-full uppercase border border-border">
-                            {t}
-                        </span>
-                    ))}
+                    {editingTag ? (
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                const val = tagInput.trim();
+                                setTags(val ? [val] : []);
+                                setEditingTag(false);
+                            }}
+                            className="flex items-center"
+                        >
+                            <input
+                                type="text"
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onBlur={() => {
+                                    const val = tagInput.trim();
+                                    setTags(val ? [val] : []);
+                                    setEditingTag(false);
+                                }}
+                                autoFocus
+                                placeholder="Category..."
+                                className="bg-foreground/10 text-[10px] font-bold rounded-full uppercase px-2.5 py-1 outline-none text-foreground w-24 ring-1 ring-brand/40 focus:ring-brand/70 placeholder:text-fg-muted transition-all"
+                            />
+                        </form>
+                    ) : (
+                        <button
+                            onClick={() => { setTagInput(tags[0] || ""); setEditingTag(true); }}
+                            className="px-2.5 py-0.5 bg-foreground/10 text-foreground text-[10px] font-bold rounded-full uppercase hover:bg-foreground/15 transition-colors flex items-center gap-1 group"
+                            title="Click to edit category"
+                        >
+                            <Tag className="w-2.5 h-2.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                            {tags[0] || "Untitled"}
+                        </button>
+                    )}
                     
                     <button 
                         onClick={handleSave}

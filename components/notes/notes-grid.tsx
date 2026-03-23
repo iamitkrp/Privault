@@ -7,6 +7,7 @@ import { useState } from "react";
 export function NotesList({
     notes,
     activeNoteId,
+    activeSection = "All",
     unlockedNotes = [],
     onSelectNote,
     onAddNote,
@@ -14,6 +15,7 @@ export function NotesList({
 }: {
     notes: VaultNote[];
     activeNoteId: string | null;
+    activeSection?: string;
     unlockedNotes?: string[];
     onSelectNote: (n: VaultNote) => void;
     onAddNote: () => void;
@@ -23,7 +25,7 @@ export function NotesList({
 
     if (isCollapsed) {
         return (
-            <section className="w-12 bg-background/30 backdrop-blur-sm border-r border-border flex flex-col items-center shrink-0 relative z-10 glass py-4 transition-all">
+            <section className="w-12 bg-background/80 backdrop-blur-sm border-r border-border flex flex-col items-center shrink-0 relative z-10 py-4 transition-all">
                 <button onClick={() => setIsCollapsed(false)} className="p-2 mb-4 hover:bg-foreground/5 rounded text-fg-muted hover:text-foreground">
                     <ChevronRight className="w-4 h-4" />
                 </button>
@@ -42,26 +44,19 @@ export function NotesList({
     }
 
     return (
-        <main className="w-96 bg-background/30 backdrop-blur-xl border-x border-border/50 flex flex-col relative z-30 transition-all shrink-0">
+        <main className="w-96 bg-background/80 backdrop-blur-sm border-x border-border/50 flex flex-col relative z-30 transition-all shrink-0">
             {/* Header */}
-            <div className="p-6 pb-2">
-                <div className="flex flex-row items-center justify-between mb-6">
+            <div className="p-6 pb-4">
+                <div className="flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
-                        {/* Collapse button for mobile/responsive can go here, using it to collapse the pane */}
                         <button onClick={() => setIsCollapsed(true)} className="p-1 hover:bg-foreground/10 text-fg-secondary hover:text-foreground rounded transition-colors -ml-2">
                             <ChevronLeft className="w-5 h-5" />
                         </button>
-                        <h1 className="text-2xl font-black tracking-tight text-foreground uppercase">Notes</h1>
+                        <h1 className="text-2xl font-black tracking-tight text-foreground uppercase">{activeSection === "All" ? "Notes" : activeSection}</h1>
                     </div>
                     <button onClick={onAddNote} className="bg-foreground/10 text-brand px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-foreground/15 transition-all outline outline-1 outline-border/50">
                         <Plus className="w-4 h-4" /> Create New
                     </button>
-                </div>
-
-                {/* Tabs */}
-                <div className="flex gap-6 mb-4">
-                    <button className="text-sm font-bold text-foreground border-b-2 border-brand pb-2">All</button>
-                    <button className="text-sm font-medium text-fg-secondary pb-2 hover:text-foreground transition-colors">Reminder</button>
                 </div>
             </div>
 
@@ -72,7 +67,7 @@ export function NotesList({
                          <div className="w-12 h-12 flex items-center justify-center mb-4 text-fg-secondary">
                              <Search className="w-6 h-6" />
                          </div>
-                         <h3 className="text-[10px] font-bold tracking-widest text-fg-secondary uppercase mb-1">No Pages Found</h3>
+                         <h3 className="text-[10px] font-bold tracking-widest text-fg-secondary uppercase mb-1">No {activeSection === "All" ? "notes" : activeSection.toLowerCase()} found</h3>
                      </div>
                 )}
                 

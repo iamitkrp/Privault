@@ -292,6 +292,22 @@ a {
   box-shadow: var(--shadow-sm);
 }
 
+/* Slide-in-bottom animation for modals */
+.slide-in-bottom {
+  animation: slideInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Text gradient */
 .text-gradient {
   background: linear-gradient(135deg, var(--text-gradient-start), var(--text-gradient-end));
