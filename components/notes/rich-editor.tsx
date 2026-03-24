@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor, EditorContent, Extension } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
@@ -13,7 +13,43 @@ import Underline from '@tiptap/extension-underline'
 import Highlight from '@tiptap/extension-highlight'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
+import FontFamily from '@tiptap/extension-font-family'
 import { useEffect, useState, forwardRef, useImperativeHandle, useCallback } from 'react'
+
+// Custom FontSize extension via TextStyle
+const FontSize = Extension.create({
+    name: 'fontSize',
+    addOptions() {
+        return { types: ['textStyle'] };
+    },
+    addGlobalAttributes() {
+        return [
+            {
+                types: this.options.types,
+                attributes: {
+                    fontSize: {
+                        default: null,
+                        parseHTML: element => element.style.fontSize?.replace(/["']/g, '') || null,
+                        renderHTML: attributes => {
+                            if (!attributes.fontSize) return {};
+                            return { style: `font-size: ${attributes.fontSize}` };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+    addCommands() {
+        return {
+            setFontSize: (fontSize: string) => ({ chain }: { chain: () => any }) => {
+                return chain().setMark('textStyle', { fontSize }).run();
+            },
+            unsetFontSize: () => ({ chain }: { chain: () => any }) => {
+                return chain().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run();
+            },
+        } as any;
+    },
+});
 
 
 export interface EditorCommands {
@@ -34,6 +70,10 @@ export interface EditorCommands {
     toggleHighlight: () => void;
     toggleHeading: (level: 1 | 2 | 3) => void;
     setContent: (html: string) => void;
+    setFontFamily: (fontFamily: string) => void;
+    setFontSize: (fontSize: string) => void;
+    getFontFamily: () => string;
+    getFontSize: () => string;
 }
 
 export const RichEditor = forwardRef<EditorCommands | null, {
@@ -70,6 +110,8 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             }),
             TextStyle,
             Color,
+            FontFamily,
+            FontSize,
             Placeholder.configure({
                 placeholder: 'Start typing securely or drag & drop an image...',
             }),
@@ -148,6 +190,26 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             toggleHighlight: () => editor.chain().focus().toggleHighlight().run(),
             toggleHeading: (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run(),
             setContent: (html: string) => editor.commands.setContent(html),
+            setFontFamily: (fontFamily: string) => {
+                if (fontFamily === '') {
+                    editor.chain().focus().unsetFontFamily().run();
+                } else {
+                    editor.chain().focus().setFontFamily(fontFamily).run();
+                }
+            },
+            setFontSize: (fontSize: string) => {
+                if (fontSize === '') {
+                    (editor.chain().focus() as any).setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run();
+                } else {
+                    (editor.chain().focus() as any).setMark('textStyle', { fontSize }).run();
+                }
+            },
+            getFontFamily: () => {
+                return editor.getAttributes('textStyle').fontFamily || '';
+            },
+            getFontSize: () => {
+                return editor.getAttributes('textStyle').fontSize || '';
+            },
             isActive: (name: string | Record<string, unknown>, attributes?: Record<string, unknown>) => {
                 if (typeof name === 'object') {
                     return editor.isActive(name as Record<string, unknown>);

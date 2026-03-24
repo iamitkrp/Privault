@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { VaultNote } from "@/types";
-import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search, Tag, CheckSquare, Users, Target, Notebook, CalendarDays, Activity, BookMarked, Contact } from "lucide-react";
+import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search, Tag, CheckSquare, Users, Target, Notebook, CalendarDays, Activity, BookMarked, Contact, Type, ALargeSmall, ChevronDown } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
 import { NoteAttachments } from "./note-attachments";
 const TEMPLATES = [
@@ -75,8 +75,37 @@ export function NoteEditor({
     const [templateSearchQuery, setTemplateSearchQuery] = useState("");
     const [mounted, setMounted] = useState(false);
     const [, setToolbarTick] = useState(0);
+    const [showFontPicker, setShowFontPicker] = useState(false);
+    const [showSizePicker, setShowSizePicker] = useState(false);
     const editorRef = useRef<EditorCommands | null>(null);
     const titleRef = useRef<HTMLInputElement>(null);
+
+    const FONT_FAMILIES = [
+        { label: 'Default', value: '' },
+        { label: 'Inter', value: 'Inter' },
+        { label: 'Arial', value: 'Arial' },
+        { label: 'Georgia', value: 'Georgia' },
+        { label: 'Times New Roman', value: 'Times New Roman' },
+        { label: 'Courier New', value: 'Courier New' },
+        { label: 'Verdana', value: 'Verdana' },
+        { label: 'Trebuchet MS', value: 'Trebuchet MS' },
+        { label: 'Garamond', value: 'Garamond' },
+        { label: 'Comic Sans MS', value: 'Comic Sans MS' },
+        { label: 'Roboto Mono', value: 'Roboto Mono' },
+    ];
+
+    const FONT_SIZES = [
+        { label: 'Default', value: '' },
+        { label: '12px', value: '12px' },
+        { label: '14px', value: '14px' },
+        { label: '16px', value: '16px' },
+        { label: '18px', value: '18px' },
+        { label: '20px', value: '20px' },
+        { label: '24px', value: '24px' },
+        { label: '28px', value: '28px' },
+        { label: '32px', value: '32px' },
+        { label: '36px', value: '36px' },
+    ];
 
     // Event-driven toolbar refresh — only updates when editor state actually changes
     const handleActiveStatesChange = useCallback(() => {
@@ -151,6 +180,87 @@ export function NoteEditor({
                     <Redo2 className="w-4 h-4" />
                 </button>
                 
+                <div className="w-px h-4 bg-outline-variant/30 mx-2" />
+
+                {/* Font Family Picker */}
+                <div className="relative">
+                    <button
+                        onClick={() => { setShowFontPicker(!showFontPicker); setShowSizePicker(false); }}
+                        className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50 text-xs font-medium min-w-[90px]"
+                        title="Font Family"
+                    >
+                        <Type className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate max-w-[60px]">{editorRef.current?.getFontFamily() || 'Default'}</span>
+                        <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
+                    </button>
+                    {showFontPicker && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setShowFontPicker(false)} />
+                            <div className="absolute top-full left-0 mt-1.5 z-50 bg-background border border-border/40 rounded-xl shadow-xl py-1 w-48 max-h-64 overflow-y-auto custom-scrollbar">
+                                {FONT_FAMILIES.map((font) => (
+                                    <button
+                                        key={font.value}
+                                        onClick={() => {
+                                            editorRef.current?.setFontFamily(font.value);
+                                            setShowFontPicker(false);
+                                        }}
+                                        className={`w-full text-left px-3 py-1.5 text-sm transition-colors flex items-center justify-between ${
+                                            (editorRef.current?.getFontFamily() || '') === font.value
+                                                ? 'bg-primary/10 text-primary font-medium'
+                                                : 'text-foreground hover:bg-foreground/5'
+                                        }`}
+                                        style={font.value ? { fontFamily: font.value } : undefined}
+                                    >
+                                        {font.label}
+                                        {(editorRef.current?.getFontFamily() || '') === font.value && (
+                                            <Check className="w-3.5 h-3.5" />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Font Size Picker */}
+                <div className="relative">
+                    <button
+                        onClick={() => { setShowSizePicker(!showSizePicker); setShowFontPicker(false); }}
+                        className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50 text-xs font-medium min-w-[70px]"
+                        title="Font Size"
+                    >
+                        <ALargeSmall className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{editorRef.current?.getFontSize() || 'Default'}</span>
+                        <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
+                    </button>
+                    {showSizePicker && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setShowSizePicker(false)} />
+                            <div className="absolute top-full left-0 mt-1.5 z-50 bg-background border border-border/40 rounded-xl shadow-xl py-1 w-36 max-h-64 overflow-y-auto custom-scrollbar">
+                                {FONT_SIZES.map((size) => (
+                                    <button
+                                        key={size.value}
+                                        onClick={() => {
+                                            editorRef.current?.setFontSize(size.value);
+                                            setShowSizePicker(false);
+                                        }}
+                                        className={`w-full text-left px-3 py-1.5 text-sm transition-colors flex items-center justify-between ${
+                                            (editorRef.current?.getFontSize() || '') === size.value
+                                                ? 'bg-primary/10 text-primary font-medium'
+                                                : 'text-foreground hover:bg-foreground/5'
+                                        }`}
+                                    >
+                                        {size.label}
+                                        {(editorRef.current?.getFontSize() || '') === size.value && (
+                                            <Check className="w-3.5 h-3.5" />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+
                 <div className="w-px h-4 bg-outline-variant/30 mx-2" />
 
                 <button onClick={() => editorRef.current?.toggleHeading(1)} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('heading', { level: 1 }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Heading 1">
