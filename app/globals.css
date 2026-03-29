@@ -31,6 +31,11 @@
   --color-error: #ff3333;
   --color-info: #737373;
 
+  /* Encryption Pipeline Neons (Dimmed for dark mode) */
+  --pipeline-neon-1: #d93d00;
+  --pipeline-neon-2: #00d9b3;
+  --pipeline-neon-3: #8e47d1;
+
   --border-primary: rgba(255, 255, 255, 0.08);
   --border-secondary: rgba(255, 255, 255, 0.12);
   --border-focus: #00cc66;
@@ -86,6 +91,11 @@
   --color-warning-subtle: rgba(234, 88, 12, 0.1);
   --color-error-subtle: rgba(220, 38, 38, 0.1);
   --color-info-subtle: rgba(82, 82, 91, 0.1);
+
+  /* Encryption Pipeline Neons (Vibrant for light mode) */
+  --pipeline-neon-1: #ff4500;
+  --pipeline-neon-2: #00ffcc;
+  --pipeline-neon-3: #a855f7;
 
   --border-primary: #e4e4e7;
   --border-secondary: #d4d4d8;

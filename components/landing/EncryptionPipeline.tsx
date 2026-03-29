@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { Key, Fingerprint, Lock, Database, Cpu, Server } from "lucide-react";
 
 type StepKey = 1 | 2 | 3 | 4 | 5 | 6 | null;
 
@@ -41,6 +42,69 @@ const TOOLTIPS: Record<NonNullable<StepKey>, { title: string; text: string; x: n
 export default function EncryptionPipeline() {
     const [hovered, setHovered] = useState<StepKey>(null);
 
+    const PipelineCard = ({ step, title, subtitle, icon: Icon, color, isHovered, onEnter, onLeave }: any) => {
+        return (
+            <foreignObject width="320" height="180" x="-40" y="-40">
+                <div 
+                    className="w-[240px] h-[100px] mx-[40px] my-[40px] rounded-[10px] relative transition-transform duration-300"
+                    onPointerEnter={onEnter}
+                    onPointerLeave={onLeave}
+                    style={{
+                        cursor: "pointer",
+                        transform: "scale(1)",
+                        filter: isHovered ? `drop-shadow(0 12px 24px ${color}55)` : 'drop-shadow(0 4px 10px rgba(0,0,0,0.1))'
+                    }}
+                >
+                    {/* Top Section (Image Area) */}
+                    <div 
+                        className="absolute top-0 left-0 w-full h-[45px] rounded-t-[10px] transition-transform duration-[400ms] overflow-hidden"
+                        style={{ 
+                            backgroundColor: color,
+                            transform: isHovered ? "translateY(-8px)" : "translateY(0px)",
+                            zIndex: 0
+                        }}
+                    >
+                        {/* Huge watermark-style icon in the top section */}
+                        <div className="absolute right-2 -top-1 text-black opacity-[0.15]">
+                            <Icon className="w-12 h-12 transform rotate-12" strokeWidth={2.5} />
+                        </div>
+                    </div>
+
+                    {/* Bottom Section (Description Area) */}
+                    <div 
+                        className="absolute bottom-0 left-0 w-full h-[75px] rounded-[10px] flex flex-col justify-center px-4 transition-colors duration-300"
+                        style={{ 
+                            backgroundColor: "var(--bg-secondary)",
+                            border: `1px solid var(--color-border)`,
+                            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05)`,
+                            zIndex: 10
+                        }}
+                    >
+                        {/* Header Row */}
+                        <div className="flex justify-between items-center w-full mb-[6px]">
+                            <span className="mono text-[10px] font-bold tracking-[0.15em] uppercase" style={{ color: color }}>Step {step}</span>
+                            <div className="flex gap-[3px]">
+                                <span className="w-[5px] h-[5px] rounded-full" style={{ backgroundColor: color, opacity: 1 }} />
+                                <span className="w-[5px] h-[5px] rounded-full" style={{ backgroundColor: color, opacity: 0.5 }} />
+                                <span className="w-[5px] h-[5px] rounded-full" style={{ backgroundColor: color, opacity: 0.2 }} />
+                            </div>
+                        </div>
+
+                        {/* Title Row */}
+                        <h3 className="font-sans text-[15px] font-bold leading-[1.1] mb-[4px] text-foreground tracking-tight truncate">
+                            {title}
+                        </h3>
+
+                        {/* Subtitle Row */}
+                        <p className="mono text-[9px] text-fg-secondary uppercase tracking-[0.1em] truncate">
+                            {subtitle}
+                        </p>
+                    </div>
+                </div>
+            </foreignObject>
+        );
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -49,13 +113,13 @@ export default function EncryptionPipeline() {
             className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0 group"
         >
 
-
             <svg
                 viewBox="0 0 700 480"
-                className="w-full h-full pointer-events-none relative z-10"
+                className="w-full h-full relative z-10"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="xMidYMid meet"
+                onPointerLeave={() => setHovered(null)}
             >
                 {/* DEFINITIONS for gradients and markers */}
                 <defs>
@@ -68,6 +132,20 @@ export default function EncryptionPipeline() {
                         <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#000" floodOpacity="0.08" />
                         <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.04" />
                     </filter>
+                    
+                    {/* Connection Gradients */}
+                    <linearGradient id="grad-path-1" gradientUnits="userSpaceOnUse" x1="280" y1="70" x2="420" y2="70">
+                        <stop offset="0%" stopColor="var(--pipeline-neon-1)" />
+                        <stop offset="100%" stopColor="var(--pipeline-neon-2)" />
+                    </linearGradient>
+                    <linearGradient id="grad-path-3" gradientUnits="userSpaceOnUse" x1="420" y1="230" x2="280" y2="230">
+                        <stop offset="0%" stopColor="var(--pipeline-neon-2)" />
+                        <stop offset="100%" stopColor="var(--pipeline-neon-1)" />
+                    </linearGradient>
+                    <linearGradient id="grad-path-4" gradientUnits="userSpaceOnUse" x1="160" y1="280" x2="160" y2="340">
+                        <stop offset="0%" stopColor="var(--pipeline-neon-1)" />
+                        <stop offset="100%" stopColor="var(--pipeline-neon-3)" />
+                    </linearGradient>
                 </defs>
 
                 {/* THE ENTIRE VISUAL LAYOUT SHIFTED DOWN 30px FOR PERFECT VERTICAL CENTERING */}
@@ -79,36 +157,36 @@ export default function EncryptionPipeline() {
                     <path id="flow-data-engine" d="M 160 280 C 120 295, 120 325, 160 340" />
                     <path id="flow-engine-server" d="M 280 390 L 420 390" />
 
-                    {/* CONNECTION LINES (Edges) */}
-                    <g stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="6 6">
-                        <path d="M 280 70 L 420 70" stroke={hovered === 1 || hovered === 2 ? "#ff4500" : undefined} className="transition-all duration-500" />
-                        <path d="M 540 120 C 580 135, 580 165, 540 180" stroke={hovered === 2 || hovered === 3 ? "#00ffcc" : undefined} className="transition-all duration-500" />
-                        <path d="M 420 230 L 280 230" stroke={hovered === 3 || hovered === 4 ? "#00ffcc" : undefined} className="transition-all duration-500" />
-                        <path d="M 160 280 C 120 295, 120 325, 160 340" stroke={hovered === 4 || hovered === 5 ? "#ff4500" : undefined} className="transition-all duration-500" />
-                        <path d="M 280 390 L 420 390" stroke={hovered === 5 || hovered === 6 ? "#a855f7" : undefined} className="transition-all duration-500" />
+                    {/* CONNECTION LINES (Edges) - Permanently visible gradients */}
+                    <g fill="none" strokeWidth="2.5" strokeDasharray="4 4" strokeLinecap="round" opacity="0.6">
+                        <path d="M 280 70 L 420 70" stroke="url(#grad-path-1)" />
+                        <path d="M 540 120 C 580 135, 580 165, 540 180" stroke="var(--pipeline-neon-2)" />
+                        <path d="M 420 230 L 280 230" stroke="url(#grad-path-3)" />
+                        <path d="M 160 280 C 120 295, 120 325, 160 340" stroke="url(#grad-path-4)" />
+                        <path d="M 280 390 L 420 390" stroke="var(--pipeline-neon-3)" />
                     </g>
 
-                    {/* DATA DOTS ANIMATIONS — no blur filter for performance */}
+                    {/* DATA DOTS ANIMATIONS */}
                     <g>
-                        <circle r="4" fill="#ff4500" opacity="0.9">
+                        <circle r="4" fill="var(--pipeline-neon-1)">
                             <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-pass-kdf" /></animateMotion>
                         </circle>
-                        <circle r="3" fill="#00ffcc" opacity="0.9">
+                        <circle r="4" fill="var(--pipeline-neon-2)">
                             <animateMotion dur="2.5s" begin="0.5s" repeatCount="indefinite"><mpath href="#flow-kdf-key" /></animateMotion>
                         </circle>
-                        <circle r="4" fill="#00ffcc" opacity="0.9">
+                        <circle r="4" fill="var(--pipeline-neon-2)">
                             <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-key-data" /></animateMotion>
                         </circle>
-                        <circle r="4" fill="#ff4500" opacity="0.9">
+                        <circle r="4" fill="var(--pipeline-neon-1)">
                             <animateMotion dur="2.5s" begin="0.8s" repeatCount="indefinite"><mpath href="#flow-data-engine" /></animateMotion>
                         </circle>
-                        <circle r="4" fill="#a855f7" opacity="0.9">
+                        <circle r="4" fill="var(--pipeline-neon-3)">
                             <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#flow-engine-server" /></animateMotion>
                         </circle>
                     </g>
 
                     {/* CONNECTION LABELS */}
-                    <g fontFamily="monospace" fontSize="11" fill="#aaaaaa" letterSpacing="1" textAnchor="middle">
+                    <g fontFamily="monospace" fontSize="10" fontWeight="bold" fill="var(--color-fg-muted)" letterSpacing="1.5" textAnchor="middle" opacity="0.6">
                         <text x="350" y="60">UTF-8 BYTES</text>
                         <text x="610" y="155">32-BYTE DERIVATION</text>
                         <text x="350" y="220">MASTER KEY</text>
@@ -116,121 +194,60 @@ export default function EncryptionPipeline() {
                         <text x="350" y="380">CIPHERTEXT + TAG</text>
                     </g>
 
-                    {/* --- PIPELINE NODES (BOXES) --- */}
-
                     {/* Master Password - STEP 01 */}
-                    <g 
-                        transform="translate(40, 20)" 
-                        className="pointer-events-auto cursor-pointer transition-all duration-300" 
-                        onMouseEnter={() => setHovered(1)} 
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 1 ? "rgba(255, 69, 0, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 1 ? "#ff4500" : "rgba(255, 69, 0, 0.25)"} strokeWidth={hovered === 1 ? "2" : "1.5"} />
-                        <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
-                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Master Password</text>
-                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">ONLY EXISTS IN MEMORY</text>
+                    <g transform="translate(40, 20)">
+                        <PipelineCard step="01" title="Master Password" subtitle="Only exists in memory" icon={Key} color="var(--pipeline-neon-1)" isHovered={hovered === 1} onEnter={() => setHovered(1)} onLeave={() => setHovered(null)} />
                     </g>
 
                     {/* PBKDF2 Hashing - STEP 02 */}
-                    <g 
-                        transform="translate(420, 20)" 
-                        className="pointer-events-auto cursor-pointer transition-all duration-300"
-                        onMouseEnter={() => setHovered(2)} 
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 2 ? "rgba(0, 255, 204, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 2 ? "#00ffcc" : "rgba(0, 255, 204, 0.25)"} strokeWidth={hovered === 2 ? "2" : "1.5"} />
-                        <rect x="-4" y="25" width="4" height="50" fill="#00ffcc" opacity="0.8" />
-                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
-                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">PBKDF2 Hashing</text>
-                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">100K ITERATIONS + SALT</text>
+                    <g transform="translate(420, 20)">
+                        <PipelineCard step="02" title="PBKDF2 Hashing" subtitle="100k iterations + salt" icon={Fingerprint} color="var(--pipeline-neon-2)" isHovered={hovered === 2} onEnter={() => setHovered(2)} onLeave={() => setHovered(null)} />
                     </g>
 
                     {/* Cryptographic Key - STEP 03 */}
-                    <g 
-                        transform="translate(420, 180)" 
-                        className="pointer-events-auto cursor-pointer transition-all duration-300"
-                        onMouseEnter={() => setHovered(3)} 
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 3 ? "rgba(0, 255, 204, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 3 ? "#00ffcc" : "rgba(0, 255, 204, 0.25)"} strokeWidth={hovered === 3 ? "2" : "1.5"} />
-                        <line x1="210" y1="0" x2="240" y2="0" stroke="#00ffcc" strokeWidth="4" />
-                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
-                        <text x="20" y="65" className="fill-foreground font-sans text-lg font-bold">Cryptographic Key</text>
-                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">AES-256 (32 BYTES)</text>
+                    <g transform="translate(420, 180)">
+                        <PipelineCard step="03" title="Cryptographic Key" subtitle="AES-256 (32 BYTES)" icon={Lock} color="var(--pipeline-neon-2)" isHovered={hovered === 3} onEnter={() => setHovered(3)} onLeave={() => setHovered(null)} />
                     </g>
 
                     {/* Private Vault Data - STEP 04 */}
-                    <g 
-                        transform="translate(40, 180)" 
-                        className="pointer-events-auto cursor-pointer transition-all duration-300"
-                        onMouseEnter={() => setHovered(4)} 
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 4 ? "rgba(255, 69, 0, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 4 ? "#ff4500" : "rgba(255, 69, 0, 0.25)"} strokeWidth={hovered === 4 ? "2" : "1.5"} />
-                        <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
-                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
-                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Private Vault Data</text>
-                        <text x="20" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">PASSWORDS & NOTES</text>
+                    <g transform="translate(40, 180)">
+                        <PipelineCard step="04" title="Private Vault Data" subtitle="Passwords & Notes" icon={Database} color="var(--pipeline-neon-1)" isHovered={hovered === 4} onEnter={() => setHovered(4)} onLeave={() => setHovered(null)} />
                     </g>
 
                     {/* AES-256-GCM Engine - STEP 05 */}
-                    <g 
-                        transform="translate(40, 340)" 
-                        className="pointer-events-auto cursor-pointer transition-all duration-300"
-                        onMouseEnter={() => setHovered(5)} 
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        <rect
-                            width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)"
-                            style={{ fill: hovered === 5 ? "rgba(168, 85, 247, 0.06)" : "var(--bg-secondary)" }} stroke={hovered === 5 ? "#a855f7" : "rgba(168, 85, 247, 0.45)"} strokeWidth={hovered === 5 ? "3" : "2"}
-                        />
-                        <text x="25" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
-                        <text x="25" y="65" className="fill-foreground font-sans text-2xl font-bold">AES-256-GCM</text>
-                        <text x="25" y="85" className="fill-fg-secondary" fontFamily="monospace" fontSize="10">AUTH TAG GENERATION</text>
+                    <g transform="translate(40, 340)">
+                        <PipelineCard step="05" title="AES-256-GCM Engine" subtitle="Auth Tag Generation" icon={Cpu} color="var(--pipeline-neon-3)" isHovered={hovered === 5} onEnter={() => setHovered(5)} onLeave={() => setHovered(null)} />
                     </g>
 
                     {/* Cloud Server (Blind) - STEP 06 */}
-                    <g 
-                        transform="translate(420, 340)" 
-                        className="pointer-events-auto cursor-pointer transition-all duration-300"
-                        onMouseEnter={() => setHovered(6)} 
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 6 ? "rgba(168, 85, 247, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 6 ? "#a855f7" : "rgba(168, 85, 247, 0.25)"} strokeWidth={hovered === 6 ? "2" : "1.5"} />
-                        <rect x="236" y="25" width="4" height="50" fill="#a855f7" opacity="0.8" />
-                        <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
-                        <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Blind Server</text>
+                    <g transform="translate(420, 340)">
+                        <PipelineCard step="06" title="Blind Server" subtitle="Zero-Knowledge Sandbox" icon={Server} color="var(--pipeline-neon-3)" isHovered={hovered === 6} onEnter={() => setHovered(6)} onLeave={() => setHovered(null)} />
                     </g>
                 </g>
 
-                {/* THE HOVER TOOLTIP (Rendered dynamically based on state) */}
+                {/* THE HOVER TOOLTIP */}
                 <AnimatePresence>
                     {hovered && (
                         <motion.g
-                            initial={{ opacity: 0, y: 15 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
+                            exit={{ opacity: 0, y: 5 }}
                             transition={{ duration: 0.2, ease: "easeOut" }}
                             className="pointer-events-none"
                         >
-                            <foreignObject x={TOOLTIPS[hovered].x} y={TOOLTIPS[hovered].y} width="320" height="180" className="overflow-visible">
-                                <div className="p-4 rounded-xl border border-border bg-background/90 shadow-lg backdrop-blur-3xl relative overflow-hidden group">
-                                    {/* Glassmorphism gradient effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-transparent pointer-events-none"></div>
-                                    <h3 
-                                        className="font-mono text-xs mb-3 font-semibold tracking-wider"
-                                        style={{ 
-                                            color: hovered === 1 || hovered === 4 ? "#ff4500" : 
-                                                   hovered === 2 || hovered === 3 ? "#00ffcc" : 
-                                                   hovered === 5 ? "#a855f7" : "var(--color-foreground)" 
-                                        }}
-                                    >
-                                        {TOOLTIPS[hovered].title}
-                                    </h3>
-                                    <div className="h-px w-full bg-border mb-3" />
-                                    <p className="text-fg-secondary text-sm leading-relaxed font-sans drop-shadow-sm">
-                                        {TOOLTIPS[hovered].text}
+                            <foreignObject x={TOOLTIPS[hovered as NonNullable<StepKey>].x} y={TOOLTIPS[hovered as NonNullable<StepKey>].y} width="300" height="150" className="overflow-visible">
+                                <div className="p-4 rounded-xl bg-background border border-border shadow-lg flex flex-col justify-center">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div 
+                                            className="w-1.5 h-1.5 rounded-full" 
+                                            style={{ backgroundColor: hovered === 1 || hovered === 4 ? "var(--pipeline-neon-1)" : hovered === 2 || hovered === 3 ? "var(--pipeline-neon-2)" : "var(--pipeline-neon-3)" }} 
+                                        />
+                                        <h3 className="mono text-[11px] font-bold tracking-widest text-foreground uppercase">
+                                            {TOOLTIPS[hovered as NonNullable<StepKey>].title}
+                                        </h3>
+                                    </div>
+                                    <p className="text-fg-secondary text-[11.5px] leading-relaxed font-sans">
+                                        {TOOLTIPS[hovered as NonNullable<StepKey>].text}
                                     </p>
                                 </div>
                             </foreignObject>
