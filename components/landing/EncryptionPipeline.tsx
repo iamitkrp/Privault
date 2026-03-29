@@ -64,6 +64,10 @@ export default function EncryptionPipeline() {
                         <stop offset="50%" stopColor="#ff4500" stopOpacity="1" />
                         <stop offset="100%" stopColor="#ff4500" stopOpacity="0" />
                     </linearGradient>
+                    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                        <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#000" floodOpacity="0.08" />
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.04" />
+                    </filter>
                 </defs>
 
                 {/* THE ENTIRE VISUAL LAYOUT SHIFTED DOWN 30px FOR PERFECT VERTICAL CENTERING */}
@@ -121,7 +125,7 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(1)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 1 ? "#ff4500" : "var(--color-border-secondary)"} strokeWidth="2" />
+                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 1 ? "rgba(255, 69, 0, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 1 ? "#ff4500" : "rgba(255, 69, 0, 0.25)"} strokeWidth={hovered === 1 ? "2" : "1.5"} />
                         <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 01</text>
                         <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Master Password</text>
@@ -135,7 +139,7 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(2)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 2 ? "#00ffcc" : "var(--color-border-secondary)"} strokeWidth="2" />
+                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 2 ? "rgba(0, 255, 204, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 2 ? "#00ffcc" : "rgba(0, 255, 204, 0.25)"} strokeWidth={hovered === 2 ? "2" : "1.5"} />
                         <rect x="-4" y="25" width="4" height="50" fill="#00ffcc" opacity="0.8" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 02</text>
                         <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">PBKDF2 Hashing</text>
@@ -149,7 +153,7 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(3)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 3 ? "#00ffcc" : "var(--color-border-secondary)"} strokeWidth="2" />
+                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 3 ? "rgba(0, 255, 204, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 3 ? "#00ffcc" : "rgba(0, 255, 204, 0.25)"} strokeWidth={hovered === 3 ? "2" : "1.5"} />
                         <line x1="210" y1="0" x2="240" y2="0" stroke="#00ffcc" strokeWidth="4" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 03</text>
                         <text x="20" y="65" className="fill-foreground font-sans text-lg font-bold">Cryptographic Key</text>
@@ -163,7 +167,7 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(4)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 4 ? "#ff4500" : "var(--color-border-secondary)"} strokeWidth="2" />
+                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 4 ? "rgba(255, 69, 0, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 4 ? "#ff4500" : "rgba(255, 69, 0, 0.25)"} strokeWidth={hovered === 4 ? "2" : "1.5"} />
                         <line x1="0" y1="0" x2="30" y2="0" stroke="#ff4500" strokeWidth="4" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 04</text>
                         <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Private Vault Data</text>
@@ -178,8 +182,8 @@ export default function EncryptionPipeline() {
                         onMouseLeave={() => setHovered(null)}
                     >
                         <rect
-                            width="240" height="100" rx="6" className="fill-bg-elevated" stroke="#a855f7" strokeWidth="2.5"
-                            opacity={hovered === 5 ? 1 : 0.8}
+                            width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)"
+                            style={{ fill: hovered === 5 ? "rgba(168, 85, 247, 0.06)" : "var(--bg-secondary)" }} stroke={hovered === 5 ? "#a855f7" : "rgba(168, 85, 247, 0.45)"} strokeWidth={hovered === 5 ? "3" : "2"}
                         />
                         <text x="25" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 05</text>
                         <text x="25" y="65" className="fill-foreground font-sans text-2xl font-bold">AES-256-GCM</text>
@@ -193,7 +197,7 @@ export default function EncryptionPipeline() {
                         onMouseEnter={() => setHovered(6)} 
                         onMouseLeave={() => setHovered(null)}
                     >
-                        <rect width="240" height="100" rx="6" className="fill-bg-secondary transition-colors duration-300" stroke={hovered === 6 ? "var(--color-fg-muted)" : "var(--color-border-secondary)"} strokeWidth="2" />
+                        <rect width="240" height="100" rx="6" className="transition-all duration-300" filter="url(#card-shadow)" style={{ fill: hovered === 6 ? "rgba(168, 85, 247, 0.04)" : "var(--bg-secondary)" }} stroke={hovered === 6 ? "#a855f7" : "rgba(168, 85, 247, 0.25)"} strokeWidth={hovered === 6 ? "2" : "1.5"} />
                         <rect x="236" y="25" width="4" height="50" fill="#a855f7" opacity="0.8" />
                         <text x="20" y="35" className="fill-fg-muted" fontFamily="monospace" fontSize="12" letterSpacing="1">// STEP 06</text>
                         <text x="20" y="65" className="fill-foreground font-sans text-xl font-bold">Blind Server</text>

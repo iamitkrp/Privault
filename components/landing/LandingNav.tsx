@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Lock } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { UserMenu } from "@/components/ui/user-menu";
@@ -102,46 +102,11 @@ export function LandingNav() {
               className="group relative flex min-w-0 shrink-0 items-center gap-2.5 text-foreground"
               onClick={() => setMobileOpen(false)}
             >
-              <span
-                className="relative h-8 w-8 shrink-0"
-                aria-hidden
-              >
-                {/* Base hex */}
-                <svg
-                  width="100%"
-                  height="100%"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-foreground/30 transition-colors duration-300 group-hover:text-foreground/55"
-                >
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                </svg>
-                {/* Animated stroke — same path */}
-                <motion.svg
-                  width="100%"
-                  height="100%"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="pointer-events-none absolute inset-0 text-primary drop-shadow-[0_0_8px_rgba(0,204,102,0.35)] transition-colors group-hover:text-primary [html[data-theme=light]_&]:drop-shadow-[0_0_10px_rgba(139,92,246,0.35)]"
-                >
-                  <motion.path
-                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
-                    initial={{ pathLength: 0, pathOffset: 0 }}
-                    animate={{ pathLength: [0, 0.45, 0], pathOffset: [0, 1, 2] }}
-                    transition={{ duration: 3.5, ease: "linear", repeat: Infinity }}
-                  />
-                </motion.svg>
-              </span>
-              <span className="truncate bg-gradient-to-r from-foreground to-fg-secondary bg-clip-text text-[0.95rem] font-semibold leading-none tracking-tight text-transparent transition-all duration-300 group-hover:from-foreground group-hover:to-primary lowercase [html[data-theme=light]_&]:group-hover:to-primary">
-                privault
+              <div className="flex h-8 w-8 items-center justify-center bg-foreground text-background transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 shadow-sm">
+                <Lock className="h-4 w-4" strokeWidth={2.5} />
+              </div>
+              <span className="text-[1.1rem] font-black uppercase tracking-tighter text-foreground transition-colors group-hover:text-brand-primary">
+                PRIVAULT.
               </span>
             </Link>
 
