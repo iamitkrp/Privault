@@ -1,36 +1,11 @@
 import type { Metadata } from "next";
 
-import {
-  Inter,
-  JetBrains_Mono,
-  Space_Grotesk,
-  Syne,
-} from "next/font/google";
+import { GeistPixelSquare } from "geist/font/pixel";
 import { AuthProvider } from "@/components/auth/auth-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Privault — Zero-Knowledge Password Manager",
@@ -54,10 +29,13 @@ export default async function RootLayout({
   // provided by middleware.ts, no manual `nonce` attributes needed.
 
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${syne.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
-      >
+    <html
+      lang="en"
+      data-theme="dark"
+      className={GeistPixelSquare.variable}
+      suppressHydrationWarning
+    >
+      <body>
         <ThemeProvider
           attribute="data-theme"
           defaultTheme="dark"

@@ -1,5 +1,5 @@
 @theme {
-  /* Futuristic Elite Workspace Theme — font vars from root layout (next/font) */
+  /* Futuristic Elite Workspace Theme — Geist Pixel from root layout (geist/font/pixel) */
   --color-primary: #00cc66;
   --color-primary-dim: #00994d;
   --color-primary-light: #059669;
@@ -17,11 +17,11 @@
   --color-concrete: #d1d1d1;
   --color-neon-orange: #ff4d00;
 
-  /* Fonts */
-  --font-family-display: var(--font-syne), ui-sans-serif, sans-serif;
-  --font-family-tech: var(--font-space-grotesk), ui-sans-serif, sans-serif;
-  --font-family-body: var(--font-inter), ui-sans-serif, sans-serif;
-  --font-family-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  /* Fonts — Geist Pixel Square (main UI + mono) */
+  --font-family-display: var(--font-geist-pixel-square), ui-monospace, monospace;
+  --font-family-tech: var(--font-geist-pixel-square), ui-monospace, monospace;
+  --font-family-body: var(--font-geist-pixel-square), ui-monospace, monospace;
+  --font-family-mono: var(--font-geist-pixel-square), ui-monospace, monospace;
 }
 
 /* ========================================
@@ -32,6 +32,9 @@ body {
   background-color: #050505;
   color: #e5e5e5;
   font-family: var(--font-family-body);
+  /* Crisper raster for Geist Pixel than global subpixel blur */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 /* Selection styling */
