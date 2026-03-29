@@ -79,6 +79,11 @@ export default function LandingPage() {
       <LandingNav />
 
       <section className="relative flex flex-col lg:flex-row items-start justify-between px-6 md:px-12 pt-28 pb-12 z-10 w-full max-w-[1600px] mx-auto overflow-hidden md:pt-32 lg:pt-36 lg:pb-16">
+        
+        {/* Glow Effects for Light/Dark Mode */}
+        <div className="absolute top-[10%] left-[20%] w-[600px] h-[600px] bg-brand-primary/10 dark:bg-brand-primary/20 blur-[120px] rounded-full pointer-events-none -z-10 mix-blend-multiply dark:mix-blend-screen" />
+        <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-sky-500/10 dark:bg-sky-500/20 blur-[100px] rounded-full pointer-events-none -z-10 mix-blend-multiply dark:mix-blend-screen" />
+
 
         {/* Left Content */}
         <motion.div
@@ -101,7 +106,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tighter text-foreground mb-2 leading-none whitespace-nowrap"
+            className="text-5xl sm:text-6xl md:text-8xl font-normal tracking-wide text-foreground mb-2 leading-none whitespace-nowrap"
           >
             Absolute <br /> Security.
           </motion.h1>
@@ -109,7 +114,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-5xl md:text-7xl font-normal tracking-tighter text-gradient mt-2 mb-8 leading-none"
+            className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-wide text-gradient mt-2 mb-8 leading-none"
           >
             [Zero Knowledge.]
           </motion.h2>
