@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -25,6 +25,17 @@ export function LandingNav() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    setNavHidden(false);
+    lastScrollY.current = typeof window !== "undefined" ? window.scrollY : 0;
+  }, [pathname]);
+
+  useEffect(() => {
+    if (mobileOpen) setNavHidden(false);
+  }, [mobileOpen]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -38,6 +49,25 @@ export function LandingNav() {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (mobileOpen) return;
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+      lastScrollY.current = y;
+
+      if (y <= 12) {
+        setNavHidden(false);
+        return;
+      }
+      if (delta > 6) setNavHidden(true);
+      else if (delta < -6) setNavHidden(false);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [mobileOpen]);
 
   const handleLoginClick = (e: React.MouseEvent) => {
@@ -55,11 +85,17 @@ export function LandingNav() {
     <>
       <motion.header
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-0 inset-x-0 z-50"
+        animate={{
+          opacity: 1,
+          y: navHidden ? "-100%" : 0,
+        }}
+        transition={{
+          opacity: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+          y: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
+        }}
+        className="fixed top-0 inset-x-0 z-50 will-change-transform"
       >
-        <div className="border-b border-foreground/[0.05] bg-background/45 backdrop-blur-2xl backdrop-saturate-150 [html[data-theme=light]_&]:border-black/[0.06] [html[data-theme=light]_&]:bg-paper/40">
+        <div className="bg-background/45 backdrop-blur-2xl backdrop-saturate-150 [html[data-theme=light]_&]:bg-paper/40">
           <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-6 md:h-[4.25rem] md:px-12">
             <Link
               href="/"
