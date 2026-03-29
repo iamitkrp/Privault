@@ -9,7 +9,7 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { ImmersiveBackground } from "@/components/landing/immersive-background";
 import { LandingNav } from "@/components/landing/LandingNav";
 
-import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon, Activity } from "lucide-react";
+import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon } from "lucide-react";
 
 import EncryptionPipeline from "@/components/landing/EncryptionPipeline";
 
@@ -96,10 +96,19 @@ export default function LandingPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mono text-xs text-fg-secondary mb-8 tracking-widest uppercase flex items-center gap-2 border border-border px-3 py-1 bg-background/50"
+            className="mb-8"
           >
-            <Activity className="w-3 h-3 text-success" />
-            <span>[[ SYSTEM ENCRYPTED // AES-256 ]]</span>
+            <Link 
+              href="/github" 
+              className="group mono text-xs text-fg-secondary hover:text-foreground tracking-widest uppercase flex items-center gap-3 border border-border px-3 py-1.5 bg-background/50 hover:bg-foreground/[0.02] transition-colors w-fit"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+              </span>
+              <span>View Source on GitHub</span>
+              <ChevronRight className="w-3 h-3 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+            </Link>
           </motion.div>
 
           <motion.h1
