@@ -81,7 +81,7 @@ export default function LandingPage() {
       <LandingNav />
 
       {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-100px)] flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 pt-10 pb-20 z-10 w-full max-w-[1600px] mx-auto overflow-hidden">
+      <section className="relative min-h-screen flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 pt-24 pb-20 z-10 w-full max-w-[1600px] mx-auto overflow-hidden md:pt-28">
 
         {/* Left Content */}
         <motion.div

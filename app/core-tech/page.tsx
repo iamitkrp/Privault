@@ -13,7 +13,7 @@ export default function CoreTechPage() {
 
       <LandingNav />
 
-      <main className="relative z-10 pt-32 pb-20 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-start min-h-screen">
+      <main className="relative z-10 pt-28 pb-20 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-start min-h-screen md:pt-32">
         <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground mb-6 uppercase">
           Core Technology
         </h1>

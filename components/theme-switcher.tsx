@@ -4,7 +4,11 @@ import * as React from "react";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 
-export function ThemeSwitcher() {
+type ThemeSwitcherProps = {
+  className?: string;
+};
+
+export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
@@ -18,8 +22,9 @@ export function ThemeSwitcher() {
 
   return (
     <button
+      type="button"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="p-2 rounded-md hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
+      className={`p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/10 ${className ?? ""}`}
       aria-label="Toggle theme"
     >
       {theme === "dark" ? (
