@@ -95,7 +95,7 @@ export function LandingNav() {
         }}
         className="fixed top-0 inset-x-0 z-50 will-change-transform"
       >
-        <div className="bg-background/45 backdrop-blur-2xl backdrop-saturate-150 [html[data-theme=light]_&]:bg-paper/40">
+        <div className="bg-transparent backdrop-blur-2xl backdrop-saturate-150">
           <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-6 md:h-[4.25rem] md:px-12">
             <Link
               href="/"
@@ -202,7 +202,7 @@ export function LandingNav() {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="overflow-hidden border-t border-foreground/[0.05] bg-background/55 backdrop-blur-xl [html[data-theme=light]_&]:border-black/[0.05] [html[data-theme=light]_&]:bg-paper/50 lg:hidden"
+                className="overflow-hidden bg-transparent backdrop-blur-2xl backdrop-saturate-150 lg:hidden"
               >
                 <nav
                   className="flex flex-col px-6 py-4 md:px-12"

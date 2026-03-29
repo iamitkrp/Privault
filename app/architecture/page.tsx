@@ -1,3 +1,4 @@
+import { ImmersiveBackground } from "@/components/landing/immersive-background";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { ArchitectureSVG } from "@/components/landing/ArchitectureSVG";
 import { Hexagon } from "lucide-react";
@@ -6,11 +7,8 @@ import Link from "next/link";
 
 export default function ArchitecturePage() {
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-brand-subtle overflow-hidden relative">
-      {/* Immersive Grid Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-grid-pattern opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background/90" />
-      </div>
+    <div className="relative min-h-screen overflow-hidden bg-transparent font-sans text-foreground selection:bg-brand-subtle">
+      <ImmersiveBackground />
 
       <LandingNav />
 

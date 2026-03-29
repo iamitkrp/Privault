@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
+import { ImmersiveBackground } from "@/components/landing/immersive-background";
 import { LandingNav } from "@/components/landing/LandingNav";
 
 import { Lock, EyeOff, Server, Fingerprint, Key, ChevronRight, Download, Hexagon, Activity } from "lucide-react";
@@ -71,12 +72,9 @@ export default function LandingPage() {
 
   return (
     <div
-      className="min-h-screen bg-background text-foreground font-sans selection:bg-brand-subtle overflow-hidden relative"
+      className="relative min-h-screen overflow-hidden bg-transparent font-sans text-foreground selection:bg-brand-subtle"
     >
-      {/* Immersive Grid Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-grid-pattern opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background/90" />
-      </div>
+      <ImmersiveBackground />
 
       <LandingNav />
 

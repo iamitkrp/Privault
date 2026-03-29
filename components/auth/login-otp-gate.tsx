@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/auth-context";
 import { OTPGate } from "@/components/auth/otp-gate";
 import { Shield, Activity, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import { ImmersiveBackground } from "@/components/landing/immersive-background";
 
 /**
  * LoginOTPGate — A full-screen OTP verification gate shown after login.
@@ -31,10 +32,8 @@ export function LoginOTPGate({ children }: { children: React.ReactNode }) {
 
     // Show the OTP gate
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-            {/* Background effects */}
-            <div className="fixed inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0" />
-            <div className="fixed inset-0 bg-gradient-to-b from-transparent via-background/40 to-background pointer-events-none z-0" />
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-transparent">
+            <ImmersiveBackground />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}

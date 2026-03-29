@@ -52,7 +52,7 @@ export default function EncryptionPipeline() {
 
             <svg
                 viewBox="0 0 700 700"
-                className="w-full h-full svg-shadow pointer-events-none relative z-10"
+                className="w-full h-full pointer-events-none relative z-10"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="xMidYMid meet"
@@ -239,12 +239,6 @@ export default function EncryptionPipeline() {
                 {/* Removed as requested */}
 
             </svg>
-
-            {/* Edge Fades for Seamless Integration */}
-            <div className="absolute inset-y-0 left-0 w-12 lg:w-24 bg-gradient-to-r from-background to-transparent pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-12 lg:w-24 bg-gradient-to-l from-background to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-10 lg:h-20 bg-gradient-to-b from-background to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-10 lg:h-20 bg-gradient-to-t from-background to-transparent pointer-events-none" />
         </motion.div>
     );
 }

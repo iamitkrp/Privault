@@ -7,7 +7,7 @@ export function ArchitectureSVG() {
         <div className="w-full h-full relative z-20 flex items-center justify-center p-2 xl:p-0 my-16">
             <svg
                 viewBox="0 0 800 400"
-                className="w-full h-full svg-shadow relative z-10"
+                className="w-full h-full relative z-10"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="xMidYMid meet"

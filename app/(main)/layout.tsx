@@ -5,17 +5,15 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SessionMonitor } from "@/components/auth/session-monitor";
 import { LoginOTPGate } from "@/components/auth/login-otp-gate";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { ImmersiveBackground } from "@/components/landing/immersive-background";
 
 
 export default function MainLayout({ children }: { children: ReactNode }) {
     return (
         <ProtectedRoute>
             <LoginOTPGate>
-            <div className="min-h-screen bg-transparent text-foreground flex flex-col relative overflow-hidden">
-                
-                {/* Grid background matching landing page */}
-                <div className="fixed inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0" />
-                <div className="fixed inset-0 bg-gradient-to-b from-transparent via-background/40 to-background pointer-events-none z-0" />
+            <div className="relative flex min-h-screen flex-col overflow-hidden bg-transparent text-foreground">
+                <ImmersiveBackground />
 
                 {/* ── Top Header — Logo + User Menu ── */}
                 <header className="fixed top-0 z-50 w-full pointer-events-none">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FileText, ArrowLeft, Database, GitBranch } from "lucide-react";
 import { Metadata } from "next";
 import { AnimatedLogo } from "@/components/ui/animated-logo";
+import { ImmersiveBackground } from "@/components/landing/immersive-background";
 
 export const metadata: Metadata = {
     title: "Terms of Service — Privault",
@@ -10,10 +11,8 @@ export const metadata: Metadata = {
 
 export default function TermsOfServicePage() {
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans relative overflow-hidden">
-            {/* Grid background matching landing page */}
-            <div className="fixed inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0" />
-            <div className="fixed inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none z-0" />
+        <div className="relative min-h-screen overflow-hidden bg-transparent font-sans text-foreground">
+            <ImmersiveBackground />
 
             {/* Navigation bar */}
             <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-md border-b border-foreground/10 bg-background/40">
