@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, Lock } from "lucide-react";
+import { Menu, X, Hexagon } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { UserMenu } from "@/components/ui/user-menu";
@@ -99,15 +99,22 @@ export function LandingNav() {
           <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-6 md:h-[4.25rem] md:px-12">
             <Link
               href="/"
-              className="group relative flex min-w-0 shrink-0 items-center gap-2.5 text-foreground"
+              className="group relative flex min-w-0 shrink-0 items-center gap-4 text-foreground"
               onClick={() => setMobileOpen(false)}
             >
-              <div className="flex h-8 w-8 items-center justify-center bg-foreground text-background transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 shadow-sm">
-                <Lock className="h-4 w-4" strokeWidth={2.5} />
+              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-background shadow-2xl transition-all duration-500 group-hover:border-brand-primary/50 group-hover:shadow-brand-primary/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/20 via-transparent to-sky-500/20 opacity-50 transition-opacity duration-500 group-hover:opacity-100" />
+                <Hexagon className="relative z-10 h-6 w-6 text-foreground transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110 group-hover:text-brand-primary" strokeWidth={1.5} />
+                <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-brand-primary to-sky-500 opacity-80" />
               </div>
-              <span className="text-[1.1rem] font-black uppercase tracking-tighter text-foreground transition-colors group-hover:text-brand-primary">
-                PRIVAULT.
-              </span>
+              <div className="flex flex-col justify-center">
+                <span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-[1.4rem] font-black uppercase tracking-[0.2em] text-transparent leading-none mb-1">
+                  PRIVAULT
+                </span>
+                <span className="mono text-[9px] font-bold uppercase tracking-[0.3em] text-brand-primary/80 leading-none">
+                  Zero-Knowledge
+                </span>
+              </div>
             </Link>
 
             <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3 md:gap-4">

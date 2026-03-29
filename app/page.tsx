@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
@@ -52,11 +52,26 @@ const features = [
   }
 ];
 
+const HERO_SUBTITLES = [
+  "[Zero Knowledge.]",
+  "[End-to-End Encrypted.]",
+  "[Mathematically Blind.]",
+  "[100% Client-Side.]"
+];
+
 export default function LandingPage() {
   const { user, profile } = useAuth();
   const router = useRouter();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [subtitleIndex, setSubtitleIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSubtitleIndex((prev) => (prev + 1) % HERO_SUBTITLES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handlePrimaryAction = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -119,14 +134,20 @@ export default function LandingPage() {
           >
             Absolute <br /> Security.
           </motion.h1>
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-wide text-gradient mt-2 mb-8 leading-none"
-          >
-            [Zero Knowledge.]
-          </motion.h2>
+          <div className="h-[40px] sm:h-[48px] md:h-[60px] mt-2 mb-8 flex items-end">
+            <AnimatePresence mode="wait">
+              <motion.h2
+                key={subtitleIndex}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-wide text-gradient leading-none whitespace-nowrap"
+              >
+                {HERO_SUBTITLES[subtitleIndex]}
+              </motion.h2>
+            </AnimatePresence>
+          </div>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
