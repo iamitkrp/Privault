@@ -1,56 +1,44 @@
 @import "tailwindcss";
+@import "../styles/globals.css";
 
-/* ============================================
-   PRIVAULT DESIGN SYSTEM
-   Security-first password manager
-   Dark theme primary, light theme secondary
-   ============================================ */
-
-/* ---- Dark Theme (Default) ---- */
+/* ---- App design tokens (mapped to Futuristic Elite palette; powers bg-background, TipTap, etc.) ---- */
 :root {
   color-scheme: dark;
 
-  /* Background layers */
-  --bg-primary: #000000;
-  --bg-secondary: #050505;
-  --bg-tertiary: #0a0a0a;
+  --bg-primary: #050505;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #0c0c0d;
   --bg-elevated: #111111;
   --bg-overlay: rgba(0, 0, 0, 0.8);
 
-  /* Foreground / text */
-  --fg-primary: #ffffff;
-  --fg-secondary: #888888;
-  --fg-muted: #555555;
-  --fg-inverted: #000000;
+  --fg-primary: #e5e5e5;
+  --fg-secondary: #a3a3a3;
+  --fg-muted: #737373;
+  --fg-inverted: #050505;
 
-  /* Text Gradients */
   --text-gradient-start: #ffffff;
-  --text-gradient-end: #888888;
+  --text-gradient-end: #a3a3a3;
 
-  /* Brand – Hacker/Technical Accent */
-  --brand-primary: #ffffff;
-  --brand-primary-hover: #cccccc;
-  --brand-primary-subtle: rgba(255, 255, 255, 0.1);
-  --brand-primary-muted: rgba(255, 255, 255, 0.2);
+  --brand-primary: #00cc66;
+  --brand-primary-hover: #00994d;
+  --brand-primary-subtle: rgba(0, 204, 102, 0.12);
+  --brand-primary-muted: rgba(0, 204, 102, 0.25);
 
-  /* Semantic colors */
-  --color-success: #ff4500;
-  /* Adapted to the orange/red from the screenshot nodes */
+  --color-success: #00cc66;
   --color-warning: #ff8c00;
   --color-error: #ff3333;
-  --color-info: #555555;
+  --color-info: #737373;
 
-  /* Borders */
-  --border-primary: #222222;
-  --border-secondary: #333333;
-  --border-focus: #ff4500;
+  --border-primary: rgba(255, 255, 255, 0.08);
+  --border-secondary: rgba(255, 255, 255, 0.12);
+  --border-focus: #00cc66;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.9), 0 2px 4px -2px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 15px rgba(255, 69, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.45), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 20px rgba(0, 204, 102, 0.35);
 
-  /* Radius - More rigid/square to match standard technical look but keeping options */
   --radius-sm: 0px;
   --radius-md: 2px;
   --radius-lg: 4px;
@@ -58,63 +46,55 @@
   --radius-2xl: 8px;
   --radius-full: 9999px;
 
-  /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ---- Light Theme ---- */
 [data-theme="light"] {
   color-scheme: light;
 
-  /* Background layers - premium off-white */
-  --bg-primary: #fafafa;
+  --bg-primary: #fbfbfb;
   --bg-secondary: #f4f4f5;
   --bg-tertiary: #e4e4e7;
   --bg-elevated: #ffffff;
-  --bg-overlay: rgba(255, 255, 255, 0.8);
+  --bg-overlay: rgba(255, 255, 255, 0.85);
 
-  /* Foreground / text */
-  --fg-primary: #09090b;
+  --fg-primary: #111111;
   --fg-secondary: #52525b;
   --fg-muted: #71717a;
   --fg-inverted: #ffffff;
 
-  /* Text Gradients */
-  --text-gradient-start: #18181b; 
-  --text-gradient-end: #3f3f46; 
+  --text-gradient-start: #18181b;
+  --text-gradient-end: #3f3f46;
 
-  /* Brand – minimalist technical black */
-  --brand-primary: #09090b;
-  --brand-primary-hover: #18181b;
-  --brand-primary-subtle: rgba(9, 9, 11, 0.1);
-  --brand-primary-muted: rgba(9, 9, 11, 0.15);
+  --brand-primary: #8b5cf6;
+  --brand-primary-hover: #7c3aed;
+  --brand-primary-subtle: rgba(139, 92, 246, 0.12);
+  --brand-primary-muted: rgba(139, 92, 246, 0.22);
 
-  /* Semantic colors */
-  --color-success: #16a34a;
+  --color-success: #059669;
   --color-warning: #ea580c;
   --color-error: #dc2626;
-  --color-info: #09090b;
+  --color-info: #52525b;
 
-  --color-success-subtle: rgba(22, 163, 74, 0.1);
+  --color-success-subtle: rgba(5, 150, 105, 0.1);
   --color-warning-subtle: rgba(234, 88, 12, 0.1);
   --color-error-subtle: rgba(220, 38, 38, 0.1);
-  --color-info-subtle: rgba(9, 9, 11, 0.1);
+  --color-info-subtle: rgba(82, 82, 91, 0.1);
 
   --border-primary: #e4e4e7;
   --border-secondary: #d4d4d8;
-  --border-focus: #18181b;
+  --border-focus: #8b5cf6;
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.025);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.025);
-  --shadow-glow: 0 0 24px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.2);
 }
 
-/* ---- Register tokens with Tailwind v4 ---- */
 @theme inline {
   --color-background: var(--bg-primary);
   --color-foreground: var(--fg-primary);
@@ -136,10 +116,10 @@
   --color-warning: var(--color-warning);
   --color-error: var(--color-error);
   --color-info: var(--color-info);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-family-body);
+  --font-mono: var(--font-family-mono);
 
-  /* Lumen Notes - Stitch Colors */
+  /* Lumen / Notes — keep TipTap & stitch screens working */
   --color-on-tertiary-container: #fffbff;
   --color-secondary-container: #e0dfe4;
   --color-on-background: #1a1c1f;
@@ -165,7 +145,6 @@
   --color-on-error-container: #93000a;
   --color-secondary-fixed-dim: #c6c6cb;
   --color-on-primary: #ffffff;
-  --color-primary: #0058bc;
   --color-inverse-on-surface: #f0f0f5;
   --color-surface-tint: #005bc1;
   --color-outline: #717786;
@@ -173,12 +152,10 @@
   --color-surface-container-high: #e8e8ed;
   --color-on-primary-fixed: #001a41;
   --color-surface-variant: #e2e2e7;
-  --color-primary-container: #0070eb;
   --color-on-secondary-fixed: #1a1b1f;
   --color-inverse-primary: #adc6ff;
   --color-error-container: #ffdad6;
   --color-primary-fixed: #d8e2ff;
-  --color-on-primary-container: #fefcff;
   --color-on-secondary-fixed-variant: #46464b;
   --color-surface: #f9f9fe;
   --color-on-tertiary-fixed: #351000;
@@ -188,102 +165,42 @@
   --color-surface-container-low: #f3f3f8;
 }
 
-/* ---- Base Styles ---- */
-body {
-  background: var(--bg-primary);
-  color: var(--fg-primary);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 [data-theme="light"] body {
-  background-color: var(--bg-primary);
   background-image: radial-gradient(100% 100% at 50% 0%, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
   background-attachment: fixed;
 }
 
-/* Tailwind preflight resets button cursor to 'default' — restore pointer globally */
 button,
 [role="button"],
 a {
   cursor: pointer;
 }
 
-/* ---- Focus Ring (Accessibility) ---- */
 *:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
-/* Remove focus ring from text inputs — they use their own subtle indicators */
 input[type="text"]:focus-visible,
 input[type="search"]:focus-visible,
 textarea:focus-visible {
   outline: none;
 }
 
-/* ---- Selection ---- */
-::selection {
-  background: var(--brand-primary-muted);
-  color: var(--fg-primary);
-}
-
-/* ---- Scrollbar (Dark themed) ---- */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--fg-muted);
-}
-
-/* ---- Utility Classes ---- */
-
-/* Custom Grid Background for Terminal Aesthetic */
-.bg-grid-pattern {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-[data-theme="light"] .bg-grid-pattern {
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-}
-
-/* Lumina Notes Liquid Background */
+/* Privault utilities (glass, notes background, motion) */
 .liquid-bg {
-    background: radial-gradient(at 0% 0%, #f9f9fe 0%, transparent 50%),
-                radial-gradient(at 100% 0%, #d8e2ff 0%, transparent 50%),
-                radial-gradient(at 100% 100%, #f3f3f8 0%, transparent 50%),
-                radial-gradient(at 0% 100%, #ffffff 0%, transparent 50%);
-    background-size: 100% 100%;
+  background: radial-gradient(at 0% 0%, #f9f9fe 0%, transparent 50%),
+    radial-gradient(at 100% 0%, #d8e2ff 0%, transparent 50%),
+    radial-gradient(at 100% 100%, #f3f3f8 0%, transparent 50%),
+    radial-gradient(at 0% 100%, #ffffff 0%, transparent 50%);
+  background-size: 100% 100%;
 }
 
-/* Glassmorphism card for Stitch Theme */
-.glass-panel { 
-    backdrop-filter: blur(40px);
-    background: rgba(255, 255, 255, 0.7);
-}
 .glass-border {
-    border: 1px solid rgba(193, 198, 215, 0.2);
+  border: 1px solid rgba(193, 198, 215, 0.2);
 }
 
-/* Glassmorphism card - more solid/noise based for technical look */
 .glass {
   background: rgba(10, 10, 10, 0.7);
   backdrop-filter: blur(4px);
@@ -299,7 +216,6 @@ textarea:focus-visible {
   box-shadow: var(--shadow-sm);
 }
 
-/* Slide-in-bottom animation for modals */
 .slide-in-bottom {
   animation: slideInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -315,7 +231,6 @@ textarea:focus-visible {
   }
 }
 
-/* Text gradient */
 .text-gradient {
   background: linear-gradient(135deg, var(--text-gradient-start), var(--text-gradient-end));
   -webkit-background-clip: text;
@@ -323,7 +238,6 @@ textarea:focus-visible {
   background-clip: text;
 }
 
-/* Glow effect for brand elements */
 .glow {
   box-shadow: var(--shadow-glow);
 }
@@ -336,7 +250,6 @@ textarea:focus-visible {
   filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.05));
 }
 
-/* Smooth page transitions */
 .page-transition {
   animation: fadeIn var(--transition-slow) ease-out;
   will-change: opacity, transform;
@@ -347,19 +260,19 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateY(4px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Shimmer for loading skeletons */
 .skeleton {
-  background: linear-gradient(90deg,
-      var(--bg-secondary) 25%,
-      var(--bg-tertiary) 50%,
-      var(--bg-secondary) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 25%,
+    var(--bg-tertiary) 50%,
+    var(--bg-secondary) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: var(--radius-md);
@@ -369,22 +282,17 @@ textarea:focus-visible {
   0% {
     background-position: 200% 0;
   }
-
   100% {
     background-position: -200% 0;
   }
 }
 
-/* ---- Micro-animations ---- */
-
 @keyframes gradient-x {
-
   0%,
   100% {
     background-size: 200% 200%;
     background-position: left center;
   }
-
   50% {
     background-size: 200% 200%;
     background-position: right center;
@@ -395,7 +303,6 @@ textarea:focus-visible {
   animation: gradient-x 3s ease infinite;
 }
 
-/* Hover lift effect for cards */
 .hover-lift {
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
@@ -405,7 +312,6 @@ textarea:focus-visible {
   box-shadow: var(--shadow-lg);
 }
 
-/* Press effect for buttons */
 .press {
   transition: transform var(--transition-fast);
 }
@@ -414,44 +320,35 @@ textarea:focus-visible {
   transform: scale(0.97);
 }
 
-/* Stagger in animation for lists */
-.stagger-in>* {
+.stagger-in > * {
   animation: fadeSlideUp var(--transition-slow) ease-out both;
 }
 
-.stagger-in>*:nth-child(1) {
+.stagger-in > *:nth-child(1) {
   animation-delay: 0ms;
 }
-
-.stagger-in>*:nth-child(2) {
+.stagger-in > *:nth-child(2) {
   animation-delay: 50ms;
 }
-
-.stagger-in>*:nth-child(3) {
+.stagger-in > *:nth-child(3) {
   animation-delay: 100ms;
 }
-
-.stagger-in>*:nth-child(4) {
+.stagger-in > *:nth-child(4) {
   animation-delay: 150ms;
 }
-
-.stagger-in>*:nth-child(5) {
+.stagger-in > *:nth-child(5) {
   animation-delay: 200ms;
 }
-
-.stagger-in>*:nth-child(6) {
+.stagger-in > *:nth-child(6) {
   animation-delay: 250ms;
 }
-
-.stagger-in>*:nth-child(7) {
+.stagger-in > *:nth-child(7) {
   animation-delay: 300ms;
 }
-
-.stagger-in>*:nth-child(8) {
+.stagger-in > *:nth-child(8) {
   animation-delay: 350ms;
 }
-
-.stagger-in>*:nth-child(9) {
+.stagger-in > *:nth-child(9) {
   animation-delay: 400ms;
 }
 
@@ -460,54 +357,61 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Pulse glow for brand elements */
 .pulse-glow {
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
 @keyframes pulseGlow {
-
   0%,
   100% {
-    box-shadow: 0 0 10px rgba(255, 69, 0, 0.2);
+    box-shadow: 0 0 10px rgba(0, 204, 102, 0.2);
   }
-
   50% {
-    box-shadow: 0 0 25px rgba(255, 69, 0, 0.6);
+    box-shadow: 0 0 25px rgba(0, 204, 102, 0.45);
   }
 }
 
-/* Node blinking effect for the graph */
+[data-theme="light"] .pulse-glow {
+  animation: pulseGlowLight 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlowLight {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.45);
+  }
+}
+
 .animate-node-blink {
   animation: nodeBlink 3s infinite ease-in-out;
 }
 
 @keyframes nodeBlink {
-
   0%,
   100% {
     opacity: 0.5;
     box-shadow: none;
   }
-
   50% {
     opacity: 1;
-    box-shadow: 0 0 10px var(--color-success);
+    box-shadow: 0 0 10px var(--brand-primary);
   }
 }
 
 .mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-family-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
-/* Skip to content accessibility */
 .skip-to-content {
   position: absolute;
   top: -100%;
@@ -524,7 +428,6 @@ textarea:focus-visible {
   top: 0;
 }
 
-/* ---- Custom scrollbar for modals ---- */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -538,9 +441,7 @@ textarea:focus-visible {
   border-radius: 9999px;
 }
 
-/* ---- Reduced motion preference ---- */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -555,115 +456,115 @@ textarea:focus-visible {
    ============================================ */
 
 .tiptap-editor {
-    @apply text-lg sm:text-xl text-on-surface-variant leading-relaxed font-sans w-full min-h-[50vh];
+  @apply text-lg sm:text-xl text-on-surface-variant leading-relaxed font-sans w-full min-h-[50vh];
 }
 
 .tiptap-editor p.is-editor-empty:first-child::before {
-    content: attr(data-placeholder);
-    float: left;
-    color: var(--color-on-surface-variant);
-    opacity: 0.5;
-    pointer-events: none;
-    height: 0;
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-on-surface-variant);
+  opacity: 0.5;
+  pointer-events: none;
+  height: 0;
 }
 
 .tiptap-editor p {
-    margin-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .tiptap-editor h1 {
-    @apply text-3xl font-bold text-on-surface mt-8 mb-4 tracking-tight;
+  @apply text-3xl font-bold text-on-surface mt-8 mb-4 tracking-tight;
 }
 
 .tiptap-editor h2 {
-    @apply text-2xl font-bold text-on-surface mt-6 mb-3 tracking-tight;
+  @apply text-2xl font-bold text-on-surface mt-6 mb-3 tracking-tight;
 }
 
 .tiptap-editor h3 {
-    @apply text-xl font-bold text-on-surface mt-4 mb-2;
+  @apply text-xl font-bold text-on-surface mt-4 mb-2;
 }
 
 .tiptap-editor ul {
-    list-style-type: disc;
-    padding-left: 1.5rem;
-    margin-bottom: 1rem;
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .tiptap-editor ol {
-    list-style-type: decimal;
-    padding-left: 1.5rem;
-    margin-bottom: 1rem;
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .tiptap-editor li {
-    margin-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .tiptap-editor blockquote {
-    @apply border-l-4 border-primary/50 pl-4 py-1 my-4 bg-primary/5 rounded-r-lg italic text-on-surface-variant;
+  @apply border-l-4 border-primary/50 pl-4 py-1 my-4 bg-primary/5 rounded-r-lg italic text-on-surface-variant;
 }
 
 .tiptap-editor code {
-    @apply bg-on-surface/5 text-primary px-1.5 py-0.5 rounded-md font-mono text-[0.9em];
+  @apply bg-on-surface/5 text-primary px-1.5 py-0.5 rounded-md font-mono text-[0.9em];
 }
 
 .tiptap-editor pre {
-    @apply bg-[#1e1e1e] text-gray-200 p-4 rounded-xl my-4 overflow-x-auto font-mono text-sm border border-border/20 shadow-inner;
+  @apply bg-[#1e1e1e] text-gray-200 p-4 rounded-xl my-4 overflow-x-auto font-mono text-sm border border-border/20 shadow-inner;
 }
 
 .tiptap-editor pre code {
-    background: transparent;
-    padding: 0;
-    color: inherit;
+  background: transparent;
+  padding: 0;
+  color: inherit;
 }
 
 ul[data-type="taskList"] {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 1rem;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1rem;
 }
 
 ul[data-type="taskList"] li {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 
 ul[data-type="taskList"] li > label {
-    margin-right: 0.75rem;
-    margin-top: 0.25rem;
-    cursor: pointer;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  cursor: pointer;
 }
 
 ul[data-type="taskList"] li > label input[type="checkbox"] {
-    @apply w-4 h-4 rounded appearance-none border border-border/60 bg-background/50 cursor-pointer transition-colors relative flex items-center justify-center shadow-sm;
+  @apply w-4 h-4 rounded appearance-none border border-border/60 bg-background/50 cursor-pointer transition-colors relative flex items-center justify-center shadow-sm;
 }
 
 ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
-    @apply bg-primary border-primary font-bold;
+  @apply bg-primary border-primary font-bold;
 }
 
 ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
-    content: "✓";
-    @apply absolute text-[10px] text-background flex text-center -mt-px ml-[0.5px];
+  content: "✓";
+  @apply absolute text-[10px] text-background flex text-center -mt-px ml-[0.5px];
 }
 
 ul[data-type="taskList"] li > div {
-    flex: 1;
+  flex: 1;
 }
 
 ul[data-type="taskList"] li[data-checked="true"] > div {
-    @apply line-through text-on-surface-variant opacity-80;
+  @apply line-through text-on-surface-variant opacity-80;
 }
 
 .tiptap-editor img {
-    @apply max-w-full h-auto rounded-xl my-6 shadow-md border border-border/30;
+  @apply max-w-full h-auto rounded-xl my-6 shadow-md border border-border/30;
 }
 
 .tiptap-editor img.ProseMirror-selectednode {
-    @apply outline outline-4 outline-brand/60 outline-offset-2;
+  @apply outline outline-4 outline-brand/60 outline-offset-2;
 }
 
 .tiptap-editor a {
-    @apply text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand transition-colors cursor-pointer;
+  @apply text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand transition-colors cursor-pointer;
 }

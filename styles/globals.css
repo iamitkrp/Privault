@@ -1,0 +1,600 @@
+@theme {
+  /* Futuristic Elite Workspace Theme — font vars from root layout (next/font) */
+  --color-primary: #00cc66;
+  --color-primary-dim: #00994d;
+  --color-primary-light: #059669;
+  --color-void: #050505;
+  --color-surface: #0a0a0a;
+  --color-paper: #FBFBFB;
+  --color-obsidian: #0c0c0d;
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-surface: rgba(255, 255, 255, 0.02);
+  --color-indigo-accent: #818cf8;
+
+  /* Legacy colors for compatibility */
+  --color-brutal-black: #2a2a2a;
+  --color-brutal-white: #fafafa;
+  --color-concrete: #d1d1d1;
+  --color-neon-orange: #ff4d00;
+
+  /* Fonts */
+  --font-family-display: var(--font-syne), ui-sans-serif, sans-serif;
+  --font-family-tech: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  --font-family-body: var(--font-inter), ui-sans-serif, sans-serif;
+  --font-family-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
+body {
+  background-color: #050505;
+  color: #e5e5e5;
+  font-family: var(--font-family-body);
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(0, 204, 102, 0.3);
+  color: white;
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00cc66;
+}
+
+/* ========================================
+   GRID PATTERN BACKGROUNDS
+   ======================================== */
+
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, #1a1a1a 1px, transparent 1px),
+    linear-gradient(to bottom, #1a1a1a 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.bg-grid-fixed {
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
+
+.bg-scanline {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+  background-size: 100% 4px;
+}
+
+/* ========================================
+   GLASS PANEL
+   ======================================== */
+
+.glass-panel {
+  background: rgba(20, 20, 20, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+/* ========================================
+   LASER LINE DIVIDER
+   ======================================== */
+
+.laser-line {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 204, 102, 0.5) 50%, transparent 100%);
+  box-shadow: 0 0 10px rgba(0, 204, 102, 0.3);
+}
+
+/* ========================================
+   TOOL CARDS
+   ======================================== */
+
+.tool-card {
+  @apply relative flex flex-col justify-between p-5 h-48 transition-all duration-300;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tool-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(0, 204, 102, 0.5);
+}
+
+.tool-card-underline {
+  @apply absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 transition-transform duration-300 origin-left;
+}
+
+.tool-card:hover .tool-card-underline {
+  @apply scale-x-100;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(0, 204, 102, 0.1), 0 0 20px rgba(0, 204, 102, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 10px rgba(0, 204, 102, 0.3), 0 0 30px rgba(0, 204, 102, 0.2);
+  }
+}
+
+@keyframes pulse-emerald {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 163, 109, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(0, 163, 109, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 163, 109, 0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.pulse-emerald {
+  animation: pulse-emerald 2s infinite;
+}
+
+/* Stagger delays */
+.stagger-1 {
+  animation-delay: 100ms;
+}
+
+.stagger-2 {
+  animation-delay: 150ms;
+}
+
+.stagger-3 {
+  animation-delay: 200ms;
+}
+
+.stagger-4 {
+  animation-delay: 250ms;
+}
+
+.stagger-5 {
+  animation-delay: 300ms;
+}
+
+.stagger-6 {
+  animation-delay: 350ms;
+}
+
+.stagger-7 {
+  animation-delay: 400ms;
+}
+
+.stagger-8 {
+  animation-delay: 450ms;
+}
+
+/* ========================================
+   CUSTOM SCROLLBAR FOR PANELS
+   ======================================== */
+
+.custom-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #e8e8e8;
+  border-radius: 10px;
+}
+
+/* ========================================
+   LASER CUT BORDERS (for PDF merger)
+   ======================================== */
+
+.laser-cut {
+  border: 1px solid #e8e8e8;
+}
+
+/* ========================================
+   MERGE BUTTON HOVER
+   ======================================== */
+
+.merge-btn:hover {
+  letter-spacing: 0.1em;
+  transform: scale(1.02);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   LIGHT MODE STYLES
+   ======================================== */
+
+[data-theme="light"] body {
+  background-color: #FBFBFB;
+  color: #111111;
+}
+
+/* Purple as primary color in light mode */
+[data-theme="light"] .text-primary,
+[data-theme="light"] .text-primary\/80,
+[data-theme="light"] .text-primary\/60,
+[data-theme="light"] .text-primary\/50 {
+  color: #8b5cf6 !important;
+}
+
+[data-theme="light"] .bg-primary {
+  background-color: #8b5cf6 !important;
+}
+
+[data-theme="light"] .bg-primary\/5,
+[data-theme="light"] .bg-primary\/10,
+[data-theme="light"] .bg-primary\/20 {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+}
+
+[data-theme="light"] .border-primary,
+[data-theme="light"] .border-primary\/10,
+[data-theme="light"] .border-primary\/20,
+[data-theme="light"] .border-primary\/30,
+[data-theme="light"] .border-primary\/50 {
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+[data-theme="light"] .hover\:text-primary:hover {
+  color: #8b5cf6 !important;
+}
+
+[data-theme="light"] .hover\:bg-primary:hover {
+  background-color: #8b5cf6 !important;
+}
+
+[data-theme="light"] .hover\:bg-primary\/10:hover,
+[data-theme="light"] .hover\:bg-primary\/20:hover {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+[data-theme="light"] .hover\:border-primary\/50:hover,
+[data-theme="light"] .hover\:border-primary:hover {
+  border-color: #8b5cf6 !important;
+}
+
+/* Force all primary colored text to purple in light mode */
+[data-theme="light"] [class*="text-primary"] {
+  color: #8b5cf6 !important;
+}
+
+/* Search bar shadow in light mode */
+[data-theme="light"] .shadow-\[0_0_50px_rgba\(0\,204\,102\,0\.15\)\] {
+  box-shadow: 0 0 50px rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Any remaining green backgrounds */
+[data-theme="light"] [class*="bg-primary"] {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+}
+
+[data-theme="light"] .bg-void {
+  background-color: #FBFBFB !important;
+}
+
+[data-theme="light"] .bg-grid-pattern {
+  background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+}
+
+[data-theme="light"] .bg-scanline {
+  opacity: 0.1;
+}
+
+[data-theme="light"] .glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .laser-line {
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
+  box-shadow: none;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #FBFBFB;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
+
+[data-theme="light"] ::selection {
+  background-color: rgba(5, 150, 105, 0.2);
+  color: black;
+}
+
+/* Text colors in light mode */
+[data-theme="light"] .text-white {
+  color: #111111 !important;
+}
+
+[data-theme="light"] .text-white\/50,
+[data-theme="light"] .text-white\/40,
+[data-theme="light"] .text-white\/30,
+[data-theme="light"] .text-white\/20,
+[data-theme="light"] .text-white\/10,
+[data-theme="light"] .text-white\/60,
+[data-theme="light"] .text-white\/80 {
+  color: rgba(17, 17, 17, 0.6) !important;
+}
+
+/* Border colors in light mode */
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/20,
+[data-theme="light"] .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Background colors in light mode */
+[data-theme="light"] .bg-white\/5,
+[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] .bg-black\/80,
+[data-theme="light"] .bg-black\/50 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Tool card styles in light mode */
+[data-theme="light"] .bg-glass-surface {
+  background: white !important;
+  box-shadow: none;
+  border: 1px solid #111111 !important;
+}
+
+[data-theme="light"] .border-glass-border {
+  border-color: #111111 !important;
+}
+
+[data-theme="light"] .bg-glass-surface:hover {
+  background: white !important;
+  box-shadow: 4px 4px 0px 0px #111111;
+  border-color: #111111 !important;
+}
+
+/* Input in light mode */
+[data-theme="light"] input {
+  color: #111111 !important;
+}
+
+[data-theme="light"] input::placeholder {
+  color: rgba(17, 17, 17, 0.4) !important;
+}
+
+/* Footer in light mode */
+[data-theme="light"] footer {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ring colors in light mode */
+[data-theme="light"] .ring-white\/5 {
+  --tw-ring-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Shadow in light mode */
+[data-theme="light"] .shadow-\[0_0_10px_\#00cc66\] {
+  box-shadow: 0 0 10px #059669 !important;
+}
+
+/* Navbar in light mode */
+[data-theme="light"] .bg-void\/80 {
+  background-color: rgba(251, 251, 251, 0.8) !important;
+}
+
+[data-theme="light"] nav.border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Dev utility pill buttons in light mode */
+[data-theme="light"] a.rounded-full.border-white\/10 {
+  border-color: #111111 !important;
+  background-color: white !important;
+}
+
+[data-theme="light"] a.rounded-full.border-white\/10:hover {
+  background-color: #111111 !important;
+  color: white !important;
+  box-shadow: 3px 3px 0px 0px #059669;
+  transform: translate(-2px, -2px);
+}
+
+[data-theme="light"] a.rounded-full.border-white\/10:hover span {
+  color: white !important;
+}
+
+/* Nav link text color */
+.nav-link {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="light"] .nav-link {
+  color: #111111 !important;
+}
+
+/* Login button in light mode */
+[data-theme="light"] .login-btn {
+  border-color: #111111 !important;
+  background-color: transparent !important;
+  color: #111111 !important;
+}
+
+[data-theme="light"] .login-btn:hover {
+  background-color: #111111 !important;
+  color: white !important;
+}
+
+[data-theme="light"] .login-btn:hover span {
+  color: white !important;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+@utility neo-border {
+  border: 2px solid #2a2a2a;
+}
+
+/* ========================================
+   SEARCH DROPDOWN STYLES
+   ======================================== */
+
+.search-dropdown {
+  background: rgba(10, 10, 10, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-result {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.search-result:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-active {
+  background: rgba(0, 204, 102, 0.1) !important;
+}
+
+.search-icon-box span {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.search-result-name {
+  color: white;
+}
+
+.search-result-desc {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.search-footer {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.search-enter-hint {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Light mode search dropdown */
+[data-theme="light"] .search-dropdown {
+  background: white !important;
+  border: 2px solid #111111 !important;
+  box-shadow: 6px 6px 0px 0px #111111, 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .search-result {
+  color: #111111 !important;
+  border-color: #e5e7eb !important;
+}
+
+[data-theme="light"] .search-result:hover {
+  background: #f9fafb !important;
+}
+
+[data-theme="light"] .search-result-active {
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+[data-theme="light"] .search-icon-box {
+  background: #f3f4f6 !important;
+  border-color: #e5e7eb !important;
+}
+
+[data-theme="light"] .search-icon-box span {
+  color: #374151 !important;
+}
+
+[data-theme="light"] .search-result-active .search-icon-box {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+[data-theme="light"] .search-result-active .search-icon-box span {
+  color: #8b5cf6 !important;
+}
+
+[data-theme="light"] .search-result-name {
+  color: #111111 !important;
+}
+
+[data-theme="light"] .search-result-desc {
+  color: #6b7280 !important;
+}
+
+[data-theme="light"] .search-footer {
+  background: #f9fafb !important;
+  border-color: #e5e7eb !important;
+}
+
+[data-theme="light"] .search-enter-hint {
+  color: #6b7280 !important;
+}
