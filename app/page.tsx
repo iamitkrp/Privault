@@ -137,14 +137,7 @@ export default function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-wide leading-none whitespace-nowrap"
-                style={{
-                  background: 'linear-gradient(135deg, var(--text-gradient-start), var(--text-gradient-end))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  color: 'var(--text-gradient-start)' // Fallback
-                }}
+                className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-wide text-warning-gradient leading-none whitespace-nowrap"
               >
                 {HERO_SUBTITLES[subtitleIndex]}
               </motion.h2>

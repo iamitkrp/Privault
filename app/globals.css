@@ -611,3 +611,21 @@ ul[data-type="taskList"] li[data-checked="true"] > div {
 .bg-immersive-crt {
   opacity: var(--bg-crt-opacity);
 }
+
+/* Hardcoded warning gradient to bypass React/Next HMR variable caching */
+.text-warning-gradient {
+  background: linear-gradient(135deg, #FFEA00, #D4C300) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Enforce override for light mode explicitly based on the <html> attribute */
+[data-theme="light"] .text-warning-gradient {
+  background: linear-gradient(135deg, #7c3aed, #0ea5e9) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
