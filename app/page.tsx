@@ -193,9 +193,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground mb-6 uppercase"
+              className="text-4xl md:text-6xl lg:text-[4.5rem] font-bold tracking-tighter text-foreground mb-6 uppercase leading-none"
             >
-              Engineered for paranoia.
+              ENGINEERED FOR <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--pipeline-neon-1)] to-[var(--pipeline-neon-2)]">PARANOIA.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -208,44 +208,74 @@ export default function LandingPage() {
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border border-border glass p-[1px]">
-            {features.map((f, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border/50 p-[1px] rounded-[2rem] overflow-hidden shadow-2xl relative">
+            {features.map((f, i) => {
+              const accentColor = i % 3 === 0 ? 'var(--pipeline-neon-1)' : i % 3 === 1 ? 'var(--pipeline-neon-2)' : 'var(--pipeline-neon-3)';
+              
+              return (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative p-10 bg-bg-secondary hover:bg-bg-tertiary transition-all duration-500 overflow-hidden"
+                className="group relative h-[340px] p-8 bg-background hover:bg-bg-secondary transition-all duration-500 overflow-hidden flex flex-col cursor-crosshair"
               >
-                {/* Subtle background gradient on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                {/* Abstract Data Mesh Background (Subtle) */}
+                <div 
+                    className="absolute inset-0 pointer-events-none opacity-[0.02] group-hover:opacity-[0.05] transition-opacity duration-500"
+                    style={{ backgroundImage: 'linear-gradient(var(--color-foreground) 1px, transparent 1px), linear-gradient(90deg, var(--color-foreground) 1px, transparent 1px)', backgroundSize: '16px 16px' }}
+                />
 
-                {/* Glowing corner accent */}
-                <div className="absolute top-0 right-0 w-20 h-20 bg-foreground/[0.02] blur-xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-foreground/[0.05] transition-colors"></div>
+                {/* Hover Spotlight matching the neon scheme */}
+                <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                    style={{
+                        background: `radial-gradient(circle at 50% 120%, ${accentColor}22 0%, transparent 70%)`
+                    }}
+                />
 
-                <div className={`w-12 h-12 flex items-center justify-center mb-8 text-fg-muted group-hover:text-foreground transition-all duration-500 group-hover:scale-110`}>
-                  <f.icon className="w-7 h-7" strokeWidth={1} />
+                {/* Massive Watermark Icon */}
+                <div 
+                    className="absolute -right-8 -bottom-10 opacity-[0.02] group-hover:opacity-[0.06] transition-all duration-700 pointer-events-none"
+                    style={{ color: accentColor }}
+                >
+                  <f.icon className="w-64 h-64 transform -rotate-12 group-hover:rotate-0 group-hover:scale-110 transition-transform duration-700 ease-out" strokeWidth={1} />
                 </div>
 
-                <h3 className="mono text-lg font-bold text-foreground mb-4 tracking-[0.2em] uppercase">
-                  {f.title}
-                </h3>
+                {/* Hardware Corners (appear on hover) */}
+                <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-transparent group-hover:border-foreground/30 transition-all duration-500 scale-150 group-hover:scale-100 pointer-events-none"></div>
+                <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-transparent group-hover:border-foreground/30 transition-all duration-500 scale-150 group-hover:scale-100 pointer-events-none"></div>
+                <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-transparent group-hover:border-foreground/30 transition-all duration-500 scale-150 group-hover:scale-100 pointer-events-none"></div>
+                <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-transparent group-hover:border-foreground/30 transition-all duration-500 scale-150 group-hover:scale-100 pointer-events-none"></div>
 
-                <p className="mono text-fg-secondary text-[10px] sm:text-xs leading-relaxed uppercase tracking-wider pr-4 group-hover:text-foreground transition-colors">
-                  {f.desc}
-                </p>
-
-                {/* Tech metadata details */}
-                <div className="absolute bottom-4 right-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
-                  <div className="mono text-[7px] text-fg-muted">STATUS: VERIFIED</div>
-                  <div className="mono text-[7px] text-fg-muted font-bold px-1.5 py-0.5 border border-border">MOD_{i + 1}</div>
+                {/* Top System Bar */}
+                <div className="relative z-10 flex justify-between items-center w-full mb-auto opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: accentColor }}></div>
+                        <span className="mono text-[9px] tracking-[0.2em] text-foreground font-bold uppercase">SEC_MOD_0{i + 1}</span>
+                    </div>
+                    <f.icon className="w-5 h-5 text-fg-muted group-hover:text-foreground transition-colors" strokeWidth={1.5} />
                 </div>
 
-                {/* Decorative corner square */}
-                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-border group-hover:border-success transition-colors"></div>
+                {/* Main Content (pushed to bottom) */}
+                <div className="relative z-10 mt-auto transform group-hover:-translate-y-2 transition-transform duration-500">
+                    <h3 className="mono text-[16px] font-bold text-foreground mb-3 tracking-[0.1em] uppercase leading-tight drop-shadow-md">
+                        {f.title}
+                    </h3>
+
+                    <p className="mono text-fg-secondary text-[10px] leading-[1.8] uppercase tracking-[0.15em] pr-4 group-hover:text-foreground transition-colors mix-blend-luminosity">
+                        {f.desc}
+                    </p>
+                </div>
+                
+                {/* Active scan line */}
+                <div 
+                    className="absolute top-0 bottom-0 left-0 w-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" 
+                    style={{ backgroundColor: accentColor }}
+                />
               </motion.div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
@@ -253,17 +283,93 @@ export default function LandingPage() {
 
 
       {/* Footer */}
-      <footer className="relative z-20 pt-16 pb-20 border-t border-border bg-background text-xs text-fg-secondary mono uppercase tracking-widest">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <Hexagon className="w-4 h-4 text-fg-muted" strokeWidth={1.5} />
-            <span>© {new Date().getFullYear()} Privault [SECURE].</span>
-          </div>
-          <div className="flex items-center gap-8">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/github" className="hover:text-foreground transition-colors">Source</Link>
-          </div>
+      <footer className="relative z-20 overflow-hidden bg-background border-t border-border/40 pt-16 pb-8">
+        {/* Animated scanning border top */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--pipeline-neon-1)] to-transparent opacity-50 blur-[1px]"></div>
+        <motion.div 
+            className="absolute top-0 left-0 h-[2px] w-64 bg-[var(--pipeline-neon-2)] blur-sm"
+            animate={{ left: ['-20%', '120%'] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+        />
+
+        {/* Huge Faded Background Logo/Text */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02] overflow-hidden select-none">
+            <h1 className="text-[10rem] md:text-[14rem] font-bold text-foreground whitespace-nowrap tracking-tighter mix-blend-overlay">PRIVAULT</h1>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col">
+            {/* Top Grid Area */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12 border-b border-border/30 pb-12">
+                
+                {/* Brand / Status Column */}
+                <div className="col-span-1 md:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 border border-border/50 flex items-center justify-center bg-bg-secondary group hover:border-[var(--pipeline-neon-1)] transition-colors cursor-crosshair">
+                                <Hexagon className="w-6 h-6 text-foreground group-hover:text-[var(--pipeline-neon-1)] transition-colors" strokeWidth={1.5} />
+                            </div>
+                            <span className="text-3xl font-bold tracking-tighter uppercase text-foreground">Privault.</span>
+                        </div>
+                        <p className="mono text-xs sm:text-sm text-fg-secondary uppercase tracking-widest max-w-sm leading-[1.8] mb-8">
+                            Absolute cryptographic isolation. Your data is mathematically inaccessible to us. We cannot read, share, or sell what we cannot see.
+                        </p>
+                    </div>
+
+                    {/* Status Indicator */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-[var(--pipeline-neon-2)] animate-pulse glow"></div>
+                        <span className="mono text-xs uppercase tracking-[0.2em] font-bold text-foreground">Core Systems Online</span>
+                    </div>
+                </div>
+
+                {/* Links Column 1 */}
+                <div className="col-span-1 flex flex-col gap-5">
+                    <span className="mono text-xs text-foreground uppercase tracking-[0.2em] mb-2 font-bold flex items-center gap-2">
+                        <span className="w-4 h-[2px] bg-[var(--pipeline-neon-2)]"></span> Architecture
+                    </span>
+                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-2)]">►</span> Whitepaper
+                    </Link>
+                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-2)]">►</span> Source Code
+                    </Link>
+                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-2)]">►</span> Security Audit
+                    </Link>
+                </div>
+
+                {/* Links Column 2 */}
+                <div className="col-span-1 flex flex-col gap-5">
+                    <span className="mono text-xs text-foreground uppercase tracking-[0.2em] mb-2 font-bold flex items-center gap-2">
+                        <span className="w-4 h-[2px] bg-[var(--pipeline-neon-3)]"></span> Legal
+                    </span>
+                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-3)]">►</span> Privacy Policy
+                    </Link>
+                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-3)]">►</span> Terms of Service
+                    </Link>
+                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-3)]">►</span> Contact Protocol
+                    </Link>
+                </div>
+            </div>
+
+            {/* Bottom Strip */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <span className="mono text-[10px] sm:text-xs text-fg-muted uppercase tracking-[0.2em]">© {new Date().getFullYear()} Privault</span>
+                    <span className="w-1 h-1 bg-border rounded-full"></span>
+                    <span className="mono text-[10px] sm:text-xs text-fg-muted uppercase tracking-[0.2em]">All Rights Reserved.</span>
+                </div>
+
+                {/* Cyberpunk Decorative element */}
+                <div className="flex items-center gap-1.5 opacity-60">
+                    <div className="w-12 h-1 bg-[var(--pipeline-neon-1)]"></div>
+                    <div className="w-3 h-1 bg-[var(--pipeline-neon-1)]"></div>
+                    <div className="w-1.5 h-1 bg-[var(--pipeline-neon-1)]"></div>
+                </div>
+            </div>
         </div>
       </footer>
 
