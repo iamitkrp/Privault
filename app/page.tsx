@@ -78,8 +78,7 @@ export default function LandingPage() {
 
       <LandingNav />
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 pt-24 pb-20 z-10 w-full max-w-[1600px] mx-auto overflow-hidden md:pt-28">
+      <section className="relative flex flex-col lg:flex-row items-start justify-between px-6 md:px-12 pt-28 pb-12 z-10 w-full max-w-[1600px] mx-auto overflow-hidden md:pt-32 lg:pt-36 lg:pb-16">
 
         {/* Left Content */}
         <motion.div
@@ -143,7 +142,7 @@ export default function LandingPage() {
         </motion.div>
 
         {/* Right Content - Encryption Pipeline Visualization */}
-        <div className="w-full lg:w-[55%] h-[500px] lg:h-[650px] relative mt-10 lg:mt-0 z-20 hidden md:flex items-center justify-end lg:pr-12">
+        <div className="w-full lg:w-[55%] lg:h-auto min-h-[450px] relative mt-10 lg:mt-0 z-20 hidden md:flex items-center justify-end lg:pr-12">
           <EncryptionPipeline />
         </div>
       </section>
@@ -151,9 +150,9 @@ export default function LandingPage() {
 
 
       {/* Feature Grid */}
-      <section id="features" className="relative z-20 py-32 px-6 lg:px-12 bg-background border-y border-border/50">
+      <section id="features" className="relative z-20 py-20 lg:py-24 px-6 lg:px-12 bg-background border-y border-border/50">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20">
+          <div className="mb-12">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
