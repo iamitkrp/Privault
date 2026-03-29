@@ -95,11 +95,6 @@ export default function LandingPage() {
 
       <section className="relative flex flex-col lg:flex-row items-start justify-between px-6 md:px-12 pt-28 pb-12 z-10 w-full max-w-[1600px] mx-auto overflow-hidden md:pt-32 lg:pt-36 lg:pb-16">
         
-        {/* Glow Effects for Light/Dark Mode */}
-        <div className="absolute top-[10%] left-[20%] w-[600px] h-[600px] bg-brand-primary/10 dark:bg-brand-primary/20 blur-[120px] rounded-full pointer-events-none -z-10 mix-blend-multiply dark:mix-blend-screen" />
-        <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-sky-500/10 dark:bg-sky-500/20 blur-[100px] rounded-full pointer-events-none -z-10 mix-blend-multiply dark:mix-blend-screen" />
-
-
         {/* Left Content */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -142,7 +137,14 @@ export default function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-wide text-gradient leading-none whitespace-nowrap"
+                className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-wide leading-none whitespace-nowrap"
+                style={{
+                  background: 'linear-gradient(135deg, var(--text-gradient-start), var(--text-gradient-end))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  color: 'var(--text-gradient-start)' // Fallback
+                }}
               >
                 {HERO_SUBTITLES[subtitleIndex]}
               </motion.h2>
@@ -185,7 +187,7 @@ export default function LandingPage() {
 
 
       {/* Feature Grid */}
-      <section id="features" className="relative z-20 py-20 lg:py-24 px-6 lg:px-12 bg-background border-y border-border/50">
+      <section id="features" className="relative z-20 py-20 lg:py-24 px-6 lg:px-12 bg-transparent border-y border-border/50">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
             <motion.h2
@@ -283,7 +285,7 @@ export default function LandingPage() {
 
 
       {/* Footer */}
-      <footer className="relative z-20 overflow-hidden bg-background border-t border-border/40 pt-16 pb-8">
+      <footer className="relative z-20 overflow-hidden bg-transparent border-t border-border/40 pt-16 pb-8">
         {/* Animated scanning border top */}
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--pipeline-neon-1)] to-transparent opacity-50 blur-[1px]"></div>
         <motion.div 

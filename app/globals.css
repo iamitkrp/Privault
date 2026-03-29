@@ -18,8 +18,8 @@
   --fg-muted: #737373;
   --fg-inverted: #050505;
 
-  --text-gradient-start: #ffffff;
-  --text-gradient-end: #a3a3a3;
+  --text-gradient-start: #FFEA00;
+  --text-gradient-end: #D4C300;
 
   --brand-primary: #00cc66;
   --brand-primary-hover: #00994d;
@@ -39,6 +39,14 @@
   --border-primary: rgba(255, 255, 255, 0.08);
   --border-secondary: rgba(255, 255, 255, 0.12);
   --border-focus: #00cc66;
+
+  /* Immersive Background Variables (Dark Mode Default) */
+  --bg-grid-opacity-1: 0.06;
+  --bg-grid-opacity-2: 0.1;
+  --bg-noise-opacity: 0.25;
+  --bg-orb-opacity: 0.03; /* Barely visible accent, preserving brutalist monochrome aesthetic */
+  --bg-orb-blend: screen;
+  --bg-crt-opacity: 0.03;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.45);
@@ -100,6 +108,14 @@
   --border-primary: #e4e4e7;
   --border-secondary: #d4d4d8;
   --border-focus: #8b5cf6;
+
+  /* Immersive Background Variables (Light Mode) */
+  --bg-grid-opacity-1: 0.08;
+  --bg-grid-opacity-2: 0.12;
+  --bg-noise-opacity: 0.4;
+  --bg-orb-opacity: 0.03; /* Extremely subtle tint, not overwhelming */
+  --bg-orb-blend: normal;
+  --bg-crt-opacity: 0.03;
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
@@ -572,4 +588,26 @@ ul[data-type="taskList"] li[data-checked="true"] > div {
 
 .tiptap-editor a {
   @apply text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand transition-colors cursor-pointer;
+}
+
+/* Immersive Background Utility Classes */
+.bg-immersive-orb {
+  opacity: var(--bg-orb-opacity);
+  mix-blend-mode: var(--bg-orb-blend);
+}
+
+.bg-immersive-noise {
+  opacity: var(--bg-noise-opacity);
+}
+
+.bg-immersive-grid-1 {
+  opacity: var(--bg-grid-opacity-1);
+}
+
+.bg-immersive-grid-2 {
+  opacity: var(--bg-grid-opacity-2);
+}
+
+.bg-immersive-crt {
+  opacity: var(--bg-crt-opacity);
 }
