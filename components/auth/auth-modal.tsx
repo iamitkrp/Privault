@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/auth/auth-context";
 import { SecurityService } from "@/services/security.service";
@@ -27,8 +27,23 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
     const [isLoading, setIsLoading] = useState(false);
     const [signupSuccess, setSignupSuccess] = useState(false);
 
-    // Track whether login API call succeeded, so we can wait for auth state
-    const loginSucceededRef = useRef(false);
+    // Prevent duplicate finalize/navigate calls from overlapping auth events.
+    const didFinalizeLoginRef = useRef(false);
+    const [awaitingAuthSync, setAwaitingAuthSync] = useState(false);
+    const LOGIN_SYNC_TIMEOUT_MS = 10_000;
+
+    const finalizeLogin = useCallback(() => {
+        if (didFinalizeLoginRef.current) return;
+        didFinalizeLoginRef.current = true;
+        setAwaitingAuthSync(false);
+        setIsLoading(false);
+        onClose();
+        if (onSuccess) {
+            onSuccess();
+        } else {
+            router.push("/vault");
+        }
+    }, [onClose, onSuccess, router]);
 
     // Reset state when modal opens/closes or mode changes
     useEffect(() => {
@@ -39,7 +54,8 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
             setConfirmPassword("");
             setError(null);
             setSignupSuccess(false);
-            loginSucceededRef.current = false;
+            setAwaitingAuthSync(false);
+            didFinalizeLoginRef.current = false;
         }
     }, [isOpen, initialMode]);
 
@@ -48,20 +64,28 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
         setMode(initialMode);
     }, [initialMode]);
 
-    // Wait for the auth context's `user` to be set after a successful login,
-    // THEN navigate. This avoids the race where router.push fires before
-    // onAuthStateChange has updated the user state in context.
+    // Wait for auth context user propagation after successful login.
+    // Including `awaitingAuthSync` in deps ensures this runs even if `user`
+    // was already set before we started waiting.
     useEffect(() => {
-        if (loginSucceededRef.current && user) {
-            loginSucceededRef.current = false;
-            onClose();
-            if (onSuccess) {
-                onSuccess();
-            } else {
-                router.push("/vault");
-            }
+        if (awaitingAuthSync && user) {
+            finalizeLogin();
         }
-    }, [user, onClose, onSuccess, router]);
+    }, [awaitingAuthSync, user, finalizeLogin]);
+
+    // Never keep spinner active forever if auth propagation stalls.
+    useEffect(() => {
+        if (!awaitingAuthSync || !isOpen) return;
+
+        const timeoutId = window.setTimeout(() => {
+            if (didFinalizeLoginRef.current) return;
+            setAwaitingAuthSync(false);
+            setIsLoading(false);
+            setError("Login completed but session sync timed out. Please try again or refresh.");
+        }, LOGIN_SYNC_TIMEOUT_MS);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [awaitingAuthSync, isOpen, LOGIN_SYNC_TIMEOUT_MS]);
 
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,6 +102,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
             } catch { /* non-blocking */ }
 
             setError(result.error.message);
+            setAwaitingAuthSync(false);
             setIsLoading(false);
         } else {
             // Store the login password hash in-memory for vault≠login enforcement
@@ -94,12 +119,18 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
                 }).catch(() => {});
             } catch { /* non-blocking */ }
 
-            // Mark login as successful — the useEffect above will handle
-            // navigation once `user` is set by the auth context.
-            loginSucceededRef.current = true;
+            // Start waiting for auth context propagation.
+            setAwaitingAuthSync(true);
 
-            // Keep the loading overlay visible while we wait for onAuthStateChange
-            // to fire and the useEffect to navigate. Don't call onClose here.
+            // Close the race window where user/session may already be available.
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session?.user || user) {
+                    finalizeLogin();
+                }
+            } catch {
+                // Non-blocking; timeout + auth-state effect are fallback paths.
+            }
         }
     };
 

@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { FileText, ArrowLeft, Database, GitBranch } from "lucide-react";
+import { FileText, Database, GitBranch } from "lucide-react";
 import { Metadata } from "next";
-import { AnimatedLogo } from "@/components/ui/animated-logo";
 import { ImmersiveBackground } from "@/components/landing/immersive-background";
+import { LandingNav } from "@/components/landing/LandingNav";
 
 export const metadata: Metadata = {
     title: "Terms of Service — Privault",
@@ -13,18 +12,7 @@ export default function TermsOfServicePage() {
     return (
         <div className="relative min-h-screen overflow-hidden bg-transparent font-sans text-foreground">
             <ImmersiveBackground />
-
-            {/* Navigation bar */}
-            <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-md border-b border-foreground/10 bg-background/40">
-                <AnimatedLogo />
-                <Link 
-                    href="/" 
-                    className="px-6 py-2 border border-foreground/20 text-foreground hover:bg-foreground/10 transition-colors uppercase tracking-widest mono text-xs flex items-center gap-2"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Home
-                </Link>
-            </nav>
+            <LandingNav />
 
             {/* Main content */}
             <main className="relative z-10 pt-28 pb-24 px-6 max-w-4xl mx-auto">

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { AnimatedLogo } from "@/components/ui/animated-logo";
 import { Database, GitBranch } from "lucide-react";
+import { LandingNav } from "@/components/landing/LandingNav";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
     return (
@@ -11,10 +11,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                 <div className="fixed inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
                 <div className="fixed inset-0 bg-gradient-to-b from-transparent via-background/60 to-background pointer-events-none" />
 
-                {/* Nav bar */}
-                <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-md border-b border-foreground/10 bg-background/40">
-                    <AnimatedLogo />
-                </nav>
+                {/* Landing-style navbar (links + Sign in) */}
+                <LandingNav />
 
                 {/* Terminal bottom bar */}
                 <div className="fixed bottom-0 inset-x-0 h-8 border-t border-border-secondary bg-background/80 backdrop-blur-md z-50 flex items-center justify-between px-4 mono text-[10px] uppercase text-fg-muted hidden sm:flex">
@@ -29,7 +27,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                     </div>
                 </div>
 
-                <div className="w-full max-w-md relative z-10 pt-16 pb-8">
+                <div className="w-full max-w-md relative z-10 pt-20 pb-8">
                     {children}
                 </div>
             </div>
