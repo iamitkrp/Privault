@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { VaultNote } from "@/types";
-import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search, Tag, CheckSquare, Users, Target, Notebook, CalendarDays, Activity, BookMarked, Contact, Type, ALargeSmall, ChevronDown } from "lucide-react";
+import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search, Tag, CheckSquare, Users, Target, Notebook, CalendarDays, Activity, BookMarked, Contact, Type, ALargeSmall, ChevronDown, Image as ImageIcon } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
 import { NoteAttachments } from "./note-attachments";
 const TEMPLATES = [
@@ -11,49 +11,297 @@ const TEMPLATES = [
         id: 'todo',
         name: 'To-Do List',
         description: 'A simple checklist to track your tasks and prioritize daily activities.',
-        html: `<h2>To-Do List</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>New Task 1</p></li><li data-type="taskItem" data-checked="false"><p>New Task 2</p></li></ul>`
+        html: `<h2>To-Do Dashboard</h2>
+<p><strong>Date:</strong> </p>
+<p><strong>Top Priority:</strong> </p>
+<h3>Must Do Today</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Critical task</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Important follow-up</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Time-blocked deep work</p></li>
+</ul>
+<h3>Quick Wins</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>5-minute admin task</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Reply to pending message</p></li>
+</ul>
+<h3>Notes</h3>
+<blockquote><p>Capture blockers, dependencies, and context here.</p></blockquote>`
     },
     {
         id: 'meeting',
         name: 'Meeting Notes',
         description: 'Structure for capturing meeting agendas, attendees, and action items.',
-        html: `<h2>Meeting Notes</h2><p><strong>Date:</strong> </p><p><strong>Attendees:</strong> </p><h3>Agenda</h3><ul><li><p></p></li></ul><h3>Action Items</h3><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p></p></li></ul>`
+        html: `<h2>Meeting Notes</h2>
+<p><strong>Date & Time:</strong> </p>
+<p><strong>Attendees:</strong> </p>
+<p><strong>Meeting Goal:</strong> </p>
+<h3>Agenda</h3>
+<ul>
+  <li><p>Topic 1</p></li>
+  <li><p>Topic 2</p></li>
+  <li><p>Topic 3</p></li>
+</ul>
+<h3>Discussion Highlights</h3>
+<blockquote><p>Key decisions, concerns, and important context.</p></blockquote>
+<h3>Action Items</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Owner - task - due date</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Owner - task - due date</p></li>
+</ul>
+<h3>Parking Lot</h3>
+<ul><li><p>Items to revisit later</p></li></ul>`
     },
     {
         id: 'project',
         name: 'Project Plan',
         description: 'Outline your project goals, detailed overview, and timeline expectations.',
-        html: `<h2>Project Plan</h2><h3>Overview</h3><p></p><h3>Goals</h3><ul><li><p></p></li></ul><h3>Timeline</h3><p></p>`
+        html: `<h2>Project Plan</h2>
+<p><strong>Project Name:</strong> </p>
+<p><strong>Owner:</strong> </p>
+<p><strong>Status:</strong> Planning</p>
+<h3>Overview</h3>
+<p>What problem are we solving and why now?</p>
+<h3>Objectives</h3>
+<ul>
+  <li><p>Business objective</p></li>
+  <li><p>User objective</p></li>
+  <li><p>Technical objective</p></li>
+</ul>
+<h3>Scope</h3>
+<p><strong>In Scope:</strong></p>
+<ul><li><p></p></li></ul>
+<p><strong>Out of Scope:</strong></p>
+<ul><li><p></p></li></ul>
+<h3>Milestones</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Milestone 1 - date</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Milestone 2 - date</p></li>
+</ul>
+<h3>Risks & Mitigations</h3>
+<blockquote><p>Risk - impact - mitigation owner.</p></blockquote>`
     },
     {
         id: 'journal',
         name: 'Daily Journal',
         description: 'Reflect on your day, learnings, achievements, and tomorrow\'s goals.',
-        html: `<h2>Daily Journal</h2><h3>What did I accomplish today?</h3><p></p><h3>What did I learn?</h3><p></p><h3>What are my goals for tomorrow?</h3><p></p>`
+        html: `<h2>Daily Journal</h2>
+<p><strong>Date:</strong> </p>
+<p><strong>Mood:</strong> </p>
+<h3>Wins Today</h3>
+<ul>
+  <li><p></p></li>
+  <li><p></p></li>
+</ul>
+<h3>Challenges</h3>
+<p>What was difficult and why?</p>
+<h3>What I Learned</h3>
+<p></p>
+<h3>Gratitude</h3>
+<ul>
+  <li><p></p></li>
+  <li><p></p></li>
+</ul>
+<h3>Tomorrow's Focus</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Priority 1</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Priority 2</p></li>
+</ul>`
     },
     {
         id: 'weekly',
         name: 'Weekly Planner',
         description: 'Plan out your week, key objectives, and day-by-day focus areas.',
-        html: `<h2>Weekly Planner</h2><h3>Objectives</h3><ul><li><p></p></li></ul><h3>Monday</h3><p></p><h3>Tuesday</h3><p></p><h3>Wednesday</h3><p></p><h3>Thursday</h3><p></p><h3>Friday</h3><p></p>`
+        html: `<h2>Weekly Planner</h2>
+<p><strong>Week Of:</strong> </p>
+<h3>Top 3 Outcomes</h3>
+<ul>
+  <li><p></p></li>
+  <li><p></p></li>
+  <li><p></p></li>
+</ul>
+<h3>Calendar Plan</h3>
+<p><strong>Monday:</strong></p><ul><li><p></p></li></ul>
+<p><strong>Tuesday:</strong></p><ul><li><p></p></li></ul>
+<p><strong>Wednesday:</strong></p><ul><li><p></p></li></ul>
+<p><strong>Thursday:</strong></p><ul><li><p></p></li></ul>
+<p><strong>Friday:</strong></p><ul><li><p></p></li></ul>
+<h3>Weekly Review Checklist</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Review progress against outcomes</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Carry forward unfinished tasks</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Plan next week priorities</p></li>
+</ul>`
     },
     {
         id: 'habit',
         name: 'Habit Tracker',
         description: 'Track your daily routines and build positive habits.',
-        html: `<h2>Weekly Habit Tracker</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>Morning Workout</p></li><li data-type="taskItem" data-checked="false"><p>Read 10 pages</p></li><li data-type="taskItem" data-checked="false"><p>Drink 2L Water</p></li></ul>`
+        html: `<h2>Habit Tracker</h2>
+<p><strong>Cycle:</strong> Weekly</p>
+<h3>Habits to Track</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Morning workout</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Read 10 pages</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Drink 2L water</p></li>
+  <li data-type="taskItem" data-checked="false"><p>No social media before noon</p></li>
+</ul>
+<h3>Progress Notes</h3>
+<p><strong>What worked:</strong></p>
+<p></p>
+<p><strong>What to improve:</strong></p>
+<p></p>
+<h3>Reward Plan</h3>
+<blockquote><p>If I complete at least 80 percent this week, I will reward myself with...</p></blockquote>`
     },
     {
         id: 'reading',
         name: 'Reading Notes',
         description: 'Capture key insights, specific quotes, and actionable takeaways from books or articles.',
-        html: `<h2>Reading Notes</h2><p><strong>Title:</strong> </p><p><strong>Author:</strong> </p><h3>Summary</h3><p></p><h3>Key Quotes</h3><blockquote><p></p></blockquote><h3>Actionable Takeaways</h3><ul><li><p></p></li></ul>`
+        html: `<h2>Reading Notes</h2>
+<p><strong>Title:</strong> </p>
+<p><strong>Author:</strong> </p>
+<p><strong>Source:</strong> </p>
+<p><strong>Date Finished:</strong> </p>
+<h3>Core Thesis</h3>
+<p>Write the single biggest idea in one paragraph.</p>
+<h3>Key Insights</h3>
+<ul>
+  <li><p></p></li>
+  <li><p></p></li>
+  <li><p></p></li>
+</ul>
+<h3>Memorable Quotes</h3>
+<blockquote><p>Quote 1</p></blockquote>
+<blockquote><p>Quote 2</p></blockquote>
+<h3>Actionable Takeaways</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Action to apply this week</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Action to revisit next month</p></li>
+</ul>`
     },
     {
         id: 'crm',
         name: 'Contact Log',
         description: 'Keep track of important conversations, client details, and clear follow-ups.',
-        html: `<h2>Contact Log</h2><p><strong>Name:</strong> </p><p><strong>Company/Role:</strong> </p><h3>Last Interaction</h3><p></p><h3>Notes</h3><p></p><h3>Follow-up Action</h3><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>Send email regarding...</p></li></ul>`
+        html: `<h2>Contact Log</h2>
+<p><strong>Name:</strong> </p>
+<p><strong>Company / Role:</strong> </p>
+<p><strong>Email / Phone:</strong> </p>
+<p><strong>Relationship Strength:</strong> </p>
+<h3>Last Interaction</h3>
+<p><strong>Date:</strong> </p>
+<p><strong>Channel:</strong> </p>
+<p><strong>Summary:</strong> </p>
+<h3>Open Opportunities</h3>
+<ul>
+  <li><p></p></li>
+</ul>
+<h3>Follow-up Actions</h3>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="false"><p>Send follow-up email</p></li>
+  <li data-type="taskItem" data-checked="false"><p>Share requested document</p></li>
+</ul>
+<h3>Personal Notes</h3>
+<blockquote><p>Preferences, context, and relationship details.</p></blockquote>`
+    },
+    {
+        id: 'prompt_storage',
+        name: 'Prompt Storage',
+        description: 'Reddit-style prompt board: image on the left, prompt variants on the right, up to 4 image slots.',
+        html: `<h2>Prompt Storage Board</h2>
+<p><strong>Pack Name:</strong> </p>
+<p><strong>Model / Engine:</strong> </p>
+<p><strong>Style Goal:</strong> </p>
+<blockquote><p>Layout flow: left side = up to 4 image refs (2x2). Right side = prompt variants (V1/V2/V3). Drag and drop images directly into the image slots.</p></blockquote>
+<h3>Section 1</h3>
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <p><strong>Image Board (4 Slots)</strong></p>
+        <table>
+          <tbody>
+            <tr>
+              <td><p><strong>IMG 1</strong></p><p><em>Drop image</em></p></td>
+              <td><p><strong>IMG 2</strong></p><p><em>Drop image</em></p></td>
+            </tr>
+            <tr>
+              <td><p><strong>IMG 3</strong></p><p><em>Drop image</em></p></td>
+              <td><p><strong>IMG 4</strong></p><p><em>Drop image</em></p></td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>
+        <p><strong>Prompt Variants</strong></p>
+        <table>
+          <thead>
+            <tr>
+              <th><p>V1</p></th>
+              <th><p>V2</p></th>
+              <th><p>V3</p></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
+              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
+              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3>Section 2</h3>
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <p><strong>Image Board (4 Slots)</strong></p>
+        <table>
+          <tbody>
+            <tr>
+              <td><p><strong>IMG 1</strong></p><p><em>Drop image</em></p></td>
+              <td><p><strong>IMG 2</strong></p><p><em>Drop image</em></p></td>
+            </tr>
+            <tr>
+              <td><p><strong>IMG 3</strong></p><p><em>Drop image</em></p></td>
+              <td><p><strong>IMG 4</strong></p><p><em>Drop image</em></p></td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>
+        <p><strong>Prompt Variants</strong></p>
+        <table>
+          <thead>
+            <tr>
+              <th><p>V1</p></th>
+              <th><p>V2</p></th>
+              <th><p>V3</p></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
+              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
+              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3>Revision Log</h3>
+<ul>
+  <li><p>v1: baseline prompt</p></li>
+  <li><p>v2: refined style / lighting / camera</p></li>
+  <li><p>v3: production-ready prompt</p></li>
+</ul>`
     }
 ];
 
@@ -509,6 +757,7 @@ export function NoteEditor({
                                     habit: <Activity className="w-5 h-5" />,
                                     reading: <BookMarked className="w-5 h-5" />,
                                     crm: <Contact className="w-5 h-5" />,
+                                    prompt_storage: <ImageIcon className="w-5 h-5" />,
                                 };
                                 const filtered = TEMPLATES.filter(t => 
                                     t.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) || 

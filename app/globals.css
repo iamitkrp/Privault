@@ -477,7 +477,8 @@ textarea:focus-visible {
    ============================================ */
 
 .tiptap-editor {
-  @apply text-lg sm:text-xl text-on-surface-variant leading-relaxed font-sans w-full min-h-[50vh];
+  @apply text-[16px] text-on-surface-variant font-sans w-full min-h-[50vh];
+  line-height: 1.3;
 }
 
 .tiptap-editor p.is-editor-empty:first-child::before {
@@ -490,35 +491,39 @@ textarea:focus-visible {
 }
 
 .tiptap-editor p {
-  margin-bottom: 0.75rem;
+  margin: 0 0 0.4rem 0;
 }
 
 .tiptap-editor h1 {
-  @apply text-3xl font-bold text-on-surface mt-8 mb-4 tracking-tight;
+  @apply text-3xl font-bold text-on-surface mt-4 mb-2 tracking-tight;
+  line-height: 1.2;
 }
 
 .tiptap-editor h2 {
-  @apply text-2xl font-bold text-on-surface mt-6 mb-3 tracking-tight;
+  @apply text-2xl font-bold text-on-surface mt-3 mb-2 tracking-tight;
+  line-height: 1.22;
 }
 
 .tiptap-editor h3 {
-  @apply text-xl font-bold text-on-surface mt-4 mb-2;
+  @apply text-xl font-bold text-on-surface mt-2.5 mb-1.5;
+  line-height: 1.25;
 }
 
 .tiptap-editor ul {
   list-style-type: disc;
   padding-left: 1.5rem;
-  margin-bottom: 1rem;
+  margin: 0.2rem 0 0.55rem 0;
 }
 
 .tiptap-editor ol {
   list-style-type: decimal;
   padding-left: 1.5rem;
-  margin-bottom: 1rem;
+  margin: 0.2rem 0 0.55rem 0;
 }
 
 .tiptap-editor li {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.12rem;
+  line-height: 1.3;
 }
 
 .tiptap-editor blockquote {
@@ -542,13 +547,13 @@ textarea:focus-visible {
 ul[data-type="taskList"] {
   list-style: none;
   padding: 0;
-  margin-bottom: 1rem;
+  margin: 0.2rem 0 0.55rem 0;
 }
 
 ul[data-type="taskList"] li {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.28rem;
 }
 
 ul[data-type="taskList"] li > label {
@@ -588,6 +593,43 @@ ul[data-type="taskList"] li[data-checked="true"] > div {
 
 .tiptap-editor a {
   @apply text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand transition-colors cursor-pointer;
+}
+
+/* Prompt storage / table-friendly layout */
+.tiptap-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 0.5rem 0 0.8rem 0;
+}
+
+.tiptap-editor th,
+.tiptap-editor td {
+  border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+  padding: 0.6rem 0.7rem;
+  vertical-align: top;
+}
+
+.tiptap-editor th {
+  background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+  font-weight: 700;
+}
+
+.tiptap-editor td:first-child,
+.tiptap-editor th:first-child {
+  width: 38%;
+}
+
+.tiptap-editor td p:last-child,
+.tiptap-editor th p:last-child {
+  margin-bottom: 0;
+}
+
+.tiptap-editor td img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  margin: 0.35rem 0;
 }
 
 /* Immersive Background Utility Classes */

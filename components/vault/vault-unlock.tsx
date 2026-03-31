@@ -26,6 +26,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
     const [remainingSeconds, setRemainingSeconds] = useState(0);
     const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const profileRecoveryInFlightRef = useRef(false);
     const [vaultOtpVerified, setVaultOtpVerified] = useState(false);
     const [isRetryingProfile, setIsRetryingProfile] = useState(false);
 
@@ -77,6 +78,29 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     useEffect(() => {
         return () => { setPassword(""); };
     }, []);
+
+    // Route-navigation resilience: if user is signed in but profile is temporarily
+    // missing after back/forward, keep re-syncing until profile arrives.
+    useEffect(() => {
+        if (!user || profile) return;
+
+        const recoverProfile = async () => {
+            if (profileRecoveryInFlightRef.current) return;
+            profileRecoveryInFlightRef.current = true;
+            try {
+                await refreshProfile();
+            } finally {
+                profileRecoveryInFlightRef.current = false;
+            }
+        };
+
+        void recoverProfile();
+        const intervalId = setInterval(() => {
+            void recoverProfile();
+        }, 4_000);
+
+        return () => clearInterval(intervalId);
+    }, [user, profile, refreshProfile]);
 
     const isLockedOut = lockoutUntil !== null && remainingSeconds > 0;
 

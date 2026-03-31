@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loadingResolved = useRef(false);
     // Track if profile has already been loaded to skip duplicate events
     const profileLoaded = useRef(false);
+    const hasProfileRef = useRef(false);
     const backgroundSyncTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const backgroundSyncInFlightRef = useRef(false);
 
@@ -93,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 clearTimeout(fallbackTimer);
 
                 // Skip redundant SIGNED_IN if INITIAL_SESSION already loaded the profile
-                if (event === "SIGNED_IN" && profileLoaded.current) {
+                if (event === "SIGNED_IN" && profileLoaded.current && hasProfileRef.current) {
                     console.log("[Auth] Skipping redundant SIGNED_IN — profile already loaded.");
                     resolveLoading();
                     return;
@@ -108,9 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                     // Retry-capable profile fetch with per-attempt timeouts.
                     // This handles stale Supabase sessions and transient network issues.
-                    const MAX_RETRIES = 3;
-                    const PER_ATTEMPT_TIMEOUT_MS = 8_000;
-                    const RETRY_DELAY_MS = 2_000;
+                    const MAX_RETRIES = 2;
+                    const PER_ATTEMPT_TIMEOUT_MS = 15_000;
+                    const RETRY_DELAY_MS = 1_500;
 
                     const fetchProfileOnce = async (): Promise<void> => {
                         const ensureResult = await authService.ensureProfileExists(session.user);
@@ -121,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         const profileResult = await authService.getProfile(session.user.id);
                         if (profileResult.success && mounted) {
                             setProfile(profileResult.data);
+                            hasProfileRef.current = true;
                             setProfileError(null);
                         } else if (!profileResult.success) {
                             throw new Error("Profile load failed: " + profileResult.error?.message);
@@ -172,6 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                                             const profileResult = await authService.getProfile(session.user.id);
                                             if (profileResult.success && mounted) {
                                                 setProfile(profileResult.data);
+                                                hasProfileRef.current = true;
                                                 setProfileError(null);
                                                 profileLoaded.current = true;
                                                 stopBackgroundSync();
@@ -194,6 +197,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     stopBackgroundSync();
                     setUser(null);
                     setProfile(null);
+                    hasProfileRef.current = false;
+                    profileLoaded.current = false;
                     setProfileError(null);
                     resolveLoading();
                 }
@@ -214,6 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loadingResolved.current = false;
         profileLoaded.current = false;
         stopBackgroundSync();
+        hasProfileRef.current = false;
         await authService.signOut();
         setUser(null);
         setProfile(null);
@@ -244,6 +250,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const result = await authService.getProfile(user.id);
         if (result.success) {
             setProfile(result.data);
+            hasProfileRef.current = true;
             setProfileError(null);
             profileLoaded.current = true;
             stopBackgroundSync();

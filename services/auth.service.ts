@@ -126,16 +126,8 @@ export class AuthService {
      */
     async ensureProfileExists(user: any): Promise<{ success: boolean; error?: Error }> {
         try {
-            // 1. Check if it already exists
-            const { data: existingProfile } = await this.supabase
-                .from('profiles')
-                .select('id')
-                .eq('user_id', user.id)
-                .maybeSingle();
-
-            if (existingProfile) return { success: true }; // All good
-
-            // 2. We need to create it. Re-extract the salt from user metadata.
+            // Use one idempotent upsert call instead of select+insert to reduce
+            // network round-trips and race windows during login/profile sync.
             let salt = user.user_metadata?.crypto_salt;
 
             if (!salt) {
@@ -146,22 +138,32 @@ export class AuthService {
                 salt = generateSalt();
             }
 
-            // 3. Insert the profile
-            // @ts-expect-error - Manual mock Database types are overly restrictive. Real DB types will fix this.
-            const { error: insertError } = await this.supabase.from('profiles').insert({
-                user_id: user.id,
-                email: user.email!,
-                salt: salt,
-                security_settings: {
-                    autoLockTimeout: 900000,
-                    requireOtp: false,
-                    require_otp_on_login: true,
-                    require_otp_on_vault_unlock: false,
-                }
-            });
+            // Idempotent profile ensure:
+            // - inserts on first login
+            // - ignores duplicates when row already exists
+            // Cast due temporary local DB typings being too restrictive (never).
+            const { error: upsertError } = await (this.supabase
+                .from('profiles') as any)
+                .upsert(
+                    {
+                        user_id: user.id,
+                        email: user.email!,
+                        salt,
+                        security_settings: {
+                            autoLockTimeout: 900000,
+                            requireOtp: false,
+                            require_otp_on_login: true,
+                            require_otp_on_vault_unlock: false,
+                        }
+                    },
+                    {
+                        onConflict: 'user_id',
+                        ignoreDuplicates: true,
+                    }
+                );
 
-            if (insertError) {
-                console.error('Profile insertion failed. Code:', insertError?.code);
+            if (upsertError) {
+                console.error('Profile upsert failed. Code:', upsertError?.code);
                 return { success: false, error: new Error('Failed to create user profile.') };
             }
 

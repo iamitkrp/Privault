@@ -11,6 +11,10 @@ import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import Highlight from '@tiptap/extension-highlight'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TableCell } from '@tiptap/extension-table-cell'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
 import FontFamily from '@tiptap/extension-font-family'
@@ -108,6 +112,12 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             Highlight.configure({
                 multicolor: true,
             }),
+            Table.configure({
+                resizable: true,
+            }),
+            TableRow,
+            TableHeader,
+            TableCell,
             TextStyle,
             Color,
             FontFamily,
@@ -127,46 +137,56 @@ export const RichEditor = forwardRef<EditorCommands | null, {
                 class: 'flex-1 focus:outline-none focus:ring-0 resize-none font-sans tiptap-editor w-full border-0 !border-none !outline-none shadow-none focus:border-transparent focus:shadow-none bg-transparent',
             },
             handleDrop: (view, event, _slice, moved) => {
-                if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-                    const file = event.dataTransfer.files[0];
-                    if (file.type.startsWith('image/')) {
-                        const imageNode = view.state.schema.nodes.image;
-                        if (!imageNode) return false;
-                        
-                        const reader = new FileReader();
-                        reader.onload = (readerEvent) => {
-                            const node = imageNode.create({
-                                src: readerEvent.target?.result
-                            });
-                            const transaction = view.state.tr.replaceSelectionWith(node);
-                            view.dispatch(transaction);
-                        };
-                        reader.readAsDataURL(file);
-                        return true; // handled
-                    }
-                }
-                return false;
+                if (moved || !event.dataTransfer?.files?.length) return false;
+
+                const imageNode = view.state.schema.nodes.image;
+                if (!imageNode) return false;
+
+                const imageFiles = Array.from(event.dataTransfer.files)
+                    .filter((file) => file.type.startsWith('image/'))
+                    .slice(0, 4);
+
+                if (imageFiles.length === 0) return false;
+
+                imageFiles.forEach((file) => {
+                    const reader = new FileReader();
+                    reader.onload = (readerEvent) => {
+                        const node = imageNode.create({
+                            src: readerEvent.target?.result
+                        });
+                        const transaction = view.state.tr.replaceSelectionWith(node);
+                        view.dispatch(transaction);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                return true; // handled
             },
             handlePaste: (view, event, _slice) => {
-                if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
-                    const file = event.clipboardData.files[0];
-                    if (file.type.startsWith('image/')) {
-                        const imageNode = view.state.schema.nodes.image;
-                        if (!imageNode) return false;
+                if (!event.clipboardData?.files?.length) return false;
 
-                        const reader = new FileReader();
-                        reader.onload = (readerEvent) => {
-                            const node = imageNode.create({
-                                src: readerEvent.target?.result
-                            });
-                            const transaction = view.state.tr.replaceSelectionWith(node);
-                            view.dispatch(transaction);
-                        };
-                        reader.readAsDataURL(file);
-                        return true; // handled
-                    }
-                }
-                return false;
+                const imageNode = view.state.schema.nodes.image;
+                if (!imageNode) return false;
+
+                const imageFiles = Array.from(event.clipboardData.files)
+                    .filter((file) => file.type.startsWith('image/'))
+                    .slice(0, 4);
+
+                if (imageFiles.length === 0) return false;
+
+                imageFiles.forEach((file) => {
+                    const reader = new FileReader();
+                    reader.onload = (readerEvent) => {
+                        const node = imageNode.create({
+                            src: readerEvent.target?.result
+                        });
+                        const transaction = view.state.tr.replaceSelectionWith(node);
+                        view.dispatch(transaction);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                return true; // handled
             }
         },
     });
