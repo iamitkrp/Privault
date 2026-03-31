@@ -42,7 +42,7 @@ export default function VaultPage() {
     const isHomeView = !activeTool || isModalOpen;
 
     return (
-        <div className="pt-20 min-h-screen relative">
+        <div className="min-h-[calc(100vh-4rem)] relative">
             {/* The Main View Layer */}
             <div
                 className="w-full animate-in fade-in slide-in-from-bottom-4 duration-400"

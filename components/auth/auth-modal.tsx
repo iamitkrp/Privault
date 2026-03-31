@@ -64,28 +64,58 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
         setMode(initialMode);
     }, [initialMode]);
 
-    // Wait for auth context user propagation after successful login.
-    // Including `awaitingAuthSync` in deps ensures this runs even if `user`
-    // was already set before we started waiting.
-    useEffect(() => {
-        if (awaitingAuthSync && user) {
-            finalizeLogin();
-        }
-    }, [awaitingAuthSync, user, finalizeLogin]);
-
-    // Never keep spinner active forever if auth propagation stalls.
+    // Wait for auth propagation by checking both context user and live session.
+    // This prevents hanging if one signal is delayed but the session is already valid.
     useEffect(() => {
         if (!awaitingAuthSync || !isOpen) return;
 
-        const timeoutId = window.setTimeout(() => {
-            if (didFinalizeLoginRef.current) return;
-            setAwaitingAuthSync(false);
-            setIsLoading(false);
-            setError("Login completed but session sync timed out. Please try again or refresh.");
-        }, LOGIN_SYNC_TIMEOUT_MS);
+        let cancelled = false;
+        let nextTickId: number | null = null;
+        const startedAt = Date.now();
 
-        return () => window.clearTimeout(timeoutId);
-    }, [awaitingAuthSync, isOpen, LOGIN_SYNC_TIMEOUT_MS]);
+        const pollForSessionSync = async () => {
+            if (cancelled || didFinalizeLoginRef.current) return;
+
+            // Fast path: context already reflects logged-in state.
+            if (user) {
+                finalizeLogin();
+                return;
+            }
+
+            // Fallback path: session exists even if context is lagging.
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session?.user) {
+                    finalizeLogin();
+                    return;
+                }
+            } catch {
+                // Non-blocking; we'll keep polling until timeout.
+            }
+
+            if (Date.now() - startedAt >= LOGIN_SYNC_TIMEOUT_MS) {
+                if (!didFinalizeLoginRef.current) {
+                    setAwaitingAuthSync(false);
+                    setIsLoading(false);
+                    setError("Login completed but session sync timed out. Please try again or refresh.");
+                }
+                return;
+            }
+
+            nextTickId = window.setTimeout(() => {
+                void pollForSessionSync();
+            }, 300);
+        };
+
+        void pollForSessionSync();
+
+        return () => {
+            cancelled = true;
+            if (nextTickId !== null) {
+                window.clearTimeout(nextTickId);
+            }
+        };
+    }, [awaitingAuthSync, isOpen, user, finalizeLogin, supabaseClient]);
 
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -119,18 +149,8 @@ export function AuthModal({ isOpen, onClose, initialMode = "login", onSuccess }:
                 }).catch(() => {});
             } catch { /* non-blocking */ }
 
-            // Start waiting for auth context propagation.
+            // Start waiting for auth/session propagation.
             setAwaitingAuthSync(true);
-
-            // Close the race window where user/session may already be available.
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session?.user || user) {
-                    finalizeLogin();
-                }
-            } catch {
-                // Non-blocking; timeout + auth-state effect are fallback paths.
-            }
         }
     };
 

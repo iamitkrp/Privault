@@ -88,7 +88,7 @@ function ModuleCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             onClick={handleClick}
-            className="group relative cursor-pointer flex items-center gap-5 p-5 border-b border-border/40 last:border-b-0 bg-transparent hover:bg-fg-primary/5 transition-colors duration-200 overflow-hidden"
+            className="group relative cursor-pointer flex items-center gap-4 p-3.5 border-b border-border/40 last:border-b-0 bg-transparent hover:bg-fg-primary/5 transition-colors duration-200 overflow-hidden"
         >
             {/* Corner accent */}
             <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-border-secondary group-hover:border-success transition-colors duration-300" />
@@ -100,7 +100,7 @@ function ModuleCard({
 
             {/* Text */}
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-1.5">
+                <div className="flex items-center gap-3 mb-1">
                     <h3 className="mono text-xs font-bold text-foreground uppercase tracking-widest">{module.label}</h3>
                     <span className="mono text-[9px] font-bold px-1.5 py-0.5 border border-success/40 text-success tracking-widest">
                         {module.badge}
@@ -129,19 +129,19 @@ export function DashboardHome({
         : userName.split(" ")[0];
 
     return (
-        <div className="relative w-full min-h-[calc(100vh-80px)] text-foreground overflow-hidden">
+        <div className="relative w-full h-[calc(100vh-4rem)] text-foreground overflow-hidden">
             {/* ── Main layout: two-column split ── */}
-            <div className="relative z-10 flex flex-col lg:flex-row w-full h-full min-h-[calc(100vh-80px)]">
+            <div className="relative z-10 flex flex-col lg:flex-row w-full h-full">
 
                 {/* ─── LEFT PANE ─── */}
-                <div className="flex-1 flex flex-col justify-center px-10 lg:px-16 py-8 lg:py-0 border-b lg:border-b-0 lg:border-r border-border">
+                <div className="flex-1 flex flex-col justify-center px-8 lg:px-12 py-4 lg:py-0 border-b lg:border-b-0 lg:border-r border-border">
 
                     {/* Status badge — landing page style */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6, delay: 0.1 }}
-                        className="mono text-xs text-fg-secondary mb-10 tracking-widest uppercase flex items-center gap-2 border border-success/30 px-3 py-1.5 bg-success/5 w-fit shadow-[0_0_15px_var(--color-success-subtle)]"
+                        className="mono text-xs text-fg-secondary mb-5 tracking-widest uppercase flex items-center gap-2 border border-success/30 px-3 py-1 bg-success/5 w-fit shadow-[0_0_15px_var(--color-success-subtle)]"
                     >
                         <Activity className="w-3 h-3 text-success" />
                         <span>[[ VAULT_STATUS // SECURE ]]</span>
@@ -152,15 +152,15 @@ export function DashboardHome({
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="mb-12 relative"
+                        className="mb-6 relative"
                     >
-                        <p className="mono text-xs text-fg-secondary uppercase tracking-widest mb-4">
+                        <p className="mono text-xs text-fg-secondary uppercase tracking-widest mb-2">
                             Welcome back, <span className="text-foreground">{displayName}</span>
                         </p>
-                        <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tighter text-foreground mb-2 leading-[0.95] uppercase">
+                        <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tighter text-foreground mb-1 leading-[0.9] uppercase">
                             Your
                         </h1>
-                        <h2 className="text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tighter text-gradient mb-8 leading-[0.95] uppercase drop-shadow-sm">
+                        <h2 className="text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tighter text-gradient mb-4 leading-[0.9] uppercase drop-shadow-sm">
                             [Secure Vault.]
                         </h2>
                         <p className="mono text-sm text-fg-muted max-w-sm leading-relaxed">
@@ -176,11 +176,11 @@ export function DashboardHome({
                         className="grid grid-cols-2 gap-[1px] bg-border/40 border border-border/40 glass p-[1px]"
                     >
                         {TRUST_STATS.map((s, i) => (
-                            <div key={i} className="flex items-start gap-3 p-4 bg-background/60 hover:bg-background/80 transition-colors duration-200">
+                            <div key={i} className="flex items-start gap-3 p-3 bg-background/60 hover:bg-background/80 transition-colors duration-200">
                                 <span className="text-brand mt-0.5 shrink-0">{s.icon}</span>
                                 <div>
-                                    <p className="mono text-foreground text-[11px] font-bold uppercase tracking-widest">{s.label}</p>
-                                    <p className="mono text-fg-muted text-[10px] mt-0.5 uppercase tracking-wide">{s.sub}</p>
+                                    <p className="mono text-foreground text-[10px] font-bold uppercase tracking-widest">{s.label}</p>
+                                    <p className="mono text-fg-muted text-[9px] mt-0.5 uppercase tracking-wide">{s.sub}</p>
                                 </div>
                             </div>
                         ))}
@@ -188,20 +188,20 @@ export function DashboardHome({
                 </div>
 
                 {/* ─── RIGHT PANE ─── */}
-                <div className="w-full lg:w-[440px] xl:w-[500px] flex flex-col justify-center px-8 lg:px-10 py-8">
+                <div className="w-full lg:w-[420px] xl:w-[460px] flex flex-col justify-center px-6 lg:px-8 py-4">
 
                     {/* Section label */}
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.5, delay: 0.25 }}
-                        className="mono text-[10px] font-bold uppercase tracking-[0.2em] text-fg-muted mb-4"
+                        className="mono text-[10px] font-bold uppercase tracking-[0.2em] text-fg-muted mb-3"
                     >
                         Your Modules
                     </motion.p>
 
                     {/* Module cards */}
-                    <div className="flex flex-col glass border border-border/40 mb-8 p-1">
+                    <div className="flex flex-col glass border border-border/40 mb-5 p-1">
                         {MODULES.map((module, idx) => (
                             <ModuleCard
                                 key={module.id}
@@ -217,9 +217,9 @@ export function DashboardHome({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.5 }}
-                        className="border border-border/40 glass p-6"
+                        className="border border-border/40 glass p-4"
                     >
-                        <div className="flex items-center justify-between mb-5 pb-4 border-b border-border/30">
+                        <div className="flex items-center justify-between mb-3 pb-3 border-b border-border/30">
                             <p className="mono text-[10px] font-bold uppercase tracking-[0.2em] text-fg-muted">System Status</p>
                             <span className="flex items-center gap-1.5 mono text-[10px] text-success uppercase tracking-widest bg-success/10 px-2 py-1 rounded">
                                 <Activity className="w-3 h-3" />
@@ -227,7 +227,7 @@ export function DashboardHome({
                             </span>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-2.5">
                             {SYSTEM_ROWS.map((row, i) => (
                                 <div key={i} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export function DashboardHome({
                             ))}
                         </div>
 
-                        <div className="mt-6 pt-5 border-t border-border/30 flex items-center justify-between">
+                        <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between">
                             <span className="mono text-[10px] text-fg-muted uppercase tracking-widest">Core version</span>
                             <span className="mono text-[10px] font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">v2.4.0</span>
                         </div>
@@ -250,7 +250,7 @@ export function DashboardHome({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.65, duration: 0.5 }}
-                        className="mt-5 flex items-center gap-3 mono text-[10px] text-fg-muted uppercase tracking-widest"
+                        className="mt-3 flex items-center gap-3 mono text-[10px] text-fg-muted uppercase tracking-widest"
                     >
                         <Database className="w-3 h-3" />
                         <span>Encrypted end-to-end.</span>

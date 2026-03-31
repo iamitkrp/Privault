@@ -21,7 +21,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
 
                 {/* ── Body ── */}
-                <div className="flex-1 pt-20 pb-8 w-full">
+                <div className="flex-1 pt-16 w-full">
                     {children}
                 </div>
             </div>
