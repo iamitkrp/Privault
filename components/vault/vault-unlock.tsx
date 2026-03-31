@@ -18,7 +18,7 @@ interface VaultUnlockProps {
 const BACKOFF_THRESHOLD = 5;
 
 export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
-    const { profile, profileError, user, supabaseClient, loginPasswordHash } = useAuth();
+    const { profile, profileError, user, supabaseClient, loginPasswordHash, refreshProfile } = useAuth();
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +27,7 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     const [remainingSeconds, setRemainingSeconds] = useState(0);
     const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [vaultOtpVerified, setVaultOtpVerified] = useState(false);
+    const [isRetryingProfile, setIsRetryingProfile] = useState(false);
 
     // Check if OTP on vault unlock is required
     const requireOtpOnVaultUnlock = profile?.security_settings?.require_otp_on_vault_unlock ?? false;
@@ -78,6 +79,15 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
     }, []);
 
     const isLockedOut = lockoutUntil !== null && remainingSeconds > 0;
+
+    const handleRetryProfileSync = async () => {
+        setIsRetryingProfile(true);
+        try {
+            await refreshProfile();
+        } finally {
+            setIsRetryingProfile(false);
+        }
+    };
 
     const handleUnlock = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -388,10 +398,11 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => window.location.reload()}
+                                            onClick={handleRetryProfileSync}
+                                            disabled={isRetryingProfile}
                                             className="shrink-0 px-2 py-1 border border-success/30 hover:bg-success/20 transition-colors text-[9px]"
                                         >
-                                            RETRY
+                                            {isRetryingProfile ? "RETRYING..." : "RETRY"}
                                         </button>
                                     </div>
                                 </motion.div>
@@ -409,10 +420,11 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => window.location.reload()}
+                                            onClick={handleRetryProfileSync}
+                                            disabled={isRetryingProfile}
                                             className="shrink-0 px-2 py-1 border border-error/30 hover:bg-error/20 transition-colors text-[9px]"
                                         >
-                                            RETRY
+                                            {isRetryingProfile ? "RETRYING..." : "RETRY"}
                                         </button>
                                     </div>
                                 </motion.div>

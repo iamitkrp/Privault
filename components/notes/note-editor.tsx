@@ -79,6 +79,10 @@ export function NoteEditor({
     const [showSizePicker, setShowSizePicker] = useState(false);
     const editorRef = useRef<EditorCommands | null>(null);
     const titleRef = useRef<HTMLInputElement>(null);
+    const fontPickerButtonRef = useRef<HTMLButtonElement>(null);
+    const sizePickerButtonRef = useRef<HTMLButtonElement>(null);
+    const [fontPickerPosition, setFontPickerPosition] = useState({ top: 0, left: 0 });
+    const [sizePickerPosition, setSizePickerPosition] = useState({ top: 0, left: 0 });
 
     const FONT_FAMILIES = [
         { label: 'Default', value: '' },
@@ -135,6 +139,24 @@ export function NoteEditor({
         }
     }, [note]);
 
+    useEffect(() => {
+        if (!showFontPicker || !fontPickerButtonRef.current) return;
+        const rect = fontPickerButtonRef.current.getBoundingClientRect();
+        setFontPickerPosition({
+            top: rect.bottom + 8,
+            left: rect.left,
+        });
+    }, [showFontPicker]);
+
+    useEffect(() => {
+        if (!showSizePicker || !sizePickerButtonRef.current) return;
+        const rect = sizePickerButtonRef.current.getBoundingClientRect();
+        setSizePickerPosition({
+            top: rect.bottom + 8,
+            left: rect.left,
+        });
+    }, [showSizePicker]);
+
     const handleSave = async () => {
         setIsSaving(true);
         await onSave({ title, content, color: "default", is_locked: isLocked, id: note?.id, tags });
@@ -185,7 +207,11 @@ export function NoteEditor({
                 {/* Font Family Picker */}
                 <div className="relative">
                     <button
-                        onClick={() => { setShowFontPicker(!showFontPicker); setShowSizePicker(false); }}
+                        ref={fontPickerButtonRef}
+                        onClick={() => {
+                            setShowFontPicker((prev) => !prev);
+                            setShowSizePicker(false);
+                        }}
                         className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50 text-xs font-medium min-w-[90px]"
                         title="Font Family"
                     >
@@ -193,39 +219,16 @@ export function NoteEditor({
                         <span className="truncate max-w-[60px]">{editorRef.current?.getFontFamily() || 'Default'}</span>
                         <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
                     </button>
-                    {showFontPicker && (
-                        <>
-                            <div className="fixed inset-0 z-40" onClick={() => setShowFontPicker(false)} />
-                            <div className="absolute top-full left-0 mt-1.5 z-50 bg-background border border-border/40 rounded-xl shadow-xl py-1 w-48 max-h-64 overflow-y-auto custom-scrollbar">
-                                {FONT_FAMILIES.map((font) => (
-                                    <button
-                                        key={font.value}
-                                        onClick={() => {
-                                            editorRef.current?.setFontFamily(font.value);
-                                            setShowFontPicker(false);
-                                        }}
-                                        className={`w-full text-left px-3 py-1.5 text-sm transition-colors flex items-center justify-between ${
-                                            (editorRef.current?.getFontFamily() || '') === font.value
-                                                ? 'bg-primary/10 text-primary font-medium'
-                                                : 'text-foreground hover:bg-foreground/5'
-                                        }`}
-                                        style={font.value ? { fontFamily: font.value } : undefined}
-                                    >
-                                        {font.label}
-                                        {(editorRef.current?.getFontFamily() || '') === font.value && (
-                                            <Check className="w-3.5 h-3.5" />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        </>
-                    )}
                 </div>
 
                 {/* Font Size Picker */}
                 <div className="relative">
                     <button
-                        onClick={() => { setShowSizePicker(!showSizePicker); setShowFontPicker(false); }}
+                        ref={sizePickerButtonRef}
+                        onClick={() => {
+                            setShowSizePicker((prev) => !prev);
+                            setShowFontPicker(false);
+                        }}
                         className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50 text-xs font-medium min-w-[70px]"
                         title="Font Size"
                     >
@@ -233,32 +236,6 @@ export function NoteEditor({
                         <span className="truncate">{editorRef.current?.getFontSize() || 'Default'}</span>
                         <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
                     </button>
-                    {showSizePicker && (
-                        <>
-                            <div className="fixed inset-0 z-40" onClick={() => setShowSizePicker(false)} />
-                            <div className="absolute top-full left-0 mt-1.5 z-50 bg-background border border-border/40 rounded-xl shadow-xl py-1 w-36 max-h-64 overflow-y-auto custom-scrollbar">
-                                {FONT_SIZES.map((size) => (
-                                    <button
-                                        key={size.value}
-                                        onClick={() => {
-                                            editorRef.current?.setFontSize(size.value);
-                                            setShowSizePicker(false);
-                                        }}
-                                        className={`w-full text-left px-3 py-1.5 text-sm transition-colors flex items-center justify-between ${
-                                            (editorRef.current?.getFontSize() || '') === size.value
-                                                ? 'bg-primary/10 text-primary font-medium'
-                                                : 'text-foreground hover:bg-foreground/5'
-                                        }`}
-                                    >
-                                        {size.label}
-                                        {(editorRef.current?.getFontSize() || '') === size.value && (
-                                            <Check className="w-3.5 h-3.5" />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        </>
-                    )}
                 </div>
 
                 <div className="w-px h-4 bg-outline-variant/30 mx-2" />
@@ -423,6 +400,71 @@ export function NoteEditor({
                     </button>
                 </div>
             </footer>
+
+            {/* Font Family Dropdown */}
+            {mounted && showFontPicker && createPortal(
+                <>
+                    <div className="fixed inset-0 z-[9998]" onClick={() => setShowFontPicker(false)} />
+                    <div
+                        className="fixed z-[9999] bg-background border border-border/40 rounded-xl shadow-xl py-1 w-48 max-h-64 overflow-y-auto custom-scrollbar"
+                        style={{ top: `${fontPickerPosition.top}px`, left: `${fontPickerPosition.left}px` }}
+                    >
+                        {FONT_FAMILIES.map((font) => (
+                            <button
+                                key={font.value}
+                                onClick={() => {
+                                    editorRef.current?.setFontFamily(font.value);
+                                    setShowFontPicker(false);
+                                }}
+                                className={`w-full text-left px-3 py-1.5 text-sm transition-colors flex items-center justify-between ${
+                                    (editorRef.current?.getFontFamily() || '') === font.value
+                                        ? 'bg-primary/10 text-primary font-medium'
+                                        : 'text-foreground hover:bg-foreground/5'
+                                }`}
+                                style={font.value ? { fontFamily: font.value } : undefined}
+                            >
+                                {font.label}
+                                {(editorRef.current?.getFontFamily() || '') === font.value && (
+                                    <Check className="w-3.5 h-3.5" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </>,
+                document.body
+            )}
+
+            {/* Font Size Dropdown */}
+            {mounted && showSizePicker && createPortal(
+                <>
+                    <div className="fixed inset-0 z-[9998]" onClick={() => setShowSizePicker(false)} />
+                    <div
+                        className="fixed z-[9999] bg-background border border-border/40 rounded-xl shadow-xl py-1 w-36 max-h-64 overflow-y-auto custom-scrollbar"
+                        style={{ top: `${sizePickerPosition.top}px`, left: `${sizePickerPosition.left}px` }}
+                    >
+                        {FONT_SIZES.map((size) => (
+                            <button
+                                key={size.value}
+                                onClick={() => {
+                                    editorRef.current?.setFontSize(size.value);
+                                    setShowSizePicker(false);
+                                }}
+                                className={`w-full text-left px-3 py-1.5 text-sm transition-colors flex items-center justify-between ${
+                                    (editorRef.current?.getFontSize() || '') === size.value
+                                        ? 'bg-primary/10 text-primary font-medium'
+                                        : 'text-foreground hover:bg-foreground/5'
+                                }`}
+                            >
+                                {size.label}
+                                {(editorRef.current?.getFontSize() || '') === size.value && (
+                                    <Check className="w-3.5 h-3.5" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </>,
+                document.body
+            )}
 
             {/* Template Pop-up Modal */}
             {mounted && showTemplateModal && createPortal(

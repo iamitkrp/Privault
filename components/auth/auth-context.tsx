@@ -55,11 +55,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loadingResolved = useRef(false);
     // Track if profile has already been loaded to skip duplicate events
     const profileLoaded = useRef(false);
+    const backgroundSyncTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const backgroundSyncInFlightRef = useRef(false);
 
     function resolveLoading() {
         if (!loadingResolved.current) {
             loadingResolved.current = true;
             setIsLoading(false);
+        }
+    }
+
+    function stopBackgroundSync() {
+        if (backgroundSyncTimerRef.current) {
+            clearInterval(backgroundSyncTimerRef.current);
+            backgroundSyncTimerRef.current = null;
         }
     }
 
@@ -92,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (session?.user) {
                     setUser(session.user);
+                    setProfileError(null);
                     // Load profile asynchronously — always resolve loading first
                     // so the UI is never blocked by a slow profile fetch
                     resolveLoading();
@@ -138,13 +148,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             await Promise.race([fetchProfileOnce(), timeout]);
                             console.log("[Auth] Profile loaded successfully.");
                             profileLoaded.current = true;
+                            stopBackgroundSync();
                             break; // Success — exit retry loop
                         } catch (err: any) {
                             console.warn(`[Auth] Attempt ${attempt} failed:`, err?.message);
                             if (attempt === MAX_RETRIES) {
-                                // Final attempt failed — surface the error
+                                // Final attempt failed — keep app usable and continue syncing in background.
                                 console.error("[Auth] All profile sync attempts exhausted.");
-                                if (mounted) setProfileError("Profile sync failed after multiple retries. Please refresh.");
+                                if (mounted) {
+                                    setProfileError("Profile sync is delayed. Retrying automatically...");
+                                }
+
+                                if (!backgroundSyncTimerRef.current) {
+                                    backgroundSyncTimerRef.current = setInterval(async () => {
+                                        if (!mounted || backgroundSyncInFlightRef.current || profileLoaded.current) return;
+                                        backgroundSyncInFlightRef.current = true;
+                                        try {
+                                            const ensureResult = await authService.ensureProfileExists(session.user);
+                                            if (!ensureResult.success) {
+                                                throw new Error(ensureResult.error?.message || "Profile init failed");
+                                            }
+
+                                            const profileResult = await authService.getProfile(session.user.id);
+                                            if (profileResult.success && mounted) {
+                                                setProfile(profileResult.data);
+                                                setProfileError(null);
+                                                profileLoaded.current = true;
+                                                stopBackgroundSync();
+                                                console.log("[Auth] Background profile sync succeeded.");
+                                            }
+                                        } catch (bgErr: any) {
+                                            console.warn("[Auth] Background profile sync retry failed:", bgErr?.message || bgErr);
+                                        } finally {
+                                            backgroundSyncInFlightRef.current = false;
+                                        }
+                                    }, 3_000);
+                                }
                             } else {
                                 // Wait before retrying
                                 await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
@@ -152,6 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         }
                     }
                 } else {
+                    stopBackgroundSync();
                     setUser(null);
                     setProfile(null);
                     setProfileError(null);
@@ -163,6 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => {
             mounted = false;
             clearTimeout(fallbackTimer);
+            stopBackgroundSync();
             subscription.unsubscribe();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,9 +213,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         loadingResolved.current = false;
         profileLoaded.current = false;
+        stopBackgroundSync();
         await authService.signOut();
         setUser(null);
         setProfile(null);
+        setProfileError(null);
         setOtpVerified(false);
         setLoginPasswordHash(null);
         setIsLoading(false);
@@ -190,9 +233,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const refreshProfile = async () => {
         if (!user) return;
+        setProfileError(null);
+
+        const ensureResult = await authService.ensureProfileExists(user);
+        if (!ensureResult.success) {
+            setProfileError("Profile sync failed. Please try again.");
+            return;
+        }
+
         const result = await authService.getProfile(user.id);
         if (result.success) {
             setProfile(result.data);
+            setProfileError(null);
+            profileLoaded.current = true;
+            stopBackgroundSync();
+        } else {
+            setProfileError("Profile sync failed. Please try again.");
         }
     };
 
