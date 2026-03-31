@@ -74,6 +74,7 @@ export interface EditorCommands {
     toggleHighlight: () => void;
     toggleHeading: (level: 1 | 2 | 3) => void;
     setContent: (html: string) => void;
+    appendContent: (html: string) => void;
     setFontFamily: (fontFamily: string) => void;
     setFontSize: (fontSize: string) => void;
     getFontFamily: () => string;
@@ -210,6 +211,7 @@ export const RichEditor = forwardRef<EditorCommands | null, {
             toggleHighlight: () => editor.chain().focus().toggleHighlight().run(),
             toggleHeading: (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run(),
             setContent: (html: string) => editor.commands.setContent(html),
+            appendContent: (html: string) => editor.chain().focus('end').insertContent(html).run(),
             setFontFamily: (fontFamily: string) => {
                 if (fontFamily === '') {
                     editor.chain().focus().unsetFontFamily().run();

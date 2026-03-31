@@ -6,6 +6,8 @@ import { VaultNote } from "@/types";
 import { Check, BookOpen, Bold, Italic, Strikethrough, List, ListTodo, Lock, Unlock, Calendar, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter, Undo2, Redo2, Heading1, Heading2, Quote, Code, LayoutTemplate, X, Search, Tag, CheckSquare, Users, Target, Notebook, CalendarDays, Activity, BookMarked, Contact, Type, ALargeSmall, ChevronDown, Image as ImageIcon } from "lucide-react";
 import { RichEditor, EditorCommands } from "./rich-editor";
 import { NoteAttachments } from "./note-attachments";
+import { PromptBoard, PromptBoardData, serializePromptBoard, parsePromptBoard } from "./prompt-board";
+
 const TEMPLATES = [
     {
         id: 'todo',
@@ -208,100 +210,8 @@ const TEMPLATES = [
     {
         id: 'prompt_storage',
         name: 'Prompt Storage',
-        description: 'Reddit-style prompt board: image on the left, prompt variants on the right, up to 4 image slots.',
-        html: `<h2>Prompt Storage Board</h2>
-<p><strong>Pack Name:</strong> </p>
-<p><strong>Model / Engine:</strong> </p>
-<p><strong>Style Goal:</strong> </p>
-<blockquote><p>Layout flow: left side = up to 4 image refs (2x2). Right side = prompt variants (V1/V2/V3). Drag and drop images directly into the image slots.</p></blockquote>
-<h3>Section 1</h3>
-<table>
-  <tbody>
-    <tr>
-      <td>
-        <p><strong>Image Board (4 Slots)</strong></p>
-        <table>
-          <tbody>
-            <tr>
-              <td><p><strong>IMG 1</strong></p><p><em>Drop image</em></p></td>
-              <td><p><strong>IMG 2</strong></p><p><em>Drop image</em></p></td>
-            </tr>
-            <tr>
-              <td><p><strong>IMG 3</strong></p><p><em>Drop image</em></p></td>
-              <td><p><strong>IMG 4</strong></p><p><em>Drop image</em></p></td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-      <td>
-        <p><strong>Prompt Variants</strong></p>
-        <table>
-          <thead>
-            <tr>
-              <th><p>V1</p></th>
-              <th><p>V2</p></th>
-              <th><p>V3</p></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
-              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
-              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<h3>Section 2</h3>
-<table>
-  <tbody>
-    <tr>
-      <td>
-        <p><strong>Image Board (4 Slots)</strong></p>
-        <table>
-          <tbody>
-            <tr>
-              <td><p><strong>IMG 1</strong></p><p><em>Drop image</em></p></td>
-              <td><p><strong>IMG 2</strong></p><p><em>Drop image</em></p></td>
-            </tr>
-            <tr>
-              <td><p><strong>IMG 3</strong></p><p><em>Drop image</em></p></td>
-              <td><p><strong>IMG 4</strong></p><p><em>Drop image</em></p></td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-      <td>
-        <p><strong>Prompt Variants</strong></p>
-        <table>
-          <thead>
-            <tr>
-              <th><p>V1</p></th>
-              <th><p>V2</p></th>
-              <th><p>V3</p></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
-              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
-              <td><p><strong>Main:</strong> </p><p><strong>Negative:</strong> </p><p><strong>Notes:</strong> </p></td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<h3>Revision Log</h3>
-<ul>
-  <li><p>v1: baseline prompt</p></li>
-  <li><p>v2: refined style / lighting / camera</p></li>
-  <li><p>v3: production-ready prompt</p></li>
-</ul>`
+        description: 'Image grid on the left, prompt variants on the right. Drag images into slots.',
+        html: `<!--PROMPT_BOARD_V2-->`
     }
 ];
 
@@ -325,7 +235,9 @@ export function NoteEditor({
     const [, setToolbarTick] = useState(0);
     const [showFontPicker, setShowFontPicker] = useState(false);
     const [showSizePicker, setShowSizePicker] = useState(false);
+    const [promptData, setPromptData] = useState<PromptBoardData | null>(null);
     const editorRef = useRef<EditorCommands | null>(null);
+    const editorCanvasRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLInputElement>(null);
     const fontPickerButtonRef = useRef<HTMLButtonElement>(null);
     const sizePickerButtonRef = useRef<HTMLButtonElement>(null);
@@ -371,17 +283,20 @@ export function NoteEditor({
     useEffect(() => {
         if (note) {
             setTitle(note.decrypted?.title || "");
-            setContent(note.decrypted?.content || "");
+            const raw = note.decrypted?.content || "";
+            setContent(raw);
             setIsLocked(note.is_locked || false);
             setTags(note.tags || []);
+
+            setPromptData(parsePromptBoard(raw));
         } else {
             setTitle("");
             setContent("");
             setIsLocked(false);
             setTags([]);
+            setPromptData(null);
         }
         setIsSaving(false);
-        // Auto-focus title for new/empty notes
         if (note && (!note.decrypted?.content || note.decrypted.content === "")) {
             setTimeout(() => titleRef.current?.focus(), 100);
         }
@@ -404,6 +319,13 @@ export function NoteEditor({
             left: rect.left,
         });
     }, [showSizePicker]);
+
+    const isPromptBoardNote = promptData !== null;
+
+    const handlePromptDataChange = useCallback((data: PromptBoardData) => {
+        setPromptData(data);
+        setContent(serializePromptBoard(data));
+    }, []);
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -441,8 +363,8 @@ export function NoteEditor({
                  </div>
             </header>
 
-            {/* Rich Text Toolbar */}
-            <div className="px-8 py-3 border-b border-border/50 bg-background/20 flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
+            {/* Rich Text Toolbar — hidden for prompt board notes */}
+            <div className={`px-8 py-3 border-b border-border/50 bg-background/20 flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar ${isPromptBoardNote ? 'hidden' : ''}`}>
                 <button onClick={() => editorRef.current?.undo()} className={`p-1.5 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50`} title="Undo">
                     <Undo2 className="w-4 h-4" />
                 </button>
@@ -542,7 +464,7 @@ export function NoteEditor({
             </div>
 
             {/* Note Editor Canvas Area */}
-            <div className="flex-1 overflow-y-auto px-6 sm:px-10 py-12 relative z-10 w-full flex flex-col no-scrollbar">
+            <div ref={editorCanvasRef} className="flex-1 overflow-y-auto px-6 sm:px-10 py-12 relative z-10 w-full flex flex-col no-scrollbar">
                 <div className="w-full flex flex-col flex-1 pb-32">
                     
                     {/* Metadata Header */}
@@ -556,18 +478,24 @@ export function NoteEditor({
                             className="w-full bg-transparent text-5xl font-black tracking-tight mb-2 text-foreground placeholder:text-fg-muted/30 leading-tight focus:outline-none focus:ring-0 focus:border-transparent outline-none border-none border-0 ring-0 shadow-none appearance-none"
                             style={{ WebkitAppearance: 'none', boxShadow: 'none', border: 'none', outline: 'none' }}
                         />
-                        {/* Thin dynamic separator line */}
                         <div className="w-16 h-1 mt-4 rounded-full bg-brand/50 shadow-glow"></div>
                     </div>
 
-                    <div className="text-lg text-foreground/90 leading-relaxed flex-1">
-                        <RichEditor 
-                            ref={editorRef}
-                            content={content} 
-                            onChange={setContent}
-                            onActiveStatesChange={handleActiveStatesChange}
+                    {isPromptBoardNote && promptData ? (
+                        <PromptBoard
+                            data={promptData}
+                            onChange={handlePromptDataChange}
                         />
-                    </div>
+                    ) : (
+                        <div className="text-lg text-foreground/90 leading-relaxed flex-1">
+                            <RichEditor 
+                                ref={editorRef}
+                                content={content} 
+                                onChange={setContent}
+                                onActiveStatesChange={handleActiveStatesChange}
+                            />
+                        </div>
+                    )}
 
                     {note?.id && <div className="mt-8 border-t glass-border pt-8"><NoteAttachments noteId={note.id} /></div>}
                 </div>
@@ -768,8 +696,15 @@ export function NoteEditor({
                                         <button 
                                             key={template.id}
                                             onClick={() => {
-                                                if (editorRef.current) {
-                                                    editorRef.current.setContent(template.html);
+                                                const parsed = parsePromptBoard(template.html);
+                                                if (parsed) {
+                                                    setPromptData(parsed);
+                                                    setContent(serializePromptBoard(parsed));
+                                                } else {
+                                                    setPromptData(null);
+                                                    if (editorRef.current) {
+                                                        editorRef.current.setContent(template.html);
+                                                    }
                                                     setContent(template.html);
                                                 }
                                                 setShowTemplateModal(false);

@@ -249,30 +249,65 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                     console.log("[VaultUnlock] Engine imported. Deriving test key...");
                     const testKey = await deriveKeyFromPassword(password, profile.salt, targetIterations);
 
-                    console.log("[VaultUnlock] Test key derived. Fetching rows...");
-                    const { data: rows, error: fetchError } = await supabase.from('vault_credentials').select('*').eq('user_id', user.id);
-                    if (fetchError) console.error("[VaultUnlock] Fetch error:", fetchError);
-                    console.log("[VaultUnlock] Rows fetched:", rows?.length);
+                    const withTimeout = async <T,>(thenable: any, timeoutMs: number, label: string): Promise<T> => {
+                        const wrapped = Promise.resolve(thenable) as Promise<T>;
+                        const timeoutPromise = new Promise<never>((_, reject) => {
+                            setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs);
+                        });
+                        return Promise.race([wrapped, timeoutPromise]);
+                    };
 
                     let needsHeal = false;
+                    let canProceedWithHeal = false;
 
-                    if (rows && rows.length > 0) {
-                        try {
-                            const firstRow = rows[0] as unknown as { encrypted_data: string; iv: string; };
-                            await decryptData(firstRow.encrypted_data, firstRow.iv, testKey);
-                        } catch {
-                            needsHeal = true; // Failed to decrypt rows with the new upgraded key!
+                    try {
+                        // Lightweight probe: fetch just one row to detect whether KDF desync exists.
+                        console.log("[VaultUnlock] Test key derived. Probing one row...");
+                        const sampleQuery = supabase
+                            .from('vault_credentials')
+                            .select('id, encrypted_data, iv')
+                            .eq('user_id', user.id)
+                            .limit(1);
+
+                        const sampleResult = await withTimeout<any>(sampleQuery, 8_000, "Probe query");
+                        const { data: sampleRows, error: sampleError } = sampleResult;
+
+                        if (sampleError) {
+                            console.error("[VaultUnlock] Probe fetch error:", sampleError);
+                        } else if (sampleRows && sampleRows.length > 0) {
+                            canProceedWithHeal = true;
+                            try {
+                                const firstRow = sampleRows[0] as unknown as { encrypted_data: string; iv: string; };
+                                await decryptData(firstRow.encrypted_data, firstRow.iv, testKey);
+                            } catch {
+                                // Failed to decrypt row with 600K-derived key -> likely legacy 100K payloads.
+                                needsHeal = true;
+                            }
                         }
+                    } catch (probeErr: any) {
+                        console.warn("[VaultUnlock] Self-heal probe skipped:", probeErr?.message || probeErr);
                     }
 
-                    if (needsHeal) {
-                        // Attempt to heal: Derive a 100K key, test rows, and manually fall back to iterative updates.
+                    if (needsHeal && canProceedWithHeal) {
+                        // Attempt to heal: Derive a 100K key, then migrate rows.
                         const oldKey = await deriveKeyFromPassword(password, profile.salt, CRYPTO_CONFIG.legacyIterations);
 
                         try {
+                            const fullRowsQuery = supabase
+                                .from('vault_credentials')
+                                .select('id, encrypted_data, iv')
+                                .eq('user_id', user.id);
+
+                            const rowsResult = await withTimeout<any>(fullRowsQuery, 15_000, "Full self-heal row fetch");
+                            const { data: rows, error: rowsError } = rowsResult;
+
+                            if (rowsError) {
+                                throw rowsError;
+                            }
+
                             const updates = [];
-                            // Explicitly test-decrypt with 100K key. If this fails, then it's genuinely corrupted.
-                            for (const row of rows!) {
+                            // Explicitly test-decrypt with 100K key. If this fails, data is likely corrupted.
+                            for (const row of (rows || [])) {
                                 const r = row as unknown as { id: string; encrypted_data: string; iv: string; };
                                 const plaintext = await decryptData(r.encrypted_data, r.iv, oldKey);
                                 const { encryptedData, iv } = await encryptData(plaintext, testKey);
@@ -306,7 +341,8 @@ export function VaultUnlock({ onUnlock }: VaultUnlockProps) {
                                 console.log("Database successfully self-healed from KDF desync via iterative fallback.");
                             }
                         } catch (corruptionErr) {
-                            console.error("Self-healing failed: Data is irrecoverably out of sync.", corruptionErr);
+                            // IMPORTANT: do not block unlock on self-heal failures/timeouts.
+                            console.error("Self-healing failed or timed out; continuing unlock path.", corruptionErr);
                         }
                     }
                 }
