@@ -4,6 +4,7 @@ import { Plus, ChevronLeft, ChevronRight, Edit2, Search, Upload, FileText, Pin, 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export function NotesSidebar({
     sections,
@@ -242,23 +243,24 @@ export function NotesSidebar({
                         >
                             <Archive className="w-5 h-5" /> Archive
                         </button>
+                        <button 
+                            onClick={() => router.push('/settings')}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-fg-secondary hover:text-foreground hover:bg-foreground/5 transition-all"
+                        >
+                            <Settings className="w-5 h-5" /> Settings
+                        </button>
                     </div>
                 </div>
             </nav>
 
             {/* User Footer */}
-            <div className="p-4 border-t border-border/50 bg-background/40">
-                <div className="flex items-center gap-3 px-2 py-2 hover:bg-foreground/5 rounded-xl cursor-pointer transition-all">
-                    <div className="w-10 h-10 rounded-full bg-foreground/10 border border-border/50 overflow-hidden flex items-center justify-center text-foreground font-bold">
+            <div className="px-4 py-3 border-t border-border/50">
+                <div className="flex items-center gap-3 px-2">
+                    <div className="w-8 h-8 rounded-full bg-brand/15 border border-brand/25 overflow-hidden flex items-center justify-center text-brand text-xs font-bold shrink-0">
                         {user?.email?.charAt(0).toUpperCase() || "A"}
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground truncate">{user?.email?.split('@')[0] || "Alex Rivers"}</p>
-                        <p className="text-xs text-brand truncate uppercase tracking-widest font-bold mt-0.5">Pro User</p>
-                    </div>
-                    <button onClick={(e) => { e.stopPropagation(); router.push('/settings'); }} title="Settings" className="p-1 hover:bg-foreground/10 rounded-md transition-colors">
-                        <Settings className="text-fg-secondary hover:text-foreground transition-colors w-5 h-5" />
-                    </button>
+                    <p className="flex-1 min-w-0 text-sm font-semibold text-foreground truncate">{user?.email?.split('@')[0] || "User"}</p>
+                    <ThemeSwitcher className="p-1.5 rounded-lg text-fg-secondary hover:text-foreground hover:bg-foreground/10 transition-colors shrink-0" />
                 </div>
             </div>
         </aside>

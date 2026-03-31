@@ -365,14 +365,14 @@ export function NoteEditor({
 
             {/* Rich Text Toolbar — hidden for prompt board notes */}
             <div className={`px-8 py-3 border-b border-border/50 bg-background/20 flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar ${isPromptBoardNote ? 'hidden' : ''}`}>
-                <button onClick={() => editorRef.current?.undo()} className={`p-1.5 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50`} title="Undo">
+                <button onClick={() => editorRef.current?.undo()} className={`p-1.5 rounded transition-colors text-fg-secondary hover:bg-foreground/10`} title="Undo">
                     <Undo2 className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.redo()} className={`p-1.5 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50`} title="Redo">
+                <button onClick={() => editorRef.current?.redo()} className={`p-1.5 rounded transition-colors text-fg-secondary hover:bg-foreground/10`} title="Redo">
                     <Redo2 className="w-4 h-4" />
                 </button>
                 
-                <div className="w-px h-4 bg-outline-variant/30 mx-2" />
+                <div className="w-px h-4 bg-border mx-2" />
 
                 {/* Font Family Picker */}
                 <div className="relative">
@@ -382,7 +382,7 @@ export function NoteEditor({
                             setShowFontPicker((prev) => !prev);
                             setShowSizePicker(false);
                         }}
-                        className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50 text-xs font-medium min-w-[90px]"
+                        className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-fg-secondary hover:bg-foreground/10 text-xs font-medium min-w-[90px]"
                         title="Font Family"
                     >
                         <Type className="w-3.5 h-3.5 shrink-0" />
@@ -399,7 +399,7 @@ export function NoteEditor({
                             setShowSizePicker((prev) => !prev);
                             setShowFontPicker(false);
                         }}
-                        className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-on-surface-variant hover:bg-slate-200/50 text-xs font-medium min-w-[70px]"
+                        className="flex items-center gap-1 px-2 py-1 rounded transition-colors text-fg-secondary hover:bg-foreground/10 text-xs font-medium min-w-[70px]"
                         title="Font Size"
                     >
                         <ALargeSmall className="w-3.5 h-3.5 shrink-0" />
@@ -408,57 +408,57 @@ export function NoteEditor({
                     </button>
                 </div>
 
-                <div className="w-px h-4 bg-outline-variant/30 mx-2" />
+                <div className="w-px h-4 bg-border mx-2" />
 
-                <button onClick={() => editorRef.current?.toggleHeading(1)} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('heading', { level: 1 }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Heading 1">
+                <button onClick={() => editorRef.current?.toggleHeading(1)} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('heading', { level: 1 }) ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Heading 1">
                     <Heading1 className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleHeading(2)} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('heading', { level: 2 }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Heading 2">
+                <button onClick={() => editorRef.current?.toggleHeading(2)} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('heading', { level: 2 }) ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Heading 2">
                     <Heading2 className="w-4 h-4" />
                 </button>
 
-                <div className="w-px h-4 bg-outline-variant/30 mx-2" />
+                <div className="w-px h-4 bg-border mx-2" />
 
-                <button onClick={() => editorRef.current?.toggleBold()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('bold') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Bold">
+                <button onClick={() => editorRef.current?.toggleBold()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('bold') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Bold">
                     <Bold className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleItalic()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('italic') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Italic">
+                <button onClick={() => editorRef.current?.toggleItalic()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('italic') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Italic">
                     <Italic className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleUnderline()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('underline') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Underline">
+                <button onClick={() => editorRef.current?.toggleUnderline()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('underline') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Underline">
                     <UnderlineIcon className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleStrike()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('strike') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Strikethrough">
+                <button onClick={() => editorRef.current?.toggleStrike()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('strike') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Strikethrough">
                     <Strikethrough className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleHighlight()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('highlight') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Highlight">
+                <button onClick={() => editorRef.current?.toggleHighlight()} className={`p-1.5 rounded transition-colors ${editorRef.current?.isActive('highlight') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Highlight">
                     <Highlighter className="w-4 h-4" />
                 </button>
                 
-                <div className="w-px h-4 bg-outline-variant/30 mx-2 hidden sm:block" />
+                <div className="w-px h-4 bg-border mx-2 hidden sm:block" />
                 
-                <button onClick={() => editorRef.current?.setTextAlign('left')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'left' }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Align Left">
+                <button onClick={() => editorRef.current?.setTextAlign('left')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'left' }) ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Align Left">
                     <AlignLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.setTextAlign('center')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'center' }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Align Center">
+                <button onClick={() => editorRef.current?.setTextAlign('center')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'center' }) ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Align Center">
                     <AlignCenter className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.setTextAlign('right')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'right' }) ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Align Right">
+                <button onClick={() => editorRef.current?.setTextAlign('right')} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive({ textAlign: 'right' }) ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Align Right">
                     <AlignRight className="w-4 h-4" />
                 </button>
 
-                <div className="w-px h-4 bg-outline-variant/30 mx-2 hidden sm:block" />
+                <div className="w-px h-4 bg-border mx-2 hidden sm:block" />
                 
-                <button onClick={() => editorRef.current?.toggleBulletList()} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive('bulletList') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Bullet List">
+                <button onClick={() => editorRef.current?.toggleBulletList()} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive('bulletList') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Bullet List">
                     <List className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleTaskList()} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive('taskList') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Task List">
+                <button onClick={() => editorRef.current?.toggleTaskList()} className={`p-1.5 rounded transition-colors hidden sm:flex ${editorRef.current?.isActive('taskList') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Task List">
                     <ListTodo className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleBlockquote()} className={`p-1.5 rounded transition-colors hidden lg:flex ${editorRef.current?.isActive('blockquote') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Quote">
+                <button onClick={() => editorRef.current?.toggleBlockquote()} className={`p-1.5 rounded transition-colors hidden lg:flex ${editorRef.current?.isActive('blockquote') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Quote">
                     <Quote className="w-4 h-4" />
                 </button>
-                <button onClick={() => editorRef.current?.toggleCodeBlock()} className={`p-1.5 rounded transition-colors hidden lg:flex ${editorRef.current?.isActive('codeBlock') ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-slate-200/50'}`} title="Code Block">
+                <button onClick={() => editorRef.current?.toggleCodeBlock()} className={`p-1.5 rounded transition-colors hidden lg:flex ${editorRef.current?.isActive('codeBlock') ? 'bg-primary/10 text-primary' : 'text-fg-secondary hover:bg-foreground/10'}`} title="Code Block">
                     <Code className="w-4 h-4" />
                 </button>
             </div>

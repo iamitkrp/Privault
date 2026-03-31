@@ -477,7 +477,7 @@ textarea:focus-visible {
    ============================================ */
 
 .tiptap-editor {
-  @apply text-[16px] text-on-surface-variant font-sans w-full min-h-[50vh];
+  @apply text-[16px] text-foreground font-sans w-full min-h-[50vh];
   line-height: 1.3;
 }
 
