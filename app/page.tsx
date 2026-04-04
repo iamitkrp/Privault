@@ -322,13 +322,13 @@ export default function LandingPage() {
                     <span className="mono text-xs text-foreground uppercase tracking-[0.2em] mb-2 font-bold flex items-center gap-2">
                         <span className="w-4 h-[2px] bg-[var(--pipeline-neon-2)]"></span> Architecture
                     </span>
-                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                    <Link href="/whitepaper" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-2)]">►</span> Whitepaper
                     </Link>
-                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                    <Link href="/source-code" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-2)]">►</span> Source Code
                     </Link>
-                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                    <Link href="/security-audit" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-2)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-2)]">►</span> Security Audit
                     </Link>
                 </div>
@@ -338,13 +338,13 @@ export default function LandingPage() {
                     <span className="mono text-xs text-foreground uppercase tracking-[0.2em] mb-2 font-bold flex items-center gap-2">
                         <span className="w-4 h-[2px] bg-[var(--pipeline-neon-3)]"></span> Legal
                     </span>
-                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                    <Link href="/privacy" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-3)]">►</span> Privacy Policy
                     </Link>
-                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                    <Link href="/terms" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-3)]">►</span> Terms of Service
                     </Link>
-                    <Link href="#" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
+                    <Link href="/contact" className="mono text-xs sm:text-sm text-fg-secondary hover:text-[var(--pipeline-neon-3)] transition-colors uppercase tracking-[0.1em] flex items-center gap-2 group w-fit">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--pipeline-neon-3)]">►</span> Contact Protocol
                     </Link>
                 </div>
