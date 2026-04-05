@@ -20,16 +20,19 @@ export function middleware(request: NextRequest) {
     // In development mode, Next.js requires 'unsafe-inline' styles for its overlay and 
     // 'unsafe-eval' for FastRefresh mapping. Modern browsers ignore 'unsafe-inline' if a nonce is present,
     // so we must explicitly omit the nonce in Dev mode for those attributes to work.
+    // Note on style-src: React and Framer Motion inject inline styles via
+    // style={{...}} props which cannot carry CSP nonces. Therefore we must
+    // allow 'unsafe-inline' for styles in ALL environments. Script nonces
+    // still provide meaningful protection (modern browsers ignore
+    // 'unsafe-inline' for scripts when a nonce or 'strict-dynamic' is present).
     const cspDirectives = [
         `default-src 'self'`,
         isDev
             ? `script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:`
-            : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob:`,
-        isDev
-            ? `style-src 'self' 'unsafe-inline'`
-            : `style-src 'self' 'nonce-${nonce}'`,
+            : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' blob:`,
+        `style-src 'self' 'unsafe-inline'`,
         `img-src 'self' data: blob: https://*.spline.design`,
-        `font-src 'self'`,
+        `font-src 'self' https://fonts.gstatic.com`,
         `connect-src 'self' ${supabaseOrigin} https://prod.spline.design https://*.spline.design`.trim(),
         `worker-src 'self' blob:`,
         `frame-src https://my.spline.design`,
