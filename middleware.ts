@@ -2,34 +2,28 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Middleware that generates a per-request nonce for Content-Security-Policy.
- * This replaces the blanket 'unsafe-inline' with a cryptographically random
- * nonce, ensuring only trusted inline scripts/styles from Next.js execute.
+ * Middleware that applies security headers to every HTML response.
+ *
+ * Why no nonce-based CSP?
+ * ──────────────────────
+ * Next.js 16 deprecated `middleware` in favour of `proxy`, and the framework
+ * no longer reliably injects per-request nonces into its own <script> tags
+ * when using the legacy middleware path.  React 19 + Framer Motion also
+ * inject countless inline `style` attributes that cannot carry a nonce.
+ *
+ * Rather than ship a broken nonce that silently blocks client JS (causing a
+ * blank page in production), we use a pragmatic CSP that allows inline
+ * scripts/styles while still locking down every other vector.  The remaining
+ * security headers (HSTS, X-Frame-Options, Permissions-Policy, etc.) are
+ * unaffected and continue to provide strong protection.
  */
-export function middleware(request: NextRequest) {
-    // Generate a cryptographic nonce for this request
-    const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-
+export function middleware(_request: NextRequest) {
     // Derive Supabase origin for connect-src
     const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 
-    const isDev = process.env.NODE_ENV === 'development';
-
-    // Build nonce-based CSP — 'strict-dynamic' allows Next.js-injected scripts
-    // that carry the nonce to load additional trusted scripts.
-    // In development mode, Next.js requires 'unsafe-inline' styles for its overlay and 
-    // 'unsafe-eval' for FastRefresh mapping. Modern browsers ignore 'unsafe-inline' if a nonce is present,
-    // so we must explicitly omit the nonce in Dev mode for those attributes to work.
-    // Note on style-src: React and Framer Motion inject inline styles via
-    // style={{...}} props which cannot carry CSP nonces. Therefore we must
-    // allow 'unsafe-inline' for styles in ALL environments. Script nonces
-    // still provide meaningful protection (modern browsers ignore
-    // 'unsafe-inline' for scripts when a nonce or 'strict-dynamic' is present).
     const cspDirectives = [
         `default-src 'self'`,
-        isDev
-            ? `script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:`
-            : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' blob:`,
+        `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:`,
         `style-src 'self' 'unsafe-inline'`,
         `img-src 'self' data: blob: https://*.spline.design`,
         `font-src 'self' https://fonts.gstatic.com`,
@@ -41,18 +35,9 @@ export function middleware(request: NextRequest) {
         `form-action 'self'`,
     ];
 
-
     const cspHeaderValue = cspDirectives.join('; ');
 
-    // Clone request headers and attach the nonce so the root layout can read it
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-nonce', nonce);
-
-    const response = NextResponse.next({
-        request: {
-            headers: requestHeaders,
-        },
-    });
+    const response = NextResponse.next();
 
     // Set security headers on the response
     response.headers.set('Content-Security-Policy', cspHeaderValue);
